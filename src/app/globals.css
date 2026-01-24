@@ -58,3 +58,42 @@
     font-family: var(--font-arabic), var(--font-sans), ui-sans-serif, system-ui;
   }
 }
+
+/* Global Button Styles for Dashboard Widgets */
+@layer components {
+  .btn-primary-widget {
+    @apply h-9 px-4 text-xs font-semibold rounded-full;
+  }
+
+  .btn-secondary-widget {
+    @apply h-9 px-4 text-xs font-semibold rounded-full;
+  }
+
+  /* Widget Row Layout */
+  .widget-row {
+    @apply flex items-end justify-between px-4 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50;
+  }
+
+  /* Widget Content Groups */
+  .widget-content-stack {
+    @apply flex items-center gap-1.5 flex-1 min-w-0;
+  }
+
+  /* Widget Text Styles */
+  .text-widget-title {
+    @apply font-medium text-gray-900 dark:text-white truncate;
+  }
+
+  .text-widget-description {
+    @apply text-sm text-gray-600 dark:text-gray-400 truncate;
+  }
+
+  .text-widget-metadata {
+    @apply text-xs font-medium text-gray-500 dark:text-gray-400;
+  }
+
+  /* Status Indicators */
+  .widget-status-accent {
+    @apply absolute left-0 top-0 bottom-0 w-1;
+  }
+}

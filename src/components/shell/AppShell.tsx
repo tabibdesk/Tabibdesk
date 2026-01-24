@@ -18,22 +18,22 @@ function AppShellContent({ children, role: propRole }: AppShellProps) {
   const role = propRole || currentUser.role
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-900">
       {/* Sidebar - TailAdmin style */}
       <Sidebar role={role} />
 
       {/* Main Content Area */}
       <div
         className={cx(
-          "flex flex-1 flex-col transition-all duration-300 ease-in-out",
-          isCollapsed ? "lg:ps-20" : "lg:ps-72"
+          "flex flex-1 flex-col w-full transition-all duration-300 ease-in-out",
+          isCollapsed ? "lg:ps-16" : "lg:ps-72"
         )}
       >
         <Topbar role={role as "doctor" | "assistant" | "manager"} />
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto w-full">
+          <div className="w-full p-4 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>

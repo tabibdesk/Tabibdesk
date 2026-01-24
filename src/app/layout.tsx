@@ -1,4 +1,5 @@
 import { TailAdminLayoutWrapper } from "@/components/shell/TailAdminLayoutWrapper"
+import { ConditionalMaxWidthWrapper } from "@/components/shell/ConditionalMaxWidthWrapper"
 import { DemoProvider } from "@/contexts/demo-context"
 import { UserClinicProvider } from "@/contexts/user-clinic-context"
 import { ToastProvider } from "@/hooks/useToast"
@@ -62,7 +63,7 @@ export default function RootLayout({
         className={`overflow-y-scroll scroll-auto antialiased selection:bg-primary-100 selection:text-primary-700 dark:bg-gray-950`}
         suppressHydrationWarning
       >
-        <div className="mx-auto max-w-screen-2xl">
+        <ConditionalMaxWidthWrapper>
           <ThemeProvider defaultTheme="system" attribute="class">
             <DemoProvider>
               <UserClinicProvider>
@@ -72,7 +73,7 @@ export default function RootLayout({
               </UserClinicProvider>
             </DemoProvider>
           </ThemeProvider>
-        </div>
+        </ConditionalMaxWidthWrapper>
       </body>
     </html>
   )

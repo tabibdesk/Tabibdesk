@@ -15,7 +15,6 @@ import { useToast } from "@/hooks/useToast"
 import {
   RiCalendarLine,
   RiArrowRightLine,
-  RiCloseLine,
   RiTimeZoneLine,
   RiRadioButtonLine,
   RiCheckboxCircleLine,
@@ -224,6 +223,24 @@ export default function DashboardPage() {
     }
   }
 
+  const getIconColorClass = (index: number) => {
+    if (index === 0) {
+      return "text-green-600 dark:text-green-400"
+    } else if (index === 1) {
+      return "text-blue-600 dark:text-blue-400"
+    }
+    return "text-gray-400 dark:text-gray-500"
+  }
+
+  const getIconBackgroundClass = (index: number) => {
+    if (index === 0) {
+      return "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400"
+    } else if (index === 1) {
+      return "bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
+    }
+    return "bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400"
+  }
+
   // Drag and Drop Handlers (for assistants)
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index)
@@ -298,15 +315,35 @@ export default function DashboardPage() {
     return role === "doctor" ? "Welcome back, Doctor!" : "Welcome back, Assistant!"
   }
 
-  const getTimeDue = (scheduledAt: string) => {
+  const getTimeDisplay = (scheduledAt: string) => {
     const now = new Date()
     const scheduled = new Date(scheduledAt)
     const diffMs = scheduled.getTime() - now.getTime()
-    const diffMins = Math.round(diffMs / 60000)
+    const diffHours = diffMs / (1000 * 60 * 60)
 
-    if (diffMins < 0) return `Due ${Math.abs(diffMins)}m ago`
-    if (diffMins === 0) return "Due now"
-    return `Due in ${diffMins}m`
+    // If less than 6 hours away, show "in X hours" or "X hours ago"
+    if (Math.abs(diffHours) < 6) {
+      if (diffHours < 0) {
+        const hoursAgo = Math.abs(Math.round(diffHours * 10) / 10) // Round to 1 decimal
+        if (hoursAgo < 1) {
+          const minsAgo = Math.abs(Math.round(diffMs / 60000))
+          return minsAgo === 0 ? "due now" : `${minsAgo}m ago`
+        }
+        return `${hoursAgo}h ago`
+      } else if (diffHours === 0) {
+        return "due now"
+      } else {
+        const hoursUntil = Math.round(diffHours * 10) / 10 // Round to 1 decimal
+        if (hoursUntil < 1) {
+          const minsUntil = Math.round(diffMs / 60000)
+          return `in ${minsUntil}m`
+        }
+        return `in ${hoursUntil}h`
+      }
+    }
+
+    // If more than 6 hours away, show the actual time
+    return scheduled.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
   }
 
   const handleNoShowClick = (appointmentId: string) => {
@@ -348,7 +385,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <CardTitle>Now Queue</CardTitle>
               <Link href="/appointments">
-                <Button variant="ghost" className="text-sm">
+                <Button variant="ghost" className="text-xs -ml-2 -mr-2 pr-2">
                   View All
                   <RiArrowRightLine className="ml-1 size-4" />
                 </Button>
@@ -364,95 +401,99 @@ export default function DashboardPage() {
               </div>
             ) : appointments.length > 0 ? (
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {appointments.map((apt) => (
+                {appointments.map((apt, index) => {
+                  const isNow = index === 0
+                  const isNext = index === 1
+                  const badgeVariant = isNow ? "success" : isNext ? "default" : "neutral"
+                  const badgeText = isNow ? "Now" : isNext ? "Next" : null
+                  
+                  return (
                   <div
                     key={apt.id}
-                    className="group relative flex items-center justify-between p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    className="widget-row"
                   >
                     {/* Status Accent Line */}
-                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                      apt.queueStatus === "now" || apt.queueStatus === "online_now" ? "bg-green-500" :
-                      apt.queueStatus === "next" ? "bg-blue-500" :
-                      apt.queueStatus === "waiting" ? "bg-yellow-500" :
+                    <div className={`widget-status-accent ${
+                      isNow || apt.queueStatus === "online_now" ? "bg-green-500" :
+                      isNext ? "bg-blue-500" :
                       "bg-gray-200 dark:bg-gray-700"
                     }`} />
 
-                    <div className="flex items-center gap-4 flex-1 min-w-0 ml-1">
+                    <div className="widget-content-stack ml-1">
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           handleMarkDone(apt.id);
                         }}
-                        className={`flex size-10 shrink-0 items-center justify-center rounded-full transition-all group/done ${getQueueStatusColor(apt.queueStatus)} hover:bg-green-500 hover:text-white dark:hover:bg-green-600 cursor-pointer`}
+                        className={`flex size-10 shrink-0 items-center justify-center rounded-full transition-all group/done ${getIconBackgroundClass(index)} hover:bg-green-500 hover:text-white dark:hover:bg-green-600 cursor-pointer`}
                         title="Mark as Done"
                       >
                         <div className="group-hover/done:hidden">
-                          {getQueueStatusIcon(apt.queueStatus)}
+                          <span className={getIconColorClass(index)}>
+                            {getQueueStatusIcon(apt.queueStatus)}
+                          </span>
                         </div>
                         <div className="hidden group-hover/done:block">
                           <RiCheckLine className="size-6" />
                         </div>
                       </button>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3">
-                          <p className="font-semibold text-gray-900 dark:text-white truncate">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
                             {apt.patientName}
                           </p>
-                          <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-sm">
-                            {apt.time}
-                          </span>
-                          {(apt.queueStatus === "now" || apt.queueStatus === "next") && (
+                          {(isNow || isNext) ? (
                             <Badge
-                              variant={apt.queueStatus === "now" ? "success" : "default"}
-                              className="h-4 px-1.5 text-[9px] font-bold uppercase tracking-tighter"
+                              variant={badgeVariant}
+                              className="h-4 px-1.5 text-xs font-bold tracking-tighter"
                             >
-                              {apt.queueStatus === "now" ? "NOW" : "NEXT"}
+                              {badgeText}
                             </Badge>
+                          ) : (
+                            <span className="shrink-0 text-xs font-bold tracking-widest text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-sm">
+                              {getTimeDisplay(apt.scheduled_at)}
+                            </span>
                           )}
                         </div>
-                        <div className="mt-0.5 flex items-center gap-2">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate uppercase tracking-tight">
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                             {apt.type}
                           </p>
                           {(apt.queueStatus === "online_now" || apt.queueStatus === "now") && (
-                            <span className={`flex items-center gap-1 text-[10px] font-medium ${apt.queueStatus === "online_now" ? "text-purple-600 dark:text-purple-400" : "text-green-600 dark:text-green-400"}`}>
+                            <span className={`flex items-center gap-1 text-xs font-medium ${apt.queueStatus === "online_now" ? "text-purple-600 dark:text-purple-400" : "text-green-600 dark:text-green-400"}`}>
                               <span className={`size-1.5 rounded-full ${apt.queueStatus === "online_now" ? "bg-purple-500" : "bg-green-500"} animate-pulse`} />
-                              Live
+                              live
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 ml-4">
+                    <div className="flex items-center gap-1.5 ml-4">
                       {apt.online_call_link ? (
-                        <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase tracking-widest whitespace-nowrap">
-                            {getTimeDue(apt.scheduled_at)}
-                          </span>
-                          <Button 
-                            variant="primary" 
-                            size="sm" 
-                            className="h-9 px-4 text-xs font-semibold"
-                            onClick={() => window.open(apt.online_call_link, '_blank')}
-                          >
-                            Join Call
-                          </Button>
-                        </div>
+                        <Button 
+                          variant="primary" 
+                          size="sm" 
+                          className="btn-primary-widget"
+                          onClick={() => window.open(apt.online_call_link, '_blank')}
+                        >
+                          join call
+                        </Button>
                       ) : null}
                       <Link href={`/patients/${apt.patient_id}`}>
-                        <Button variant="outline" size="sm" className="h-9 px-4 text-xs font-semibold">
-                          Open Profile
+                        <Button variant="outline" size="sm" className="btn-secondary-widget">
+                          open profile
                         </Button>
                       </Link>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="py-8 text-center text-gray-600 dark:text-gray-400">
                 <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-                <p className="mt-2">No appointments in queue</p>
+                <p className="mt-2 text-xs">No appointments in queue</p>
               </div>
             )}
           </CardContent>
@@ -463,7 +504,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <CardTitle>Today&apos;s Appointments</CardTitle>
               <Link href="/appointments">
-                <Button variant="ghost" className="text-sm">
+                <Button variant="ghost" className="text-xs -ml-2 -mr-2 pr-2">
                   View All
                   <RiArrowRightLine className="ml-1 size-4" />
                 </Button>
@@ -479,7 +520,13 @@ export default function DashboardPage() {
               </div>
             ) : appointments.length > 0 ? (
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {appointments.map((apt, index) => (
+                {appointments.map((apt, index) => {
+                  const isNow = index === 0
+                  const isNext = index === 1
+                  const badgeVariant = isNow ? "success" : isNext ? "default" : "neutral"
+                  const badgeText = isNow ? "Now" : isNext ? "Next" : null
+                  
+                  return (
                   <div
                     key={apt.id}
                     draggable
@@ -488,7 +535,7 @@ export default function DashboardPage() {
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, index)}
                     onDragEnd={handleDragEnd}
-                    className={`group relative flex items-center justify-between p-3 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-move ${
+                    className={`widget-row cursor-move ${
                       draggedIndex === index
                         ? "opacity-50 bg-primary-50/30 dark:bg-primary-900/10"
                         : dragOverIndex === index
@@ -497,30 +544,38 @@ export default function DashboardPage() {
                     }`}
                   >
                     {/* Status Accent Line */}
-                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                      apt.queueStatus === "now" || apt.queueStatus === "online_now" ? "bg-green-500" :
-                      apt.queueStatus === "next" ? "bg-blue-500" :
-                      apt.queueStatus === "waiting" ? "bg-yellow-500" :
+                    <div className={`widget-status-accent ${
+                      isNow || apt.queueStatus === "online_now" ? "bg-green-500" :
+                      isNext ? "bg-blue-500" :
                       apt.queueStatus === "no_show" ? "bg-red-500" :
                       "bg-gray-200 dark:bg-gray-700"
                     }`} />
 
-                    <div className="flex items-center gap-3 flex-1 min-w-0 ml-1">
-                      <div className="flex size-8 shrink-0 items-center justify-center text-gray-400 group-hover:text-primary-500 transition-colors">
-                        <RiMenuLine className="size-4" />
+                    <div className="widget-content-stack ml-1">
+                      <div className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-colors ${getIconBackgroundClass(index)}`}>
+                        <RiMenuLine className={`size-4 ${getIconColorClass(index)}`} />
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-medium text-gray-900 dark:text-white truncate">
                             {apt.patientName}
                           </p>
-                          <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-sm">
-                            {apt.time}
-                          </span>
+                          {(isNow || isNext) ? (
+                            <Badge
+                              variant={badgeVariant}
+                              className="h-3.5 px-1 text-xs font-bold tracking-tighter"
+                            >
+                              {badgeText}
+                            </Badge>
+                          ) : (
+                            <span className="shrink-0 text-xs font-bold tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-sm">
+                              {getTimeDisplay(apt.scheduled_at)}
+                            </span>
+                          )}
                         </div>
-                        <div className="mt-0.5 flex items-center gap-2">
-                          <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-tight truncate">
+                        <div className="mt-1 flex items-center gap-1.5">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
                             {apt.type}
                           </p>
                         </div>
@@ -528,48 +583,35 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5 ml-4">
-                      {apt.queueStatus && (
+                      {apt.queueStatus === "no_show" && (
                         <Badge
-                          variant={
-                            apt.queueStatus === "no_show"
-                              ? "error"
-                              : apt.queueStatus === "now"
-                              ? "success"
-                              : apt.queueStatus === "next"
-                              ? "default"
-                              : "warning"
-                          }
-                          className="h-3.5 px-1 text-[8px] font-bold uppercase tracking-tighter"
+                          variant="error"
+                          className="h-3.5 px-1 text-xs font-bold tracking-tighter"
                         >
-                          {apt.queueStatus === "no_show"
-                            ? "No Show"
-                            : apt.queueStatus === "now"
-                            ? "Now"
-                            : apt.queueStatus === "next"
-                            ? "Next"
-                            : "Waiting"}
+                          no show
                         </Badge>
                       )}
                       <Button
-                        variant={apt.queueStatus === "no_show" ? "destructive" : "ghost"}
+                        variant="primary"
                         size="sm"
                         onClick={(e) => { 
                           e.stopPropagation(); 
                           handleNoShowClick(apt.id); 
                         }}
-                        className="h-7 w-7 p-0 flex items-center justify-center"
+                        className="btn-primary-widget"
                         title="Mark as No Show"
                       >
-                        <RiCloseLine className="size-3.5" />
+                        x no show
                       </Button>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
               <div className="py-8 text-center text-gray-600 dark:text-gray-400">
                 <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-                <p className="mt-2">No appointments scheduled for today</p>
+                <p className="mt-2 text-xs">No appointments scheduled for today</p>
               </div>
             )}
           </CardContent>

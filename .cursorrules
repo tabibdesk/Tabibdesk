@@ -1,0 +1,71 @@
+# TabibDesk Project Rules
+
+## Font Hierarchy
+
+When creating new components, always follow the font hierarchy established in `src/features/patients/PatientsPage.tsx`:
+
+### Standard Font Sizes
+
+1. **Headers/Titles** (Table headers, Card titles):
+   - `text-sm font-semibold` for table headers
+   - `text-lg` for card titles (when using CardTitle component)
+
+2. **Primary Content** (Main text, patient names, important labels):
+   - `text-sm font-medium` for patient names in list/table views (matches phone/last appointment size)
+   - `font-medium` (base size) for patient names in detailed views
+   - `text-sm font-semibold` for smaller emphasis
+
+3. **Secondary Information** (Metadata, descriptions, supporting text):
+   - `text-sm` for phone numbers, dates, and secondary details
+   - `text-xs` for age/gender, complaint labels, and smaller metadata
+
+4. **Small Labels/Badges** (Time badges, status indicators, badges):
+   - `text-xs` for badges, time indicators, and small labels
+   - Use `font-bold` with `text-xs` for emphasis on small text
+
+### Examples from PatientsPage
+
+- **Table Header**: `text-sm font-semibold`
+- **Patient Name (Table)**: `font-medium` (base size) - for detailed table views
+- **Patient Name (List/Queue)**: `text-sm font-medium` - for compact list/queue views
+- **Age/Gender**: `text-xs`
+- **Complaint**: `text-xs`
+- **Phone**: `text-sm`
+- **Last Appointment**: `text-sm`
+- **Card Title**: `text-lg`
+- **Card Description**: `text-xs`
+
+### Important Rules
+
+- **Never use arbitrary font sizes** like `text-[8px]`, `text-[9px]`, `text-[10px]` - always use standard Tailwind classes: `text-xs`, `text-sm`, `text-base`, `text-lg`
+- **Consistent hierarchy**: Primary content should be larger than secondary content
+- **Badges and small labels**: Use `text-xs` minimum, never smaller
+- **Time indicators**: Use `text-xs` with `font-bold` and `uppercase tracking-widest` for time badges
+
+## Dashboard & Widget Standards
+
+Widgets (like Now Queue and Today's Appointments) have a specific "dense" design language that differs from full-page tables:
+
+1. **Alignment & Density**:
+   - Use `items-end` for row vertical alignment (bottom-heavy).
+   - Use tight gaps (`gap-1.5`) between content elements.
+   - Use `px-4 py-4` for widget row padding.
+
+2. **Global Widget Styles**:
+   - **Always** use global classes from `globals.css` instead of inline Tailwind:
+     - Buttons: `.btn-primary-widget`, `.btn-secondary-widget`.
+     - Rows: `.widget-row`.
+     - Content Stacks: `.widget-content-stack`.
+     - Text: `.text-widget-title`, `.text-widget-description`, `.text-widget-metadata`.
+
+3. **Text Transformation**:
+   - Widgets use **lowercase only** for status text, labels, and metadata (no capitalization/uppercase).
+
+4. **Data Integrity**:
+   - Never use inline mocked data within components.
+   - Always fetch from the `mock/` data layer or API.
+
+### Reference Implementation
+
+See `src/features/patients/PatientsTable.tsx` and `src/features/patients/PatientsCards.tsx` for canonical examples of proper font hierarchy usage.
+See `src/app/(app)/dashboard/page.tsx` for the canonical widget implementation.
