@@ -1,5 +1,7 @@
 import { mockUsers } from "@/data/mock/users-clinics"
 import { mockData } from "@/data/mock/mock-data"
+import { isTaskArchived } from "@/features/archive/archive.rules"
+import { logActivity } from "@/api/activity.api"
 import type {
   ListTasksParams,
   ListTasksResponse,
@@ -288,10 +290,19 @@ export async function listTasks(params: ListTasksParams): Promise<ListTasksRespo
       const patientNameMatch = patient
         ? `${patient.first_name} ${patient.last_name}`.toLowerCase().includes(lowerQuery)
         : false
+      const typeMatch = task.type.toLowerCase().replace("_", " ").includes(lowerQuery)
+      const sourceMatch = task.source.toLowerCase().includes(lowerQuery)
 
-      return titleMatch || descriptionMatch || patientNameMatch
+      return titleMatch || descriptionMatch || patientNameMatch || typeMatch || sourceMatch
     })
   }
+
+  // Exclude archived tasks (only show pending/active tasks)
+  // Enrich tasks first to check archive status
+  const enrichedForArchiveCheck = filteredTasks.map(enrichTaskWithNames)
+  filteredTasks = filteredTasks.filter((task, index) => {
+    return !isTaskArchived(enrichedForArchiveCheck[index])
+  })
 
   // Sort by due date (overdue first, then by date), then by priority
   filteredTasks.sort((a, b) => {
@@ -351,6 +362,20 @@ export async function createTask(payload: CreateTaskPayload): Promise<TaskListIt
   }
 
   tasksStore.push(newTask)
+
+  // Log activity
+  await logActivity({
+    clinicId: payload.clinicId,
+    actorUserId: payload.createdByUserId,
+    actorName: "Dr. Ahmed Hassan", // TODO: Get name
+    actorRole: "doctor",
+    action: "create",
+    entityType: "task",
+    entityId: newTask.id,
+    entityLabel: newTask.title,
+    message: `Created task: ${newTask.title}`,
+  });
+
   return enrichTaskWithNames(newTask)
 }
 
@@ -361,6 +386,20 @@ export async function updateTaskStatus(payload: UpdateTaskStatusPayload): Promis
   }
 
   task.status = payload.status
+
+  // Log activity
+  await logActivity({
+    clinicId: task.clinicId,
+    actorUserId: "user-001",
+    actorName: "Dr. Ahmed Hassan",
+    actorRole: "doctor",
+    action: "status_change",
+    entityType: "task",
+    entityId: task.id,
+    entityLabel: task.title,
+    message: `Updated task status to ${payload.status}`,
+  });
+
   return enrichTaskWithNames(task)
 }
 
@@ -371,5 +410,21 @@ export async function assignTask(payload: AssignTaskPayload): Promise<TaskListIt
   }
 
   task.assignedToUserId = payload.assignedToUserId || undefined
+
+  // Log activity
+  await logActivity({
+    clinicId: task.clinicId,
+    actorUserId: "user-001",
+    actorName: "Dr. Ahmed Hassan",
+    actorRole: "doctor",
+    action: "assign",
+    entityType: "task",
+    entityId: task.id,
+    entityLabel: task.title,
+    message: payload.assignedToUserId 
+      ? `Assigned task to user ${payload.assignedToUserId}`
+      : `Unassigned task`,
+  });
+
   return enrichTaskWithNames(task)
 }

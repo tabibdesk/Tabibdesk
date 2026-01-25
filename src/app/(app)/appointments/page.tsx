@@ -1,368 +1,133 @@
 "use client"
 
-import { useState, useEffect, lazy, Suspense } from "react"
-import { Card, CardContent } from "@/components/Card"
-import { Button } from "@/components/Button"
-import { PageHeader } from "@/components/shared/PageHeader"
-import { RiCalendarLine, RiAddLine } from "@remixicon/react"
-import Link from "next/link"
+import { useState, useEffect, useRef } from "react"
+import { AppointmentsHeader } from "@/features/appointments/components/AppointmentsHeader"
+import { DailyScheduleView, type DailyScheduleViewRef } from "@/features/appointments/components/DailyScheduleView"
+import { WaitlistTab } from "@/features/appointments/components/WaitlistTab"
+import { BookAppointmentDrawer } from "@/features/appointments/components/BookAppointmentDrawer"
+import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useDemo } from "@/contexts/demo-context"
-import { mockData } from "@/data/mock/mock-data"
-import { ConfirmationModal } from "@/components/ConfirmationModal"
-import { RescheduleModal } from "@/components/RescheduleModal"
-import { AppointmentActionsModal } from "@/components/AppointmentActionsModal"
-import { useDebounce } from "@/lib/useDebounce"
-import { listAppointments } from "@/features/appointments/appointments.api"
-import type { AppointmentListItem } from "@/features/appointments/appointments.types"
-import { AppointmentsToolbar } from "@/features/appointments/AppointmentsToolbar"
-import { AppointmentsTable } from "@/features/appointments/AppointmentsTable"
-import { AppointmentsCards } from "@/features/appointments/AppointmentsCards"
-
-// Lazy load the calendar component
-const AppointmentCalendar = lazy(() => import("@/components/AppointmentCalendar").then(mod => ({ default: mod.AppointmentCalendar })))
-
-const PAGE_SIZE = 10
+import { DEMO_CLINIC_ID, DEMO_DOCTOR_ID } from "@/data/mock/mock-data"
+import type { Slot } from "@/features/appointments/types"
 
 export default function AppointmentsPage() {
+  const { currentUser, currentClinic } = useUserClinic()
   const { isDemoMode } = useDemo()
-  const [appointments, setAppointments] = useState<AppointmentListItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(false)
-  const [total, setTotal] = useState(0)
-  const [timeFilter, setTimeFilter] = useState<"upcoming" | "past" | "all">("upcoming")
-  const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
-  const [showCancelModal, setShowCancelModal] = useState(false)
-  const [appointmentToCancel, setAppointmentToCancel] = useState<string | null>(null)
-  const [isCancelling, setIsCancelling] = useState(false)
-  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
-  const [appointmentToReschedule, setAppointmentToReschedule] = useState<AppointmentListItem | null>(null)
-  const [isRescheduling, setIsRescheduling] = useState(false)
-  const [showActionsModal, setShowActionsModal] = useState(false)
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentListItem | null>(null)
-
-  const debouncedSearch = useDebounce(searchQuery, 300)
-
+  
+  // Use global clinic from context
+  const clinicId = currentClinic?.id || currentUser.clinicId || DEMO_CLINIC_ID
+  
+  // Determine initial doctor ID
+  // If current user is a doctor, use their ID; otherwise will be set by AppointmentsFilters
+  const getInitialDoctorId = () => {
+    if (currentUser.role === "doctor") {
+      return currentUser.id
+    }
+    // For assistants/managers, will be set by AppointmentsFilters based on clinic
+    return DEMO_DOCTOR_ID
+  }
+  
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>(getInitialDoctorId())
+  const [activeTab, setActiveTab] = useState<"appointments" | "waitlist">("appointments")
+  const scheduleViewRef = useRef<DailyScheduleViewRef>(null)
+  const [isBookingDrawerOpen, setIsBookingDrawerOpen] = useState(false)
+  const [selectedSlotForFill, setSelectedSlotForFill] = useState<Slot | null>(null)
+  const [rescheduleSlot, setRescheduleSlot] = useState<Slot | null>(null)
+  const [rescheduleAppointmentId, setRescheduleAppointmentId] = useState<string | null>(null)
+  
+  // Use selected doctor ID, or fallback to current user if they're a doctor
+  const effectiveDoctorId = selectedDoctorId || (currentUser.role === "doctor" ? currentUser.id : DEMO_DOCTOR_ID)
+  
+  // Handle slot click - open BookAppointmentDrawer with pre-selected slot
+  const handleFillSlot = (slot: Slot) => {
+    setSelectedSlotForFill(slot)
+    setRescheduleSlot(null)
+    setIsBookingDrawerOpen(true)
+  }
+  
+  // Handle reschedule - open drawer with patient pre-selected but no slot
+  const handleReschedule = (slot: Slot) => {
+    setRescheduleSlot(slot)
+    setRescheduleAppointmentId(slot.appointmentId || null)
+    setSelectedSlotForFill(null)
+    setIsBookingDrawerOpen(true)
+  }
+  
+  // Handle booking complete
+  const handleBookingComplete = async () => {
+    // Refetch appointments after booking/rescheduling
+    if (scheduleViewRef.current) {
+      await scheduleViewRef.current.refetch()
+    }
+    // Reset selected slots
+    setSelectedSlotForFill(null)
+    setRescheduleSlot(null)
+    setRescheduleAppointmentId(null)
+  }
+  
+  // Handle drawer close
+  const handleDrawerClose = () => {
+    setIsBookingDrawerOpen(false)
+    setSelectedSlotForFill(null)
+    setRescheduleSlot(null)
+    setRescheduleAppointmentId(null)
+  }
+  
+  // Reset doctor selection when clinic changes (if user is not a doctor)
   useEffect(() => {
-    setPage(1)
-    fetchAppointments(1, debouncedSearch)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, timeFilter, isDemoMode])
-
-  const fetchAppointments = async (pageNum: number, query?: string) => {
-    setLoading(true)
-    try {
-      const response = await listAppointments({
-        page: pageNum,
-        pageSize: PAGE_SIZE,
-        query: query || undefined,
-        status: "all",
-        timeFilter: timeFilter,
-      })
-      if (pageNum === 1) {
-        setAppointments(response.appointments)
-      } else {
-        setAppointments((prev) => [...prev, ...response.appointments])
-      }
-      setHasMore(response.hasMore)
-      setTotal(response.total)
-      setPage(pageNum)
-    } catch (error) {
-      console.error("Failed to fetch appointments:", error)
-    } finally {
-      setLoading(false)
+    if (currentUser.role !== "doctor") {
+      // AppointmentsFilters will handle setting the correct doctor
+      // But we can reset here to trigger the effect in AppointmentsFilters
+      setSelectedDoctorId(DEMO_DOCTOR_ID)
+    } else {
+      // If user is a doctor, keep their ID
+      setSelectedDoctorId(currentUser.id)
     }
-  }
-
-  const handleLoadMore = () => {
-    if (!loading && hasMore) {
-      fetchAppointments(page + 1, debouncedSearch)
-    }
-  }
-
-  const handleCancelClick = (appointmentId: string) => {
-    setAppointmentToCancel(appointmentId)
-    setShowCancelModal(true)
-  }
-
-  const handleCancelConfirm = async () => {
-    if (!appointmentToCancel) return
-
-    setIsCancelling(true)
-
-    try {
-      if (isDemoMode) {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        
-        // Update appointment status in state
-        setAppointments((prev) =>
-          prev.map((apt) =>
-            apt.id === appointmentToCancel ? { ...apt, status: "cancelled" as const } : apt
-          )
-        )
-        // Refresh the list
-        await fetchAppointments(1, debouncedSearch)
-      } else {
-        // TODO: Actual API call to cancel appointment
-        // await cancelAppointment(appointmentToCancel)
-      }
-
-      setShowCancelModal(false)
-      setAppointmentToCancel(null)
-    } catch (error) {
-      console.error("Failed to cancel appointment:", error)
-    } finally {
-      setIsCancelling(false)
-    }
-  }
-
-  const handleCancelModalClose = () => {
-    if (!isCancelling) {
-      setShowCancelModal(false)
-      setAppointmentToCancel(null)
-    }
-  }
-
-  const handleRescheduleClick = (appointment: AppointmentListItem) => {
-    setAppointmentToReschedule(appointment)
-    setShowRescheduleModal(true)
-  }
-
-  const handleRescheduleConfirm = async (appointmentId: string, newDate: string, newTime: string) => {
-    setIsRescheduling(true)
-
-    try {
-      if (isDemoMode) {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        
-        // Update appointment in state and propagate to mock data
-        setAppointments((prev) => {
-          const updated = prev.map((apt) =>
-            apt.id === appointmentId
-              ? { ...apt, appointment_date: newDate, appointment_time: newTime }
-              : apt
-          )
-          
-          // Update mock data source (mock uses scheduled_at, not appointment_date/time)
-          const appointmentIndex = mockData.appointments.findIndex((a) => a.id === appointmentId)
-          if (appointmentIndex !== -1) {
-            const newScheduledAt = new Date(`${newDate}T${newTime}:00`).toISOString()
-            mockData.appointments[appointmentIndex] = {
-              ...mockData.appointments[appointmentIndex],
-              scheduled_at: newScheduledAt,
-            }
-          }
-          
-          return updated
-        })
-        // Refresh the list
-        await fetchAppointments(1, debouncedSearch)
-      } else {
-        // TODO: Actual API call to reschedule appointment
-        // await rescheduleAppointment(appointmentId, newDate, newTime)
-      }
-
-      setShowRescheduleModal(false)
-      setAppointmentToReschedule(null)
-    } catch (error) {
-      console.error("Failed to reschedule appointment:", error)
-    } finally {
-      setIsRescheduling(false)
-    }
-  }
-
-  const handleRescheduleModalClose = () => {
-    if (!isRescheduling) {
-      setShowRescheduleModal(false)
-      setAppointmentToReschedule(null)
-    }
-  }
-
-  const filteredCount = searchQuery ? appointments.length : total
-
-  // Transform appointments for calendar view
-  const calendarAppointments = appointments.map((apt) => ({
-    id: apt.id,
-    patient_name: apt.patient_name,
-    patient_phone: apt.patient_phone,
-    date: apt.appointment_date,
-    time: apt.appointment_time,
-    status: apt.status as "scheduled" | "completed" | "cancelled" | "confirmed" | "in_progress" | "no_show",
-    type: apt.type,
-  }))
-
+  }, [clinicId, currentUser])
+  
   return (
     <div className="space-y-6">
-      {/* PageHeader */}
-      <PageHeader
-        title="Appointments"
+      <AppointmentsHeader
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        clinicId={clinicId}
+        selectedDoctorId={effectiveDoctorId}
+        onDoctorChange={setSelectedDoctorId}
       />
-
-      <AppointmentsToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        timeFilter={timeFilter}
-        onTimeFilterChange={setTimeFilter}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        totalAppointments={total}
-        filteredCount={filteredCount}
-      />
-
-      {/* Conditional Rendering Based on View Mode */}
-      {viewMode === "calendar" ? (
-        /* Calendar View */
-        <Suspense fallback={
-          <div className="flex h-96 items-center justify-center">
-            <div className="text-center">
-              <div className="mx-auto size-12 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-800 dark:border-t-primary-400"></div>
-              <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading calendar...</p>
-            </div>
-          </div>
-        }>
-          <AppointmentCalendar 
-            appointments={calendarAppointments}
-            onAppointmentClick={(calendarAppointment) => {
-              const fullAppointment = appointments.find(apt => apt.id === calendarAppointment.id)
-              if (fullAppointment) {
-                setSelectedAppointment(fullAppointment)
-                setShowActionsModal(true)
-              }
-            }}
-          />
-        </Suspense>
+      
+      {activeTab === "appointments" ? (
+        <DailyScheduleView
+          ref={scheduleViewRef}
+          clinicId={clinicId}
+          doctorId={effectiveDoctorId}
+          onFillSlot={handleFillSlot}
+          onReschedule={handleReschedule}
+        />
       ) : (
-        /* List/Table View */
-        <>
-          {loading && appointments.length === 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-48 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800"></div>
-              ))}
-            </div>
-          ) : appointments.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-                <p className="mt-4 text-gray-600 dark:text-gray-400">
-                  {searchQuery
-                    ? "No appointments found matching your filters."
-                    : "No appointments scheduled yet."}
-                </p>
-                {!searchQuery && (
-                  <Link href="/appointments/book">
-                    <Button className="mt-4">
-                      <RiAddLine className="mr-2 size-4" />
-                      Schedule First Appointment
-                    </Button>
-                  </Link>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {/* Desktop Table View */}
-              <div className="hidden md:block">
-                <AppointmentsTable
-                  appointments={appointments}
-                  onReschedule={handleRescheduleClick}
-                  onCancel={handleCancelClick}
-                  onViewDetails={(appointment) => {
-                    setSelectedAppointment(appointment)
-                    setShowActionsModal(true)
-                  }}
-                />
-              </div>
-              {/* Mobile Cards View */}
-              <div className="md:hidden">
-                <AppointmentsCards
-                  appointments={appointments}
-                  onReschedule={handleRescheduleClick}
-                  onCancel={handleCancelClick}
-                />
-              </div>
-
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="mt-6 flex justify-center">
-                  <Button
-                    variant="secondary"
-                    onClick={handleLoadMore}
-                    disabled={loading}
-                    isLoading={loading}
-                  >
-                    Load More
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </>
+        <WaitlistTab clinicId={clinicId} doctorId={effectiveDoctorId} />
       )}
-
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={showCancelModal}
-        onClose={handleCancelModalClose}
-        onConfirm={handleCancelConfirm}
-        title="Cancel Appointment"
-        description="Are you sure you want to cancel this appointment? This action cannot be undone."
-        confirmText="Yes, Cancel"
-        cancelText="Keep Appointment"
-        variant="danger"
-        isLoading={isCancelling}
-      />
-
-      {/* Reschedule Modal */}
-      <RescheduleModal
-        isOpen={showRescheduleModal}
-        onClose={handleRescheduleModalClose}
-        onConfirm={handleRescheduleConfirm}
-        appointment={appointmentToReschedule ? {
-          id: appointmentToReschedule.id,
-          patient_id: appointmentToReschedule.patient_id,
-          patient_name: appointmentToReschedule.patient_name,
-          appointment_date: appointmentToReschedule.appointment_date,
-          appointment_time: appointmentToReschedule.appointment_time,
-          duration_minutes: appointmentToReschedule.duration_minutes,
-          status: appointmentToReschedule.status,
-          type: appointmentToReschedule.type,
+      
+      <BookAppointmentDrawer
+        open={isBookingDrawerOpen}
+        onClose={handleDrawerClose}
+        onBookingComplete={handleBookingComplete}
+        preSelectedSlot={selectedSlotForFill ? {
+          clinicId: selectedSlotForFill.clinicId,
+          doctorId: selectedSlotForFill.doctorId,
+          startAt: selectedSlotForFill.startAt,
+          endAt: selectedSlotForFill.endAt,
+          appointmentType: selectedSlotForFill.appointmentType,
         } : null}
-        isLoading={isRescheduling}
-      />
-
-      {/* Appointment Actions Modal (from calendar) */}
-      <AppointmentActionsModal
-        isOpen={showActionsModal}
-        onClose={() => {
-          setShowActionsModal(false)
-          setSelectedAppointment(null)
-        }}
-        appointment={selectedAppointment ? {
-          id: selectedAppointment.id,
-          patient_id: selectedAppointment.patient_id,
-          patient_name: selectedAppointment.patient_name,
-          patient_phone: selectedAppointment.patient_phone,
-          appointment_date: selectedAppointment.appointment_date,
-          appointment_time: selectedAppointment.appointment_time,
-          duration_minutes: selectedAppointment.duration_minutes,
-          status: selectedAppointment.status,
-          type: selectedAppointment.type,
-          online_call_link: selectedAppointment.online_call_link,
+        initialPatient={rescheduleSlot && rescheduleSlot.patientId ? {
+          id: rescheduleSlot.patientId,
+          first_name: rescheduleSlot.patientName?.split(" ")[0] || "",
+          last_name: rescheduleSlot.patientName?.split(" ").slice(1).join(" ") || "",
+          phone: rescheduleSlot.patientPhone || "",
+          email: null,
         } : null}
-        onReschedule={() => {
-          if (selectedAppointment) {
-            handleRescheduleClick(selectedAppointment)
-          }
-        }}
-        onCancel={() => {
-          if (selectedAppointment) {
-            handleCancelClick(selectedAppointment.id)
-          }
-        }}
+        rescheduleAppointmentId={rescheduleAppointmentId}
+        clinicId={rescheduleSlot?.clinicId || clinicId}
+        doctorId={rescheduleSlot?.doctorId || effectiveDoctorId}
       />
     </div>
   )

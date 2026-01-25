@@ -7,9 +7,12 @@ import {
   RiUserSharedLine,
   RiWhatsappLine,
 } from "@remixicon/react"
+import { Badge } from "@/components/Badge"
 import {
   formatTaskDate,
   isOverdue,
+  getSourceLabel,
+  getSourceBadgeVariant,
 } from "./tasks.utils"
 import type { TaskListItem } from "./tasks.types"
 import { cx } from "@/lib/utils"
@@ -104,6 +107,9 @@ export function TasksTable({
                       {task.patientName}
                     </Link>
                   )}
+                  <Badge variant={getSourceBadgeVariant(task.source)} className="text-[10px] px-1.5 py-0">
+                    {getSourceLabel(task.source)}
+                  </Badge>
                 </div>
               </div>
             </div>

@@ -18,6 +18,7 @@ import { MedicationsTab } from "@/components/patient/MedicationsTab"
 import { FilesTab } from "@/components/patient/FilesTab"
 import { AppointmentsTab } from "@/components/patient/AppointmentsTab"
 import { TasksTab } from "@/components/patient/TasksTab"
+import { ActivityFeed } from "@/features/activity/ActivityFeed"
 import {
   RiFileTextLine,
   RiUserLine,
@@ -26,6 +27,7 @@ import {
   RiTaskLine,
   RiCalendarLine,
   RiTimeLine,
+  RiHistoryLine,
 } from "@remixicon/react"
 
 export default function PatientDetailPage() {
@@ -182,6 +184,7 @@ export default function PatientDetailPage() {
     { id: "files", label: "Files", icon: RiFolderLine },
     { id: "tasks", label: "Tasks", icon: RiTaskLine },
     { id: "appointments", label: "Appointments", icon: RiCalendarLine },
+    { id: "history", label: "History", icon: RiHistoryLine },
   ]
 
   return (
@@ -284,6 +287,18 @@ export default function PatientDetailPage() {
           />
         )}
         {activeTab === "appointments" && <AppointmentsTab appointments={appointments} />}
+        {activeTab === "history" && (
+          <Card>
+            <CardContent className="p-6">
+              <ActivityFeed
+                clinicId={patient.clinic_id || "clinic-001"}
+                entityId={patientId}
+                entityType="patient"
+                title="Patient Audit Trail"
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

@@ -36,15 +36,12 @@ export function TasksPage({
   role,
   currentUserId,
   clinicId,
-  defaultSourceFilter = "all",
   pageTitle,
 }: TasksPageProps) {
   const [tasks, setTasks] = useState<TaskListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const debouncedSearch = useDebounce(searchQuery, 250)
-  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("pending")
-  const [sourceFilter, setSourceFilter] = useState<TaskSource | "all">(defaultSourceFilter)
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [hasMore, setHasMore] = useState(false)
@@ -58,8 +55,7 @@ export function TasksPage({
     try {
       const response = await listTasks({
         clinicId,
-        status: statusFilter,
-        source: sourceFilter,
+        status: "pending", // Main page only shows pending tasks now
         query: debouncedSearch,
         page,
         pageSize,
@@ -77,11 +73,11 @@ export function TasksPage({
   useEffect(() => {
     fetchTasks()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, statusFilter, sourceFilter, page, clinicId])
+  }, [debouncedSearch, page, clinicId])
 
   useEffect(() => {
     setPage(1)
-  }, [statusFilter, sourceFilter, debouncedSearch])
+  }, [debouncedSearch])
 
   const handleCreateTask = async (payload: CreateTaskPayload) => {
     await createTask(payload)
@@ -112,10 +108,6 @@ export function TasksPage({
       <TasksToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-        sourceFilter={sourceFilter}
-        onSourceFilterChange={setSourceFilter}
         onNewTask={() => setShowNewTaskModal(true)}
       />
 

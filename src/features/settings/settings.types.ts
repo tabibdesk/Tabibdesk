@@ -35,6 +35,13 @@ export interface FeatureFlag {
   locked?: boolean // true if locked by plan tier
 }
 
+// Appointment settings
+export interface AppointmentSettings {
+  bufferMinutes: number // default 5
+  slotDurationMinutes: number // default 30
+  bookingRangeDays: number // default 14
+}
+
 // Clinic settings
 export interface ClinicSettings {
   clinicId: string
@@ -42,6 +49,8 @@ export interface ClinicSettings {
   address?: string
   timezone?: string
   defaultAppointmentDuration?: number // in minutes
+  bufferMinutes?: number // buffer time between appointments (default 5)
+  appointmentSettings?: AppointmentSettings
 }
 
 // Effective features result (what user actually has access to)

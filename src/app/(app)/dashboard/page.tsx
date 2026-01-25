@@ -10,7 +10,7 @@ import { ConfirmationModal } from "@/components/ConfirmationModal"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useDemo } from "@/contexts/demo-context"
 import { mockAppointments } from "@/data/mock/mock-data"
-import { updateStatus as updateAppointmentStatus } from "@/api/appointments.api"
+import { updateStatus as updateAppointmentStatus } from "@/features/appointments/appointments.api"
 import { useToast } from "@/hooks/useToast"
 import {
   RiCalendarLine,

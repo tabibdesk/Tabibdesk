@@ -8,6 +8,8 @@ import {
   RiTaskLine,
   RiBarChartLine,
   RiMoneyDollarCircleLine,
+  RiArchiveLine,
+  RiHistoryLine,
 } from "@remixicon/react"
 import type { FeatureKey } from "@/features/settings/settings.types"
 
@@ -27,6 +29,8 @@ export const doctorNavigation: NavItem[] = [
   { name: "Appointments", href: "/appointments", icon: RiCalendarLine, featureKey: "appointments" },
   { name: "Insights", href: "/insights", icon: RiBarChartLine, featureKey: "insights" },
   { name: "Tasks", href: "/tasks", icon: RiTaskLine, featureKey: "tasks" },
+  { name: "Archive", href: "/archive", icon: RiArchiveLine },
+  { name: "Activity", href: "/activity", icon: RiHistoryLine },
   { name: "Accounting", href: "/accounting", icon: RiMoneyDollarCircleLine, featureKey: "accounting" },
   { name: "Settings", href: "/settings", icon: RiSettingsLine },
 ]
@@ -37,6 +41,8 @@ export const assistantNavigation: NavItem[] = [
   { name: "Appointments", href: "/appointments", icon: RiCalendarLine, featureKey: "appointments" },
   { name: "Insights", href: "/insights", icon: RiBarChartLine, featureKey: "insights" },
   { name: "Tasks", href: "/tasks", icon: RiTaskLine, featureKey: "tasks" },
+  { name: "Archive", href: "/archive", icon: RiArchiveLine },
+  { name: "Activity", href: "/activity", icon: RiHistoryLine },
   { name: "Accounting", href: "/accounting", icon: RiMoneyDollarCircleLine, featureKey: "accounting" },
   { name: "Settings", href: "/settings", icon: RiSettingsLine },
 ]
@@ -47,6 +53,8 @@ export const managerNavigation: NavItem[] = [
   { name: "Appointments", href: "/appointments", icon: RiCalendarLine, featureKey: "appointments" },
   { name: "Insights", href: "/insights", icon: RiBarChartLine, featureKey: "insights" },
   { name: "Tasks", href: "/tasks", icon: RiTaskLine, featureKey: "tasks" },
+  { name: "Archive", href: "/archive", icon: RiArchiveLine },
+  { name: "Activity", href: "/activity", icon: RiHistoryLine },
   { name: "Accounting", href: "/accounting", icon: RiMoneyDollarCircleLine, featureKey: "accounting" },
   { name: "Settings", href: "/settings", icon: RiSettingsLine },
 ]

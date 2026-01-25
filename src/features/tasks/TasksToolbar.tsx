@@ -8,20 +8,12 @@ import type { TaskSource, TaskStatus } from "./tasks.types"
 interface TasksToolbarProps {
   searchQuery: string
   onSearchChange: (query: string) => void
-  statusFilter: TaskStatus | "all"
-  onStatusFilterChange: (status: TaskStatus | "all") => void
-  sourceFilter: TaskSource | "all"
-  onSourceFilterChange: (source: TaskSource | "all") => void
   onNewTask: () => void
 }
 
 export function TasksToolbar({
   searchQuery,
   onSearchChange,
-  statusFilter,
-  onStatusFilterChange,
-  sourceFilter,
-  onSourceFilterChange,
   onNewTask,
 }: TasksToolbarProps) {
   return (
@@ -39,29 +31,6 @@ export function TasksToolbar({
             className="pl-10"
           />
         </div>
-
-        {/* Status Filter */}
-        <select
-          value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value as TaskStatus | "all")}
-          className="flex-shrink-0 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-50"
-        >
-          <option value="pending">Active</option>
-          <option value="done">Completed</option>
-          <option value="all">All Tasks</option>
-        </select>
-
-        {/* Source Filter */}
-        <select
-          value={sourceFilter}
-          onChange={(e) => onSourceFilterChange(e.target.value as TaskSource | "all")}
-          className="flex-shrink-0 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-50"
-        >
-          <option value="all">All Sources</option>
-          <option value="alert">Automated</option>
-          <option value="manual">Manual</option>
-          <option value="ai">AI</option>
-        </select>
 
         {/* New Task Button */}
         <Button onClick={onNewTask} className="flex-shrink-0">

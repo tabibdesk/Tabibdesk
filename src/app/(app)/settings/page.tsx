@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
@@ -399,52 +399,116 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
 
 // Preferences Tab
 function PreferencesTab() {
+  const { currentClinic } = useUserClinic()
+  const [bufferMinutes, setBufferMinutes] = useState(5)
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    // Load current clinic settings
+    settingsApi.getClinicSettings(currentClinic.id).then((settings) => {
+      setBufferMinutes(settings.bufferMinutes || 5)
+    })
+  }, [currentClinic.id])
+
+  const handleSaveAppointmentSettings = async () => {
+    setIsSaving(true)
+    try {
+      await settingsApi.updateClinicSettings(currentClinic.id, {
+        bufferMinutes,
+      })
+    } catch (error) {
+      console.error("Failed to save settings:", error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>App Preferences</CardTitle>
-        <CardDescription>Customize your TabibDesk experience</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Label htmlFor="language">Language</Label>
-          <select
-            id="language"
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
-          >
-            <option>English</option>
-            <option>العربية</option>
-          </select>
-        </div>
+    <div className="space-y-6">
+      {/* Appointment Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Appointment Settings</CardTitle>
+          <CardDescription>Configure default appointment behavior</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="buffer-minutes">Buffer Time Between Appointments</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="buffer-minutes"
+                type="number"
+                min="0"
+                max="60"
+                value={bufferMinutes}
+                onChange={(e) => setBufferMinutes(Number(e.target.value))}
+                className="w-24"
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">minutes</span>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Time gap between appointments for preparation and cleanup
+            </p>
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="date-format">Date Format</Label>
-          <select
-            id="date-format"
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
-          >
-            <option>DD/MM/YYYY</option>
-            <option>MM/DD/YYYY</option>
-            <option>YYYY-MM-DD</option>
-          </select>
-        </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setBufferMinutes(5)}>
+              Reset
+            </Button>
+            <Button variant="primary" onClick={handleSaveAppointmentSettings} disabled={isSaving}>
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="space-y-2">
-          <Label htmlFor="time-format">Time Format</Label>
-          <select
-            id="time-format"
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
-          >
-            <option>12-hour (AM/PM)</option>
-            <option>24-hour</option>
-          </select>
-        </div>
+      {/* App Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle>App Preferences</CardTitle>
+          <CardDescription>Customize your TabibDesk experience</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="language">Language</Label>
+            <select
+              id="language"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
+            >
+              <option>English</option>
+              <option>العربية</option>
+            </select>
+          </div>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="secondary">Cancel</Button>
-          <Button variant="primary">Save Preferences</Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="space-y-2">
+            <Label htmlFor="date-format">Date Format</Label>
+            <select
+              id="date-format"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
+            >
+              <option>DD/MM/YYYY</option>
+              <option>MM/DD/YYYY</option>
+              <option>YYYY-MM-DD</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="time-format">Time Format</Label>
+            <select
+              id="time-format"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
+            >
+              <option>12-hour (AM/PM)</option>
+              <option>24-hour</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary">Cancel</Button>
+            <Button variant="primary">Save Preferences</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

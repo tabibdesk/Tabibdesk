@@ -12,6 +12,7 @@ import {
   RiCloseLine,
   RiVideoLine,
   RiCalendarEventLine,
+  RiUserAddLine,
 } from "@remixicon/react"
 import Link from "next/link"
 import type { AppointmentListItem } from "./appointments.types"
@@ -21,12 +22,14 @@ interface AppointmentsCardsProps {
   appointments: AppointmentListItem[]
   onReschedule: (appointment: AppointmentListItem) => void
   onCancel: (appointmentId: string) => void
+  onFillSlot?: (appointment: AppointmentListItem) => void
 }
 
 export function AppointmentsCards({
   appointments,
   onReschedule,
   onCancel,
+  onFillSlot,
 }: AppointmentsCardsProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -126,9 +129,32 @@ export function AppointmentsCards({
                 </Button>
               )}
               {appointment.status === "cancelled" && (
-                <Button variant="ghost" className="flex-1 text-sm text-gray-500" disabled>
-                  <RiCloseLine className="mr-1 size-4" />
-                  Cancelled
+                <>
+                  {onFillSlot ? (
+                    <Button
+                      variant="primary"
+                      className="flex-1 text-sm"
+                      onClick={() => onFillSlot(appointment)}
+                    >
+                      <RiUserAddLine className="mr-1 size-4" />
+                      Fill Slot
+                    </Button>
+                  ) : (
+                    <Button variant="ghost" className="flex-1 text-sm text-gray-500" disabled>
+                      <RiCloseLine className="mr-1 size-4" />
+                      Cancelled
+                    </Button>
+                  )}
+                </>
+              )}
+              {appointment.status === "no_show" && onFillSlot && (
+                <Button
+                  variant="primary"
+                  className="flex-1 text-sm"
+                  onClick={() => onFillSlot(appointment)}
+                >
+                  <RiUserAddLine className="mr-1 size-4" />
+                  Fill Slot
                 </Button>
               )}
             </div>

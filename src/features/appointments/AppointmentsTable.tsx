@@ -17,6 +17,7 @@ import {
   RiCloseLine,
   RiVideoLine,
   RiEyeLine,
+  RiUserAddLine,
 } from "@remixicon/react"
 import Link from "next/link"
 import type { AppointmentListItem } from "./appointments.types"
@@ -27,6 +28,7 @@ interface AppointmentsTableProps {
   onReschedule: (appointment: AppointmentListItem) => void
   onCancel: (appointmentId: string) => void
   onViewDetails: (appointment: AppointmentListItem) => void
+  onFillSlot?: (appointment: AppointmentListItem) => void
 }
 
 export function AppointmentsTable({
@@ -34,6 +36,7 @@ export function AppointmentsTable({
   onReschedule,
   onCancel,
   onViewDetails,
+  onFillSlot,
 }: AppointmentsTableProps) {
   const formatTime = (timeString: string) => {
     return timeString
@@ -152,6 +155,17 @@ export function AppointmentsTable({
                             </DropdownMenuIconWrapper>
                             Cancel
                           </DropdownMenuItem>
+                        )}
+                        {(appointment.status === "cancelled" || appointment.status === "no_show") && onFillSlot && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => onFillSlot(appointment)}>
+                              <DropdownMenuIconWrapper className="mr-2">
+                                <RiUserAddLine className="size-4" />
+                              </DropdownMenuIconWrapper>
+                              Fill This Slot
+                            </DropdownMenuItem>
+                          </>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -1,6 +1,8 @@
 // Clean separation of mock data from app logic
 // This file contains all mock data for demo mode
 
+import type { DoctorAvailability } from "@/features/appointments/types"
+
 export const DEMO_DOCTOR_ID = "demo-doctor-001"
 export const DEMO_CLINIC_ID = "demo-clinic-001"
 
@@ -1104,221 +1106,492 @@ interface Appointment {
 }
 
 // Helper function to get fresh appointments with current timestamps
-const generateMockAppointments = (): Appointment[] => [
-  {
-    id: "apt-001",
-    patient_id: "patient-001",
-    patient_name: "Fatima Mohamed",
-    scheduled_at: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
-    status: "confirmed",
-    type: "Follow-up",
-    notes: "Check blood pressure levels",
-    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-    online_call_link: "https://meet.google.com/abc-defg-hij",
-  },
-  {
-    id: "apt-002",
-    patient_id: "patient-002",
-    patient_name: "Ahmed Abdullah",
-    scheduled_at: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
-    status: "scheduled",
-    type: "Consultation",
-    notes: "Initial consultation for back pain",
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-003",
-    patient_id: "patient-003",
-    patient_name: "Layla Ibrahim",
-    scheduled_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-    status: "confirmed",
-    type: "Check-up",
-    notes: "Regular check-up appointment",
-    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-004",
-    patient_id: "patient-004",
-    patient_name: "Omar Khalil",
-    scheduled_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-    status: "scheduled",
-    type: "Follow-up",
-    notes: "Review test results",
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-005",
-    patient_id: "patient-005",
-    patient_name: "Nour Amin",
-    scheduled_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    type: "Consultation",
-    notes: "Discussed treatment plan",
-    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-006",
-    patient_id: "patient-001",
-    patient_name: "Fatima Mohamed",
-    scheduled_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "completed",
-    type: "Check-up",
-    notes: "Annual health screening",
-    created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-007",
-    patient_id: "patient-002",
-    patient_name: "Ahmed Abdullah",
-    scheduled_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
-    status: "scheduled",
-    type: "Procedure",
-    notes: "Physical therapy session",
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-008",
-    patient_id: "patient-003",
-    patient_name: "Layla Ibrahim",
-    scheduled_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "no_show",
-    type: "Follow-up",
-    notes: "Patient did not attend",
-    created_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  // Additional appointments for today - spread throughout the day
-  {
-    id: "apt-009",
-    patient_id: "patient-001",
-    patient_name: "Fatima Mohamed",
-    scheduled_at: new Date(Date.now() + 1 * 60 * 60 * 1000).toISOString(),
-    status: "confirmed",
-    type: "Follow-up",
-    notes: "Blood pressure check",
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-010",
-    patient_id: "patient-002",
-    patient_name: "Ahmed Abdullah",
-    scheduled_at: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-    status: "confirmed",
-    type: "Consultation",
-    notes: "Diabetes management review",
-    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-011",
-    patient_id: "patient-004",
-    patient_name: "Omar Khalil",
-    scheduled_at: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString(),
-    status: "scheduled",
-    type: "Check-up",
-    notes: "Asthma follow-up",
-    created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-    online_call_link: "https://zoom.us/j/123456789",
-  },
-  {
-    id: "apt-012",
-    patient_id: "patient-005",
-    patient_name: "Nour Amin",
-    scheduled_at: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
-    status: "scheduled",
-    type: "Follow-up",
-    notes: "GERD management",
-    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-013",
-    patient_id: "patient-003",
-    patient_name: "Layla Ibrahim",
-    scheduled_at: new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString(),
-    status: "confirmed",
-    type: "Consultation",
-    notes: "Thyroid check-up",
-    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-014",
-    patient_id: "patient-001",
-    patient_name: "Fatima Mohamed",
-    scheduled_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
-    status: "scheduled",
-    type: "Check-up",
-    notes: "Blood pressure monitoring",
-    created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-  {
-    id: "apt-015",
-    patient_id: "patient-002",
-    patient_name: "Ahmed Abdullah",
-    scheduled_at: new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString(),
-    status: "confirmed",
-    type: "Procedure",
-    notes: "Physical therapy session",
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    doctor_id: DEMO_DOCTOR_ID,
-    doctor_full_name: "Dr. Ahmed Hassan",
-    clinic_id: DEMO_CLINIC_ID,
-    clinic_name: "TabibDesk Wellness Center",
-  },
-]
+// Distributes appointments across all doctors (user-001, user-002) and all clinics (clinic-001, clinic-002, clinic-003)
+const generateMockAppointments = (): Appointment[] => {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  
+  // Get start of current week (Sunday)
+  const dayOfWeek = today.getDay()
+  const weekStart = new Date(today)
+  weekStart.setDate(today.getDate() - dayOfWeek)
+  weekStart.setHours(9, 0, 0, 0) // Start at 9 AM
+  
+  // Helper to create date for a specific day of week (0=Sunday, 6=Saturday) and hour
+  const getWeekDate = (dayOffset: number, hour: number, minute: number = 0) => {
+    const date = new Date(weekStart)
+    date.setDate(weekStart.getDate() + dayOffset)
+    date.setHours(hour, minute, 0, 0)
+    return date
+  }
+  
+  // Doctor and clinic assignments
+  // user-001 = "أحمد حسن" (العلاج الطبيعي والتغذية)
+  // user-002 = "فاطمة علي" (الطب الباطني)
+  // clinic-001 = "المعادي"
+  // clinic-002 = "مدينة نصر"
+  // clinic-003 = "الزمالك"
+  
+  return [
+    // ========== CLINIC-001 (المعادي) ==========
+    // Doctor user-001 (أحمد حسن) - Sunday
+    {
+      id: "apt-001",
+      patient_id: "patient-001",
+      patient_name: "Fatima Mohamed",
+      scheduled_at: getWeekDate(0, 10, 0).toISOString(),
+      status: "confirmed",
+      type: "Follow-up",
+      notes: "Check blood pressure levels",
+      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+      online_call_link: "https://meet.google.com/abc-defg-hij",
+    },
+    // Doctor user-002 (فاطمة علي) - Sunday
+    {
+      id: "apt-002",
+      patient_id: "patient-002",
+      patient_name: "Ahmed Abdullah",
+      scheduled_at: getWeekDate(0, 14, 0).toISOString(),
+      status: "scheduled",
+      type: "Consultation",
+      notes: "Initial consultation for back pain",
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Doctor user-001 - Sunday
+    {
+      id: "apt-003",
+      patient_id: "patient-003",
+      patient_name: "Layla Ibrahim",
+      scheduled_at: getWeekDate(0, 16, 0).toISOString(),
+      status: "confirmed",
+      type: "Check-up",
+      notes: "Regular check-up appointment",
+      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Monday - Doctor user-001
+    {
+      id: "apt-004",
+      patient_id: "patient-004",
+      patient_name: "Omar Khalil",
+      scheduled_at: getWeekDate(1, 9, 30).toISOString(),
+      status: "scheduled",
+      type: "Follow-up",
+      notes: "Review test results",
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Monday - Doctor user-002
+    {
+      id: "apt-005",
+      patient_id: "patient-005",
+      patient_name: "Nour Amin",
+      scheduled_at: getWeekDate(1, 11, 0).toISOString(),
+      status: "confirmed",
+      type: "Consultation",
+      notes: "Discussed treatment plan",
+      created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Monday - Doctor user-001
+    {
+      id: "apt-006",
+      patient_id: "patient-001",
+      patient_name: "Fatima Mohamed",
+      scheduled_at: getWeekDate(1, 15, 0).toISOString(),
+      status: "scheduled",
+      type: "Check-up",
+      notes: "Blood pressure monitoring",
+      created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Tuesday - Doctor user-002
+    {
+      id: "apt-007",
+      patient_id: "patient-002",
+      patient_name: "Ahmed Abdullah",
+      scheduled_at: getWeekDate(2, 10, 0).toISOString(),
+      status: "scheduled",
+      type: "Procedure",
+      notes: "Physical therapy session",
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Tuesday - Doctor user-001
+    {
+      id: "apt-008",
+      patient_id: "patient-003",
+      patient_name: "Layla Ibrahim",
+      scheduled_at: getWeekDate(2, 13, 30).toISOString(),
+      status: "confirmed",
+      type: "Consultation",
+      notes: "Thyroid check-up",
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Tuesday - Doctor user-002
+    {
+      id: "apt-009",
+      patient_id: "patient-004",
+      patient_name: "Omar Khalil",
+      scheduled_at: getWeekDate(2, 16, 0).toISOString(),
+      status: "scheduled",
+      type: "Check-up",
+      notes: "Asthma follow-up",
+      created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+      online_call_link: "https://zoom.us/j/123456789",
+    },
+    // Wednesday - Doctor user-001
+    {
+      id: "apt-010",
+      patient_id: "patient-005",
+      patient_name: "Nour Amin",
+      scheduled_at: getWeekDate(3, 9, 0).toISOString(),
+      status: "confirmed",
+      type: "Follow-up",
+      notes: "GERD management",
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Wednesday - Doctor user-002
+    {
+      id: "apt-011",
+      patient_id: "patient-001",
+      patient_name: "Fatima Mohamed",
+      scheduled_at: getWeekDate(3, 11, 30).toISOString(),
+      status: "scheduled",
+      type: "Follow-up",
+      notes: "Blood pressure check",
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Wednesday - Doctor user-001
+    {
+      id: "apt-012",
+      patient_id: "patient-002",
+      patient_name: "Ahmed Abdullah",
+      scheduled_at: getWeekDate(3, 14, 0).toISOString(),
+      status: "confirmed",
+      type: "Consultation",
+      notes: "Diabetes management review",
+      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Thursday - Doctor user-002
+    {
+      id: "apt-013",
+      patient_id: "patient-003",
+      patient_name: "Layla Ibrahim",
+      scheduled_at: getWeekDate(4, 10, 0).toISOString(),
+      status: "scheduled",
+      type: "Check-up",
+      notes: "Regular check-up appointment",
+      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Thursday - Doctor user-001
+    {
+      id: "apt-014",
+      patient_id: "patient-004",
+      patient_name: "Omar Khalil",
+      scheduled_at: getWeekDate(4, 13, 0).toISOString(),
+      status: "confirmed",
+      type: "Follow-up",
+      notes: "Review test results",
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Thursday - Doctor user-002
+    {
+      id: "apt-015",
+      patient_id: "patient-005",
+      patient_name: "Nour Amin",
+      scheduled_at: getWeekDate(4, 15, 30).toISOString(),
+      status: "scheduled",
+      type: "Procedure",
+      notes: "Physical therapy session",
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Friday - Doctor user-001
+    {
+      id: "apt-016",
+      patient_id: "patient-001",
+      patient_name: "Fatima Mohamed",
+      scheduled_at: getWeekDate(5, 9, 0).toISOString(),
+      status: "confirmed",
+      type: "Check-up",
+      notes: "Annual health screening",
+      created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Friday - Doctor user-002
+    {
+      id: "apt-017",
+      patient_id: "patient-002",
+      patient_name: "Ahmed Abdullah",
+      scheduled_at: getWeekDate(5, 11, 0).toISOString(),
+      status: "scheduled",
+      type: "Consultation",
+      notes: "Follow-up consultation",
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Friday - Doctor user-001
+    {
+      id: "apt-018",
+      patient_id: "patient-003",
+      patient_name: "Layla Ibrahim",
+      scheduled_at: getWeekDate(5, 14, 0).toISOString(),
+      status: "confirmed",
+      type: "Follow-up",
+      notes: "Thyroid check-up",
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Saturday - Doctor user-001
+    {
+      id: "apt-019",
+      patient_id: "patient-004",
+      patient_name: "Omar Khalil",
+      scheduled_at: getWeekDate(6, 10, 0).toISOString(),
+      status: "scheduled",
+      type: "Check-up",
+      notes: "Asthma follow-up",
+      created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    // Saturday - Doctor user-001
+    {
+      id: "apt-020",
+      patient_id: "patient-005",
+      patient_name: "Nour Amin",
+      scheduled_at: getWeekDate(6, 12, 0).toISOString(),
+      status: "confirmed",
+      type: "Consultation",
+      notes: "GERD management",
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    
+    // ========== CLINIC-002 (مدينة نصر) ==========
+    // Doctor user-001 - Monday
+    {
+      id: "apt-021",
+      patient_id: "patient-001",
+      patient_name: "Fatima Mohamed",
+      scheduled_at: getWeekDate(1, 10, 0).toISOString(),
+      status: "confirmed",
+      type: "Follow-up",
+      notes: "Physical therapy follow-up",
+      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-002",
+      clinic_name: "مدينة نصر",
+    },
+    // Doctor user-002 - Monday
+    {
+      id: "apt-022",
+      patient_id: "patient-002",
+      patient_name: "Ahmed Abdullah",
+      scheduled_at: getWeekDate(1, 14, 0).toISOString(),
+      status: "scheduled",
+      type: "Consultation",
+      notes: "Internal medicine consultation",
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-002",
+      clinic_name: "مدينة نصر",
+    },
+    // Doctor user-001 - Wednesday
+    {
+      id: "apt-023",
+      patient_id: "patient-003",
+      patient_name: "Layla Ibrahim",
+      scheduled_at: getWeekDate(3, 10, 0).toISOString(),
+      status: "confirmed",
+      type: "Check-up",
+      notes: "Nutrition consultation",
+      created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-002",
+      clinic_name: "مدينة نصر",
+    },
+    // Doctor user-002 - Wednesday
+    {
+      id: "apt-024",
+      patient_id: "patient-004",
+      patient_name: "Omar Khalil",
+      scheduled_at: getWeekDate(3, 15, 0).toISOString(),
+      status: "scheduled",
+      type: "Follow-up",
+      notes: "Cardiology follow-up",
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-002",
+      clinic_name: "مدينة نصر",
+    },
+    // Doctor user-001 - Friday
+    {
+      id: "apt-025",
+      patient_id: "patient-005",
+      patient_name: "Nour Amin",
+      scheduled_at: getWeekDate(5, 10, 0).toISOString(),
+      status: "confirmed",
+      type: "Consultation",
+      notes: "Physical therapy assessment",
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-002",
+      clinic_name: "مدينة نصر",
+    },
+    
+    // ========== CLINIC-003 (الزمالك) ==========
+    // Doctor user-002 - Tuesday
+    {
+      id: "apt-026",
+      patient_id: "patient-001",
+      patient_name: "Fatima Mohamed",
+      scheduled_at: getWeekDate(2, 11, 0).toISOString(),
+      status: "scheduled",
+      type: "Consultation",
+      notes: "Internal medicine consultation",
+      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-003",
+      clinic_name: "الزمالك",
+    },
+    // Doctor user-001 - Thursday
+    {
+      id: "apt-027",
+      patient_id: "patient-002",
+      patient_name: "Ahmed Abdullah",
+      scheduled_at: getWeekDate(4, 11, 0).toISOString(),
+      status: "confirmed",
+      type: "Follow-up",
+      notes: "Physical therapy progress check",
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-003",
+      clinic_name: "الزمالك",
+    },
+    // Doctor user-002 - Thursday
+    {
+      id: "apt-028",
+      patient_id: "patient-003",
+      patient_name: "Layla Ibrahim",
+      scheduled_at: getWeekDate(4, 14, 0).toISOString(),
+      status: "scheduled",
+      type: "Check-up",
+      notes: "General health check",
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-003",
+      clinic_name: "الزمالك",
+    },
+    
+    // ========== PAST APPOINTMENTS (for history) ==========
+    {
+      id: "apt-029",
+      patient_id: "patient-001",
+      patient_name: "Fatima Mohamed",
+      scheduled_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      status: "completed",
+      type: "Check-up",
+      notes: "Previous week appointment",
+      created_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-001",
+      doctor_full_name: "أحمد حسن",
+      clinic_id: "clinic-001",
+      clinic_name: "المعادي",
+    },
+    {
+      id: "apt-030",
+      patient_id: "patient-003",
+      patient_name: "Layla Ibrahim",
+      scheduled_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      status: "no_show",
+      type: "Follow-up",
+      notes: "Patient did not attend",
+      created_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+      doctor_id: "user-002",
+      doctor_full_name: "فاطمة علي",
+      clinic_id: "clinic-002",
+      clinic_name: "مدينة نصر",
+    },
+  ]
+}
 
 // Export fresh appointments
 export const mockAppointments: Appointment[] = generateMockAppointments()
@@ -1532,6 +1805,384 @@ export const mockLeads: Lead[] = [
   },
 ]
 
+// Waiting List Entries
+export interface WaitingListEntry {
+  id: string
+  clinicId: string
+  patientId: string
+  patientName: string
+  patientPhone: string
+  requestedDoctorId?: string
+  appointmentType?: "new" | "followup" | "online"
+  earliestDate?: string
+  latestDate?: string
+  preferredTimeWindow?: "any" | "morning" | "afternoon" | "evening"
+  preferredDays?: string[]
+  status: "active" | "offered" | "booked" | "snoozed" | "removed"
+  priority: "low" | "normal" | "high"
+  notes?: string
+  nextActionAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export const mockWaitingListEntries: WaitingListEntry[] = [
+  {
+    id: "waitlist-001",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-001",
+    patientName: "Fatima Mohamed",
+    patientPhone: "+20 100 1234567",
+    requestedDoctorId: DEMO_DOCTOR_ID,
+    appointmentType: "followup",
+    earliestDate: new Date().toISOString().split("T")[0],
+    latestDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    preferredTimeWindow: "morning",
+    preferredDays: ["monday", "wednesday", "friday"],
+    status: "active",
+    priority: "high",
+    notes: "Patient prefers morning appointments",
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "waitlist-002",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-002",
+    patientName: "Ahmed Abdullah",
+    patientPhone: "+20 100 2345678",
+    appointmentType: "followup",
+    preferredTimeWindow: "afternoon",
+    preferredDays: ["tuesday", "thursday"],
+    status: "active",
+    priority: "normal",
+    notes: "Flexible with timing",
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "waitlist-003",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-003",
+    patientName: "Layla Ibrahim",
+    patientPhone: "+20 100 3456789",
+    requestedDoctorId: DEMO_DOCTOR_ID,
+    appointmentType: "new",
+    preferredTimeWindow: "evening",
+    preferredDays: ["monday", "wednesday", "friday"],
+    status: "active",
+    priority: "normal",
+    notes: "Evening appointments preferred",
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "waitlist-004",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-004",
+    patientName: "Omar Khalil",
+    patientPhone: "+20 100 4567890",
+    appointmentType: "online",
+    preferredTimeWindow: "any",
+    status: "active",
+    priority: "low",
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "waitlist-005",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-005",
+    patientName: "Mariam Hassan",
+    patientPhone: "+20 100 5678901",
+    requestedDoctorId: DEMO_DOCTOR_ID,
+    appointmentType: "followup",
+    earliestDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    latestDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    preferredTimeWindow: "morning",
+    preferredDays: ["saturday", "sunday"],
+    status: "active",
+    priority: "high",
+    notes: "Weekend morning preferred",
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "waitlist-006",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-006",
+    patientName: "Youssef Ali",
+    patientPhone: "+20 100 6789012",
+    appointmentType: "new",
+    preferredTimeWindow: "afternoon",
+    status: "active",
+    priority: "normal",
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "waitlist-007",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-007",
+    patientName: "Nour Mahmoud",
+    patientPhone: "+20 100 7890123",
+    appointmentType: "followup",
+    preferredTimeWindow: "any",
+    preferredDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    status: "offered",
+    priority: "normal",
+    notes: "Already offered a slot, waiting for response",
+    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "waitlist-008",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-008",
+    patientName: "Sara Mohamed",
+    patientPhone: "+20 100 8901234",
+    requestedDoctorId: DEMO_DOCTOR_ID,
+    appointmentType: "online",
+    preferredTimeWindow: "evening",
+    status: "active",
+    priority: "high",
+    notes: "Urgent online consultation needed",
+    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+// Appointment Approval Requests
+export interface AppointmentApprovalRequest {
+  id: string
+  clinicId: string
+  patientId: string
+  patientName: string
+  patientPhone: string
+  doctorId?: string
+  appointmentType: string
+  requestedStartAt: string
+  requestedEndAt: string
+  source: "integration" | "online_booking"
+  status: "pending" | "approved" | "rejected"
+  notes?: string
+  createdAt: string
+}
+
+export const mockApprovalRequests: AppointmentApprovalRequest[] = [
+  {
+    id: "approval-001",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-009",
+    patientName: "Khaled Farid",
+    patientPhone: "+20 100 9012345",
+    doctorId: DEMO_DOCTOR_ID,
+    appointmentType: "new",
+    requestedStartAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    requestedEndAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000).toISOString(),
+    source: "integration",
+    status: "pending",
+    notes: "Booked via TidyCal integration",
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "approval-002",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-010",
+    patientName: "Rania Taha",
+    patientPhone: "+20 100 0123456",
+    appointmentType: "followup",
+    requestedStartAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+    requestedEndAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000).toISOString(),
+    source: "online_booking",
+    status: "pending",
+    notes: "Booked via website",
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "approval-003",
+    clinicId: DEMO_CLINIC_ID,
+    patientId: "patient-011",
+    patientName: "Tamer Soliman",
+    patientPhone: "+20 100 1234567",
+    doctorId: DEMO_DOCTOR_ID,
+    appointmentType: "online",
+    requestedStartAt: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+    requestedEndAt: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 45 * 60 * 1000).toISOString(),
+    source: "integration",
+    status: "pending",
+    notes: "Booked via Calendly integration",
+    createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+// Doctor Availability
+// Note: 
+// - doctorId should match user IDs from users-clinics.ts ("user-001", "user-002")
+// - clinicId should match clinic IDs from users-clinics.ts ("clinic-001", "clinic-002", "clinic-003")
+// Distributing availability across all doctors and clinics so appointments are visible everywhere
+export const mockDoctorAvailability: DoctorAvailability[] = [
+  // ========== DOCTOR user-001 (أحمد حسن) ==========
+  // Clinic-001 (المعادي) - Weekdays
+  {
+    id: "avail-001",
+    doctorId: "user-001",
+    clinicId: "clinic-001",
+    daysOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    startTime: "09:00",
+    endTime: "17:00",
+    slotDuration: 30,
+    appointmentTypeDurations: {
+      "new": 60,
+      "Consultation": 60,
+      "followup": 30,
+      "Follow-up": 30,
+      "Followup": 30,
+      "online": 45,
+      "Check-up": 60,
+      "Checkup": 60,
+      "Procedure": 45,
+    },
+    breaks: [
+      { startTime: "12:00", endTime: "13:00" },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  // Clinic-001 (المعادي) - Saturday
+  {
+    id: "avail-002",
+    doctorId: "user-001",
+    clinicId: "clinic-001",
+    daysOfWeek: ["saturday"],
+    startTime: "09:00",
+    endTime: "13:00",
+    slotDuration: 30,
+    appointmentTypeDurations: {
+      "new": 60,
+      "Consultation": 60,
+      "followup": 30,
+      "Follow-up": 30,
+      "Followup": 30,
+    },
+    breaks: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  // Clinic-002 (مدينة نصر) - Monday, Wednesday, Friday
+  {
+    id: "avail-003",
+    doctorId: "user-001",
+    clinicId: "clinic-002",
+    daysOfWeek: ["monday", "wednesday", "friday"],
+    startTime: "09:00",
+    endTime: "15:00",
+    slotDuration: 30,
+    appointmentTypeDurations: {
+      "new": 60,
+      "Consultation": 60,
+      "followup": 30,
+      "Follow-up": 30,
+      "Followup": 30,
+    },
+    breaks: [
+      { startTime: "12:00", endTime: "13:00" },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  // Clinic-003 (الزمالك) - Thursday
+  {
+    id: "avail-004",
+    doctorId: "user-001",
+    clinicId: "clinic-003",
+    daysOfWeek: ["thursday"],
+    startTime: "09:00",
+    endTime: "16:00",
+    slotDuration: 30,
+    appointmentTypeDurations: {
+      "new": 60,
+      "Consultation": 60,
+      "followup": 30,
+      "Follow-up": 30,
+      "Followup": 30,
+    },
+    breaks: [
+      { startTime: "12:00", endTime: "13:00" },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  
+  // ========== DOCTOR user-002 (فاطمة علي) ==========
+  // Clinic-001 (المعادي) - Weekdays
+  {
+    id: "avail-005",
+    doctorId: "user-002",
+    clinicId: "clinic-001",
+    daysOfWeek: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    startTime: "10:00",
+    endTime: "16:00",
+    slotDuration: 30,
+    appointmentTypeDurations: {
+      "new": 45,
+      "Consultation": 45,
+      "followup": 30,
+      "Follow-up": 30,
+      "Followup": 30,
+    },
+    breaks: [
+      { startTime: "13:00", endTime: "14:00" },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  // Clinic-002 (مدينة نصر) - Monday, Wednesday
+  {
+    id: "avail-006",
+    doctorId: "user-002",
+    clinicId: "clinic-002",
+    daysOfWeek: ["monday", "wednesday"],
+    startTime: "09:00",
+    endTime: "15:00",
+    slotDuration: 30,
+    appointmentTypeDurations: {
+      "new": 45,
+      "Consultation": 45,
+      "followup": 30,
+      "Follow-up": 30,
+      "Followup": 30,
+    },
+    breaks: [
+      { startTime: "12:00", endTime: "13:00" },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  // Clinic-003 (الزمالك) - Tuesday, Thursday
+  {
+    id: "avail-007",
+    doctorId: "user-002",
+    clinicId: "clinic-003",
+    daysOfWeek: ["tuesday", "thursday"],
+    startTime: "09:00",
+    endTime: "16:00",
+    slotDuration: 30,
+    appointmentTypeDurations: {
+      "new": 45,
+      "Consultation": 45,
+      "followup": 30,
+      "Follow-up": 30,
+      "Followup": 30,
+    },
+    breaks: [
+      { startTime: "12:00", endTime: "13:00" },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+]
+
 export const mockData = {
   doctors: mockDoctors,
   patients: mockPatients,
@@ -1547,4 +2198,7 @@ export const mockData = {
   transcriptions: mockTranscriptions,
   attachments: mockAttachments,
   leads: mockLeads,
+  waitingListEntries: mockWaitingListEntries,
+  approvalRequests: mockApprovalRequests,
+  doctorAvailability: mockDoctorAvailability,
 }

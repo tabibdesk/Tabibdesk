@@ -10,6 +10,7 @@ import type {
   PlanInfo,
   ClinicSettings,
   FeatureKey,
+  AppointmentSettings,
 } from "@/features/settings/settings.types"
 import { mockClinics } from "@/data/mock/users-clinics"
 
@@ -249,6 +250,27 @@ export async function clearClinicFeatureFlags(clinicId: string): Promise<void> {
 
   // Update cache
   delete featureFlagsCache[clinicId]
+}
+
+/**
+ * Get appointment settings for a clinic
+ * Returns settings from ClinicSettings.appointmentSettings or defaults
+ */
+export async function getAppointmentSettings(clinicId: string): Promise<AppointmentSettings> {
+  await new Promise((resolve) => setTimeout(resolve, 100))
+
+  const clinicSettings = await getClinicSettings(clinicId)
+  
+  if (clinicSettings.appointmentSettings) {
+    return clinicSettings.appointmentSettings
+  }
+
+  // Return defaults
+  return {
+    bufferMinutes: 5,
+    slotDurationMinutes: 30,
+    bookingRangeDays: 14,
+  }
 }
 
 /**

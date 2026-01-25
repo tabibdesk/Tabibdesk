@@ -13,9 +13,13 @@ import {
   RiCheckLine,
   RiCalendarLine,
   RiTimeLine,
+  RiHospitalLine,
 } from "@remixicon/react"
 import { useDemo } from "@/contexts/demo-context"
-import { PatientFormFields, type PatientFormData } from "@/features/patients/PatientFormFields"
+import { PatientSelector, type Patient } from "@/components/shared/PatientSelector"
+import { mockUsers, mockClinics } from "@/data/mock/users-clinics"
+import { createAppointment, updateAppointmentTime } from "@/features/appointments/appointments.api"
+import { getAvailableDates, getAvailableSlots } from "@/features/appointments/slots.api"
 
 // Types
 export interface Patient {
@@ -47,9 +51,24 @@ interface AvailableDate {
   date: string
 }
 
+interface PreSelectedSlot {
+  clinicId: string
+  doctorId: string
+  startAt: string
+  endAt: string
+  appointmentType?: string
+}
+
 interface BookAppointmentFlowProps {
   initialPatient?: Patient | null
   showBackButton?: boolean
+  showTitle?: boolean
+  showHeader?: boolean
+  isEmbedded?: boolean
+  preSelectedSlot?: PreSelectedSlot | null
+  rescheduleAppointmentId?: string | null
+  clinicId?: string
+  doctorId?: string
   onBookingComplete?: () => void
   onCancel?: () => void
 }
@@ -57,6 +76,13 @@ interface BookAppointmentFlowProps {
 export function BookAppointmentFlow({
   initialPatient = null,
   showBackButton = true,
+  showTitle = true,
+  showHeader = true,
+  isEmbedded = false,
+  preSelectedSlot = null,
+  rescheduleAppointmentId = null,
+  clinicId,
+  doctorId,
   onBookingComplete,
   onCancel,
 }: BookAppointmentFlowProps) {
@@ -66,58 +92,38 @@ export function BookAppointmentFlow({
   const [currentStep, setCurrentStep] = useState<"patient" | "service" | "datetime" | "confirmation" | "success">(
     initialPatient ? "service" : "patient"
   )
-  const [patientMode, setPatientMode] = useState<"existing" | "new">("existing")
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(initialPatient)
   const [selectedService, setSelectedService] = useState<AppBookableService | null>(null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
-  // New Patient Form State
-  const [newPatientForm, setNewPatientForm] = useState<PatientFormData>({
-    first_name: "",
-    last_name: "",
-    phone: "",
-    email: "",
-  })
-  
-  // Search & Loading States
-  const [searchTerm, setSearchTerm] = useState("")
-  const [searchResults, setSearchResults] = useState<Patient[]>([])
-  const [isSearching, setIsSearching] = useState(false)
   const [services, setServices] = useState<AppBookableService[]>([])
   const [isLoadingServices, setIsLoadingServices] = useState(false)
   const [availableDates, setAvailableDates] = useState<AvailableDate[]>([])
   const [isLoadingDates, setIsLoadingDates] = useState(false)
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
   const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+  
+  // Slot context info (doctor & clinic names)
+  const [slotContextInfo, setSlotContextInfo] = useState<{
+    doctorName: string
+    clinicName: string
+  } | null>(null)
 
-  // Patient Search with Debounce
+  // Load slot context info (doctor & clinic names) when preSelectedSlot is provided
   useEffect(() => {
-    if (searchTerm.length < 2) {
-      setSearchResults([])
-      return
+    if (preSelectedSlot) {
+      const doctor = mockUsers.find(u => u.id === preSelectedSlot.doctorId)
+      const clinic = mockClinics.find(c => c.id === preSelectedSlot.clinicId)
+      
+      if (doctor && clinic) {
+        setSlotContextInfo({
+          doctorName: doctor.full_name,
+          clinicName: clinic.name,
+        })
+      }
     }
-
-    const timeoutId = setTimeout(() => {
-      searchPatients(searchTerm)
-    }, 300)
-
-    return () => clearTimeout(timeoutId)
-  }, [searchTerm])
-
-  const searchPatients = async (term: string) => {
-    setIsSearching(true)
-    try {
-      const response = await fetch(`/api/patients/search?q=${encodeURIComponent(term)}&demo=${isDemoMode}`)
-      const data = await response.json()
-      setSearchResults(data)
-    } catch (error) {
-      console.error('Search failed:', error)
-    } finally {
-      setIsSearching(false)
-    }
-  }
+  }, [preSelectedSlot])
 
   // Load Services
   useEffect(() => {
@@ -149,13 +155,31 @@ export function BookAppointmentFlow({
   const loadAvailableDates = async () => {
     if (!selectedService) return
     
+    // Determine clinic and doctor IDs from preSelectedSlot or props
+    const effectiveClinicId = preSelectedSlot?.clinicId || clinicId
+    const effectiveDoctorId = preSelectedSlot?.doctorId || doctorId
+    
+    if (!effectiveClinicId || !effectiveDoctorId) {
+      console.error('Missing clinic or doctor ID for loading available dates')
+      return
+    }
+    
     setIsLoadingDates(true)
     try {
-      const response = await fetch(
-        `/api/tidycal/available-dates?bookingTypeId=${selectedService.id}&demo=${isDemoMode}`
-      )
-      const data = await response.json()
-      setAvailableDates(data)
+      // Use TabibDesk slots API which respects doctor availability and buffers
+      const startDate = new Date()
+      const endDate = new Date()
+      endDate.setDate(endDate.getDate() + 30) // Next 30 days
+      
+      const availableDates = await getAvailableDates({
+        clinicId: effectiveClinicId,
+        doctorId: effectiveDoctorId,
+        startDate,
+        endDate,
+        excludeAppointmentId: rescheduleAppointmentId || undefined,
+      })
+      
+      setAvailableDates(availableDates.map(date => ({ date })))
     } catch (error) {
       console.error('Failed to load dates:', error)
     } finally {
@@ -173,13 +197,36 @@ export function BookAppointmentFlow({
   const loadTimeSlots = async () => {
     if (!selectedService || !selectedDate) return
     
+    // Determine clinic and doctor IDs from preSelectedSlot or props
+    const effectiveClinicId = preSelectedSlot?.clinicId || clinicId
+    const effectiveDoctorId = preSelectedSlot?.doctorId || doctorId
+    
+    if (!effectiveClinicId || !effectiveDoctorId) {
+      console.error('Missing clinic or doctor ID for loading time slots')
+      return
+    }
+    
     setIsLoadingSlots(true)
     try {
-      const response = await fetch(
-        `/api/tidycal/timeslots?bookingTypeId=${selectedService.id}&date=${selectedDate}&demo=${isDemoMode}`
-      )
-      const data = await response.json()
-      setTimeSlots(data)
+      // Use TabibDesk slots API which respects doctor availability and buffers
+      const startDate = new Date(selectedDate)
+      const endDate = new Date(selectedDate)
+      
+      const slotsByDate = await getAvailableSlots({
+        clinicId: effectiveClinicId,
+        doctorId: effectiveDoctorId,
+        startDate,
+        endDate,
+        excludeAppointmentId: rescheduleAppointmentId || undefined,
+      })
+      
+      const availableSlots = slotsByDate[selectedDate] || []
+      
+      // Transform TabibDesk Slot format to TimeSlot format
+      setTimeSlots(availableSlots.map(slot => ({
+        starts_at: slot.startAt,
+        ends_at: slot.endAt,
+      })))
     } catch (error) {
       console.error('Failed to load time slots:', error)
     } finally {
@@ -190,33 +237,24 @@ export function BookAppointmentFlow({
   // Handle Patient Selection
   const handlePatientSelect = (patient: Patient) => {
     setSelectedPatient(patient)
-    setSearchTerm("")
-    setSearchResults([])
-    setCurrentStep("service")
-  }
-
-  // Handle New Patient Form Submit
-  const handleNewPatientSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Create a temporary patient object
-    const emailValue = newPatientForm.email?.trim() || ""
-    const newPatient: Patient = {
-      id: `temp-${Date.now()}`,
-      first_name: newPatientForm.first_name,
-      last_name: newPatientForm.last_name,
-      phone: newPatientForm.phone,
-      email: emailValue ? emailValue : null,
-    }
-    
-    setSelectedPatient(newPatient)
     setCurrentStep("service")
   }
 
   // Handle Service Selection
   const handleServiceSelect = (service: AppBookableService) => {
     setSelectedService(service)
-    setCurrentStep("datetime")
+    // If we have a pre-selected slot, skip datetime and go to confirmation
+    if (preSelectedSlot) {
+      // Set the slot data from preSelectedSlot
+      setSelectedDate(preSelectedSlot.startAt.split('T')[0])
+      setSelectedSlot({
+        starts_at: preSelectedSlot.startAt,
+        ends_at: preSelectedSlot.endAt,
+      })
+      setCurrentStep("confirmation")
+    } else {
+      setCurrentStep("datetime")
+    }
   }
 
   // Handle Date Selection
@@ -240,12 +278,6 @@ export function BookAppointmentFlow({
           setCurrentStep("service")
         } else {
           setSelectedPatient(null)
-          setNewPatientForm({
-            first_name: "",
-            last_name: "",
-            phone: "",
-            email: "",
-          } as PatientFormData)
           setCurrentStep("patient")
         }
         break
@@ -255,8 +287,15 @@ export function BookAppointmentFlow({
         setCurrentStep("service")
         break
       case "confirmation":
-        setSelectedSlot(null)
-        setCurrentStep("datetime")
+        // If we have a pre-selected slot, go back to service (skip datetime)
+        if (preSelectedSlot) {
+          setSelectedSlot(null)
+          setSelectedDate(null)
+          setCurrentStep("service")
+        } else {
+          setSelectedSlot(null)
+          setCurrentStep("datetime")
+        }
         break
     }
   }
@@ -267,28 +306,45 @@ export function BookAppointmentFlow({
     
     setIsSubmitting(true)
     try {
-      const response = await fetch('/api/tidycal/create-booking', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          bookingTypeId: selectedService.id,
-          startsAt: selectedSlot.starts_at,
-          patientId: selectedPatient.id,
-          name: `${selectedPatient.first_name} ${selectedPatient.last_name}`,
-          email: selectedPatient.email,
-          phone: selectedPatient.phone,
-          isDemo: isDemoMode
-        })
-      })
-      
-      if (response.ok) {
+      // If rescheduling, update existing appointment
+      if (rescheduleAppointmentId) {
+        await updateAppointmentTime(
+          rescheduleAppointmentId,
+          selectedSlot.starts_at,
+          selectedSlot.ends_at
+        )
+        
         setCurrentStep("success")
         if (onBookingComplete) {
-          // Delay callback to show success message
           setTimeout(() => {
             onBookingComplete()
-          }, 2000)
+          }, 1500)
         }
+      }
+      // If we have a pre-selected slot, create appointment using TabibDesk API
+      else if (preSelectedSlot) {
+        await createAppointment({
+          patientId: selectedPatient.id,
+          patientName: `${selectedPatient.first_name} ${selectedPatient.last_name}`,
+          patientPhone: selectedPatient.phone,
+          clinicId: preSelectedSlot.clinicId,
+          doctorId: preSelectedSlot.doctorId,
+          startAt: selectedSlot.starts_at,
+          endAt: selectedSlot.ends_at,
+          appointmentType: selectedService.app_appointment_type_name || selectedService.title,
+          notes: undefined,
+        })
+        
+        setCurrentStep("success")
+        if (onBookingComplete) {
+          setTimeout(() => {
+            onBookingComplete()
+          }, 1500)
+        }
+      } else {
+        // This should never happen - all bookings require either a pre-selected slot or reschedule
+        console.error('Invalid booking state: missing preSelectedSlot or rescheduleAppointmentId')
+        throw new Error('Invalid booking state')
       }
     } catch (error) {
       console.error('Booking failed:', error)
@@ -303,13 +359,6 @@ export function BookAppointmentFlow({
     setSelectedService(null)
     setSelectedDate(null)
     setSelectedSlot(null)
-    setPatientMode("existing")
-    setNewPatientForm({
-      first_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
-    } as PatientFormData)
     setCurrentStep(initialPatient ? "service" : "patient")
   }
 
@@ -335,7 +384,7 @@ export function BookAppointmentFlow({
   return (
     <div className="space-y-6">
       {/* Back Navigation */}
-      {showBackButton && currentStep !== "success" && (
+      {showHeader && showBackButton && currentStep !== "success" && (
         <div className="mb-3">
           {onCancel ? (
             <Button variant="ghost" onClick={onCancel} className="mb-2 -ml-2">
@@ -354,12 +403,33 @@ export function BookAppointmentFlow({
       )}
 
       {/* Header */}
-      <div className="mb-3">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Book Appointment</h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Schedule a new appointment for a patient
-        </p>
-      </div>
+      {showTitle && (
+        <div className="mb-3">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">Book Appointment</h1>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            Schedule a new appointment for a patient
+          </p>
+        </div>
+      )}
+
+      {/* Slot Context Banner - shown when filling a specific slot */}
+      {preSelectedSlot && slotContextInfo && currentStep !== "success" && (
+        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4 dark:bg-blue-900/10 dark:border-blue-800">
+          <div className="flex items-start gap-3">
+            <RiHospitalLine className="size-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-blue-900 dark:text-blue-100">
+              <p className="font-medium">
+                Filling slot for <span className="font-semibold">{slotContextInfo.doctorName}</span> at{" "}
+                <span className="font-semibold">{slotContextInfo.clinicName}</span>
+              </p>
+              <p className="mt-1 text-blue-700 dark:text-blue-300">
+                {formatDate(preSelectedSlot.startAt.split('T')[0])} at{" "}
+                {formatTime(preSelectedSlot.startAt)} - {formatTime(preSelectedSlot.endAt)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Progress Steps */}
       <div className="mb-8">
@@ -367,10 +437,11 @@ export function BookAppointmentFlow({
           {[
             { key: "patient", label: "Patient" },
             { key: "service", label: "Service" },
-            { key: "datetime", label: "Date & Time" },
+            ...(preSelectedSlot ? [] : [{ key: "datetime", label: "Date & Time" }]),
             { key: "confirmation", label: "Confirm" },
-          ].map((step, index) => {
-            const stepIndex = ["patient", "service", "datetime", "confirmation"].indexOf(currentStep)
+          ].map((step, index, array) => {
+            const stepKeys = array.map(s => s.key)
+            const stepIndex = stepKeys.indexOf(currentStep)
             const isActive = step.key === currentStep
             const isCompleted = index < stepIndex || currentStep === "success"
             
@@ -396,7 +467,7 @@ export function BookAppointmentFlow({
                     {step.label}
                   </span>
                 </div>
-                {index < 3 && (
+                {index < array.length - 1 && (
                   <div
                     className={`mx-4 h-0.5 flex-1 ${
                       isCompleted ? "bg-primary-600" : "bg-gray-300 dark:bg-gray-700"
@@ -410,23 +481,23 @@ export function BookAppointmentFlow({
       </div>
 
       {/* Step Content */}
-      <Card>
-        <CardHeader>
+      <Card className={isEmbedded ? "border-0 shadow-none" : ""}>
+        <CardHeader className={isEmbedded ? "px-0 pt-0" : ""}>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>
                 {currentStep === "patient" && "Search Patient"}
                 {currentStep === "service" && "Select Service"}
                 {currentStep === "datetime" && "Choose Date & Time"}
-                {currentStep === "confirmation" && "Confirm Booking"}
-                {currentStep === "success" && "Booking Confirmed!"}
+                {currentStep === "confirmation" && (rescheduleAppointmentId ? "Confirm Reschedule" : "Confirm Booking")}
+                {currentStep === "success" && (rescheduleAppointmentId ? "Appointment Rescheduled!" : "Booking Confirmed!")}
               </CardTitle>
               <CardDescription>
                 {currentStep === "patient" && "Search for the patient by name or phone"}
                 {currentStep === "service" && "Choose the type of appointment"}
                 {currentStep === "datetime" && "Pick an available date and time slot"}
                 {currentStep === "confirmation" && "Review and confirm the appointment details"}
-                {currentStep === "success" && "The appointment has been successfully booked"}
+                {currentStep === "success" && (rescheduleAppointmentId ? "The appointment has been successfully rescheduled" : "The appointment has been successfully booked")}
               </CardDescription>
             </div>
             {currentStep !== "patient" && currentStep !== "success" && (
@@ -437,117 +508,16 @@ export function BookAppointmentFlow({
             )}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className={isEmbedded ? "px-0" : ""}>
           {/* STEP 1: Patient Selection */}
           {currentStep === "patient" && (
             <div className="space-y-6">
-              {/* Patient Mode Selection */}
-              <div>
-                <Label>Patient Type</Label>
-                <div className="mt-3 flex gap-4">
-                  <label className="flex flex-1 cursor-pointer items-center gap-3 rounded-lg border-2 border-gray-200 p-4 transition hover:border-primary-600 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-50 dark:border-gray-800 dark:has-[:checked]:border-primary-600 dark:has-[:checked]:bg-primary-900/20">
-                    <input
-                      type="radio"
-                      name="patient-mode"
-                      value="existing"
-                      checked={patientMode === "existing"}
-                      onChange={() => setPatientMode("existing")}
-                      className="size-4 text-primary-600 focus:ring-primary-500"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-50">Existing Patient</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Search from patient database</p>
-                    </div>
-                  </label>
-                  
-                  <label className="flex flex-1 cursor-pointer items-center gap-3 rounded-lg border-2 border-gray-200 p-4 transition hover:border-primary-600 has-[:checked]:border-primary-600 has-[:checked]:bg-primary-50 dark:border-gray-800 dark:has-[:checked]:border-primary-600 dark:has-[:checked]:bg-primary-900/20">
-                    <input
-                      type="radio"
-                      name="patient-mode"
-                      value="new"
-                      checked={patientMode === "new"}
-                      onChange={() => setPatientMode("new")}
-                      className="size-4 text-primary-600 focus:ring-primary-500"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-50">New Patient</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Create a new patient record</p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Existing Patient Search */}
-              {patientMode === "existing" && (
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="patient-search">Search Patient</Label>
-                    <div className="relative">
-                      <Input
-                        id="patient-search"
-                        placeholder="Type patient name or phone number..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pr-10"
-                      />
-                      {isSearching && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <div className="size-5 animate-spin rounded-full border-2 border-gray-300 border-t-primary-600"></div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {searchResults.length > 0 && (
-                    <div className="space-y-2">
-                      {searchResults.map((patient) => (
-                        <button
-                          key={patient.id}
-                          onClick={() => handlePatientSelect(patient)}
-                          className="w-full rounded-lg border border-gray-200 p-4 text-left transition hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="flex size-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/20">
-                              <RiUserLine className="size-5 text-primary-600 dark:text-primary-400" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-gray-50">
-                                {patient.first_name} {patient.last_name}
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {patient.phone} {patient.email && `• ${patient.email}`}
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {searchTerm.length >= 2 && !isSearching && searchResults.length === 0 && (
-                    <Alert variant="default">
-                      No patients found matching &quot;{searchTerm}&quot;
-                    </Alert>
-                  )}
-                </div>
-              )}
-
-              {/* New Patient Form */}
-              {patientMode === "new" && (
-                <form onSubmit={handleNewPatientSubmit} className="space-y-4">
-                  <PatientFormFields
-                    formData={newPatientForm}
-                    onChange={setNewPatientForm}
-                    showEmail={true}
-                  />
-
-                  <div className="flex justify-end">
-                    <Button type="submit" variant="primary">
-                      Continue to Service Selection
-                    </Button>
-                  </div>
-                </form>
-              )}
+              <PatientSelector
+                initialPatient={initialPatient}
+                onPatientSelect={handlePatientSelect}
+                showEmail={true}
+                required={true}
+              />
             </div>
           )}
 
@@ -726,13 +696,13 @@ export function BookAppointmentFlow({
                 <RiCheckLine className="size-8 text-green-600 dark:text-green-400" />
               </div>
               <h3 className="mt-4 text-xl font-medium text-gray-900 dark:text-gray-50">
-                Appointment Booked Successfully!
+                {rescheduleAppointmentId ? "Appointment Rescheduled Successfully!" : "Appointment Booked Successfully!"}
               </h3>
               <p className="mt-2 text-gray-600 dark:text-gray-400">
                 The patient has been notified and will receive a confirmation.
               </p>
               <Button variant="primary" onClick={handleNewBooking} className="mt-6">
-                Book Another Appointment
+                {rescheduleAppointmentId ? "Done" : "Book Another Appointment"}
               </Button>
             </div>
           )}

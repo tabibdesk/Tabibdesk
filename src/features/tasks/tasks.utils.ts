@@ -1,4 +1,4 @@
-import type { TaskStatus, TaskType, TaskPriority } from "./tasks.types"
+import type { TaskStatus, TaskType, TaskPriority, TaskSource } from "./tasks.types"
 
 export function getStatusBadgeVariant(status: TaskStatus): "default" | "success" | "error" | "warning" | "neutral" {
   switch (status) {
@@ -42,6 +42,32 @@ export function getTypeLabel(type: TaskType): string {
       return "Other"
     default:
       return type
+  }
+}
+
+export function getSourceLabel(source: TaskSource): string {
+  switch (source) {
+    case "alert":
+      return "Automated"
+    case "manual":
+      return "Manual"
+    case "ai":
+      return "AI"
+    default:
+      return source
+  }
+}
+
+export function getSourceBadgeVariant(source: TaskSource): "default" | "success" | "error" | "warning" | "neutral" {
+  switch (source) {
+    case "alert":
+      return "warning"
+    case "ai":
+      return "success"
+    case "manual":
+      return "neutral"
+    default:
+      return "neutral"
   }
 }
 
