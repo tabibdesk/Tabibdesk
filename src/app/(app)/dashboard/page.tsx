@@ -238,7 +238,7 @@ export default function DashboardPage() {
               return {
                 ...apt,
                 queueStatus: newStatus === "scheduled" ? undefined : newStatus,
-                status: newStatus === "scheduled" ? "scheduled" : newStatus === "no_show" ? "no_show" : apt.status,
+                status: newStatus === "scheduled" ? "scheduled" : apt.status,
               }
             }
             return apt

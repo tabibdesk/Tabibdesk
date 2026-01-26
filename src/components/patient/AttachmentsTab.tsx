@@ -170,7 +170,7 @@ export function AttachmentsTab({ attachments, onUpload, onDelete }: AttachmentsT
                     <RiDownloadLine className="size-4" />
                   </Button>
                   <Button
-                    variant="destructive"
+                    variant="error"
                     size="sm"
                     onClick={() => onDelete?.(attachment.id)}
                   >

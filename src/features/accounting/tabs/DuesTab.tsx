@@ -184,7 +184,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                           </div>
                         </td>
                         <td className="px-4 py-4">
-                          <Badge variant="destructive" className="font-semibold">
+                          <Badge variant="error" className="font-semibold">
                             {invoice.amount.toFixed(2)} EGP
                           </Badge>
                         </td>
@@ -256,7 +256,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                           <span className="break-all">{patientPhone}</span>
                         </div>
                       </div>
-                      <Badge variant="destructive" className="font-semibold shrink-0">
+                      <Badge variant="error" className="font-semibold shrink-0">
                         {invoice.amount.toFixed(2)} EGP
                       </Badge>
                     </div>

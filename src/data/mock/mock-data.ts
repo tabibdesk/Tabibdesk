@@ -1095,7 +1095,7 @@ interface Appointment {
   patient_id: string
   patient_name: string
   scheduled_at: string
-  status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show"
+  status: "scheduled" | "confirmed" | "in_progress" | "completed" | "cancelled" | "no_show" | "arrived"
   type: string
   notes: string | null
   created_at: string

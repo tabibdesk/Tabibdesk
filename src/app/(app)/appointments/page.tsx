@@ -17,7 +17,7 @@ export default function AppointmentsPage() {
   const { isDemoMode } = useDemo()
   
   // Use global clinic from context
-  const clinicId = currentClinic?.id || currentUser.clinicId || DEMO_CLINIC_ID
+  const clinicId = currentClinic?.id || DEMO_CLINIC_ID
   
   // Determine initial doctor ID
   // If current user is a doctor, use their ID; otherwise will be set by AppointmentsFilters

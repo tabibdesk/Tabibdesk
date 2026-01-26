@@ -29,7 +29,7 @@ export interface Appointment {
   startAt: string
   endAt: string
   durationMinutes: number
-  status: "scheduled" | "completed" | "cancelled" | "confirmed" | "in_progress" | "no_show"
+  status: "scheduled" | "completed" | "cancelled" | "confirmed" | "in_progress" | "no_show" | "arrived"
   type: string
   notes?: string
   createdAt: string

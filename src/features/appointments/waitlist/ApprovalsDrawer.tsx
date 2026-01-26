@@ -38,8 +38,8 @@ export interface ApprovalsDrawerProps {
 
 export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
   const { showToast } = useToast()
-  const { currentUser } = useUserClinic()
-  const clinicId = currentUser.clinicId || DEMO_CLINIC_ID
+  const { currentUser, currentClinic } = useUserClinic()
+  const clinicId = currentClinic?.id || DEMO_CLINIC_ID
 
   const [loading, setLoading] = useState(false)
   const [requests, setRequests] = useState<AppointmentApprovalRequest[]>([])
@@ -241,7 +241,7 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
                           Approve
                         </Button>
                         <Button
-                          variant="destructive"
+                          variant="error"
                           size="sm"
                           onClick={() => handleReject(request)}
                           className="flex-1 sm:flex-none"

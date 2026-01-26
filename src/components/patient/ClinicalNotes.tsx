@@ -79,7 +79,7 @@ export function ClinicalNotes({ title, onSave, onCancel, onViewTranscription }: 
                   )}
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="error"
                   onClick={handleStopRecording}
                   className="gap-2"
                 >

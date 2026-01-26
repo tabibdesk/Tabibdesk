@@ -22,14 +22,6 @@ import { getAvailableDates, getAvailableSlots } from "@/features/appointments/sl
 import { format } from "date-fns"
 
 // Types
-export interface Patient {
-  id: string
-  first_name: string
-  last_name: string
-  phone: string
-  email: string | null
-}
-
 export interface AppBookableService {
   id: number
   title: string

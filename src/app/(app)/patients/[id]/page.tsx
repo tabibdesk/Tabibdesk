@@ -112,7 +112,7 @@ export default function PatientDetailPage() {
 
   const fetchUnpaidInvoices = async () => {
     try {
-      const clinicId = currentClinic?.id || currentUser?.clinicId || "clinic-001"
+      const clinicId = currentClinic?.id || "clinic-001"
       const result = await listInvoices({
         clinicId,
         patientId,
@@ -151,7 +151,7 @@ export default function PatientDetailPage() {
     }
 
     try {
-      const clinicId = currentClinic?.id || currentUser?.clinicId || "clinic-001"
+      const clinicId = currentClinic?.id || "clinic-001"
       const response = await listTasks({
         clinicId,
         status: "all",
@@ -316,7 +316,7 @@ export default function PatientDetailPage() {
             </Badge>
             {totalDue > 0 && (
               <Badge 
-                variant="destructive" 
+                variant="error" 
                 className="text-xs font-medium"
               >
                 Due: {totalDue.toFixed(2)} EGP
@@ -413,7 +413,7 @@ export default function PatientDetailPage() {
           onSubmit={handleCreateTask}
           defaultPatientId={patientId}
           currentUserId={currentUser?.id || "user-001"}
-          clinicId={currentClinic?.id || currentUser?.clinicId || "clinic-001"}
+          clinicId={currentClinic?.id || "clinic-001"}
         />
         <AddPrescriptionDrawer
           open={showAddPrescriptionDrawer}
@@ -437,7 +437,7 @@ export default function PatientDetailPage() {
             }
           }}
           patientId={patientId}
-          clinicId={currentClinic?.id || currentUser?.clinicId || "clinic-001"}
+          clinicId={currentClinic?.id || "clinic-001"}
           doctorId={currentUser?.id}
         />
         <AddPastMedicationModal

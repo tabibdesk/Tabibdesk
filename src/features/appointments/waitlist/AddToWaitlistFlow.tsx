@@ -20,7 +20,7 @@ interface AddToWaitlistFlowProps {
 export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowProps) {
   const { showToast } = useToast()
   const { currentUser, currentClinic } = useUserClinic()
-  const clinicId = currentClinic?.id || currentUser.clinicId || DEMO_CLINIC_ID
+  const clinicId = currentClinic?.id || DEMO_CLINIC_ID
 
   const [currentStep, setCurrentStep] = useState<"patient" | "preferences" | "confirmation" | "success">("patient")
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
