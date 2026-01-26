@@ -436,7 +436,7 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             <RiSparklingLine className="mr-1 inline-block size-4" />
             Features locked by your subscription plan require an upgrade.{" "}
-            <a href="/pricing" className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
+            <a href="/#pricing" className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
               View Plans
             </a>
           </p>

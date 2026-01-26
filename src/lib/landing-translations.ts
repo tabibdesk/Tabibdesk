@@ -2,74 +2,70 @@
 export const translations = {
   ar: {
     // Hero
-    heroHeadline: "عيادتك تمشي أسرع… من غير ورق ومن غير فورمز",
-    heroSubheadline: "TabibDesk يكتب معاك. يلخّص. يذكّر. ويخلي المتابعة سهلة.",
-    ctaPrimary: "ابدأ تجربة مجانية",
-    ctaSecondary: "اطلب ديمو",
-    heroFeature1: "زيارة أسرع",
-    heroFeature2: "متابعة أوتوماتيك",
-    heroFeature3: "ملف مريض ذكي",
+    heroEyebrow: "للعيادات الخاصة",
+    heroHeadline: "نظم عيادتك في 5 دقائق",
+    heroSubheadline: "مواعيد • ملفات مرضى • نوتات ذكية • كاشير EGP",
+    ctaPrimary: "ابدأ الآن",
+    ctaSecondary: "الديمو المباشر",
+    heroFeature1: "إعداد في 5 دقائق",
+    heroFeature2: "كاشير بالـ EGP",
+    heroFeature3: "متابعات للسكرتارية",
+
+    // WhatsApp
+    whatsappIntegration: "WhatsApp CRM آلي",
+    whatsappDesc: "تذكيرات تلقائية للمرضى وتنظيم مهام السكرتارية فوراً.",
 
     // Problem → Outcome
-    problem1: "المواعيد بتتلخبط",
-    problem2: "المريض بيرجع بعد شهر وانت ناسي التفاصيل",
-    problem3: "المتابعات بتضيع",
-    outcome1: "ملخص جاهز لكل مريض",
-    outcome2: "تاسكات للسكرتيرة والمريض",
-    outcome3: "تنبيهات للمتابعات والتحاليل",
-
-    // Differentiators
-    diff1: "تسجيل بالڤويس → نوت جاهزة",
-    diff1Note: "(دكتور يوافق)",
-    diff2: "AI يلخص آخر الزيارات في ثواني",
-    diff3: "AI يقترح تاسكات وفولو-أب",
-    diff4: "رفع تحاليل/صور + استخراج نتائج (اختياري)",
-    diff5: "كل عيادة تختار اللي يظهر: تبويبات بسيطة",
+    problemTitle: "العيادات بدون نظام",
+    problem1: "وقت ضايع في البحث عن الملفات الورقية",
+    problem2: "مواعيد ومتابعات تائهة في شات الواتساب",
+    problem3: "تفاصيل طبية مهمة بتتنسى من زيارة للتانية",
+    outcomeTitle: "مع TabibDesk",
+    outcome1: "ملف المريض وتاريخه جاهز في ثانية",
+    outcome2: "طابور واضح ومهام منظمة للسكرتارية",
+    outcome3: "كاشير دقيق وتقفيل يومي في دقيقتين",
 
     // How it works
-    step1: "افتح المريض",
-    step2: "اتكلم/اكتب… والنوت تتجهز",
-    step3: "اقفل الزيارة: خطة + تاسكات + معاد متابعة",
-    controlNote: "كل اقتراحات الـ AI لازم تتأكد منها.",
-
-    // What you get
-    module1: "المواعيد",
-    module2: "ملفات المرضى + الخط الزمني",
-    module3: "النوتات + القوالب",
-    module4: "التاسكات والمتابعات",
-    module5: "التحاليل/الملفات",
-    module6: "الإجراءات/العلاجات",
-    module7: "إحصائيات بسيطة (غيابات، إعادة حجز، متابعات متأخرة)",
-    module8: "استشارة أونلاين + دفعات (اختياري)",
+    howItWorksTitle: "3 خطوات بسيطة",
+    howItWorksSubtitle: "نظام مصمم ليرتب عيادتك بدون مجهود",
+    step1: "وصول المريض (سكرتارية)",
+    step1Desc: "السكرتارية تسجل الوصول في ثانية، ويظهر المريض فوراً في طابور الطبيب.",
+    step2: "الكشف الذكي (طبيب)",
+    step2Desc: "سجل ملاحظاتك بالصوت أو الكتابة، والذكاء الاصطناعي يلخص الحالة فوراً.",
+    step3: "التقرير والمتابعة (نظام)",
+    step3Desc: "النظام يجهز الروشتة، يحسب الحسابات، ويجدول المتابعة القادمة تلقائياً.",
+    controlNote: "أنت المتحكم • توافق على كل مسودة قبل الحفظ",
 
     // Pricing
-    pricingTitle: "الأسعار",
-    planBasic: "Solo Basic",
-    planBasicPrice: "899",
-    planBasicPeriod: "جنيه/شهر",
-    planBasicDesc: "طبيب واحد + موظف واحد",
-    planPro: "Solo Pro",
-    planProPrice: "1,599",
-    planProPeriod: "جنيه/شهر",
-    planProDesc: "طبيب واحد + موظفين",
-    addonAINotes: "AI Notes",
-    addonAINotesPrice: "499",
-    addonVoice: "Voice",
-    addonVoicePrice: "699",
-    addonLabAI: "Lab AI",
-    addonLabAIPrice: "399",
-    addonAIBundle: "AI Bundle",
-    addonAIBundlePrice: "1,199",
-    pricingCancel: "يمكنك الإلغاء في أي وقت.",
+    pricingTitle: "أسعار واضحة ومناسبة",
+    pricingSubtitle: "اختر الباقة المناسبة لحجم عملك",
+    planStarter: "بداية (Starter)",
+    planStarterPrice: "999",
+    planStarterDesc: "طبيب واحد + سكرتارية (Solo)",
+    planPro: "احترافي (Pro + AI)",
+    planProPrice: "1,999",
+    planProDesc: "طبيب واحد + ذكاء اصطناعي",
+    planClinic: "عيادة (Clinic Team)",
+    planClinicPrice: "3,999",
+    planClinicDesc: "فريق عمل (عدة أطباء)",
+    planPeriod: "ج.م / شهر",
+    pricingCancel: "لا توجد عقود طويلة، يمكنك الإلغاء في أي وقت.",
+    
+    // Add-ons
+    addonTitle: "إضافات اختيارية",
+    addonWhatsApp: "باقة رسائل WhatsApp",
+    addonAI: "دقائق إضافية للذكاء الاصطناعي",
 
-    // Trust
-    trust1: "بياناتك محفوظة",
-    trust2: "صلاحيات للموظفين",
-    trust3: "سجل تغييرات (Audit log)",
+    // Navigation
+    navPricing: "الأسعار",
+    navFeatures: "المميزات",
+    navDemo: "الديمو",
+    navLogin: "دخول",
+    navSignup: "إنشاء حساب",
 
     // Final CTA
-    finalCTATitle: "جرّب TabibDesk",
-    finalCTASubtitle: "احجز ديمو",
+    finalCTATitle: "وفّر وقتك وركّز على مرضاك",
+    finalCTASubtitle: "جرّب الديمو المباشر الآن • بدون تسجيل • في دقيقة واحدة",
 
     // Language toggle
     langAr: "العربية",
@@ -77,74 +73,70 @@ export const translations = {
   },
   en: {
     // Hero
-    heroHeadline: "Your clinic runs faster... without papers, without forms",
-    heroSubheadline: "TabibDesk writes with you. Summarizes. Reminds. Makes follow-ups easy.",
-    ctaPrimary: "Start free trial",
-    ctaSecondary: "Request demo",
-    heroFeature1: "Faster visits",
-    heroFeature2: "Automatic follow-up",
-    heroFeature3: "Smart patient file",
+    heroEyebrow: "For Private Clinics",
+    heroHeadline: "Organize Your Clinic in 5 Minutes",
+    heroSubheadline: "Appointments • Patient Files • Smart Notes • EGP Billing",
+    ctaPrimary: "Start Now",
+    ctaSecondary: "Live Demo",
+    heroFeature1: "5-Min Setup",
+    heroFeature2: "EGP cashier",
+    heroFeature3: "Front-desk follow-ups",
+
+    // WhatsApp
+    whatsappIntegration: "Automated WhatsApp CRM",
+    whatsappDesc: "Auto reminders and instant task organization for your staff.",
 
     // Problem → Outcome
-    problem1: "Appointments get mixed up",
-    problem2: "Patient returns after a month and you forgot the details",
-    problem3: "Follow-ups get lost",
-    outcome1: "Ready summary for each patient",
-    outcome2: "Tasks for secretary and patient",
-    outcome3: "Automated tasks for follow-ups and labs",
-
-    // Differentiators
-    diff1: "Voice recording → Ready notes",
-    diff1Note: "(doctor approves)",
-    diff2: "AI summarizes recent visits in seconds",
-    diff3: "AI suggests tasks and follow-ups",
-    diff4: "Upload labs/images + extract results (optional)",
-    diff5: "Each clinic chooses what appears: simple tabs",
+    problemTitle: "Clinics Without a System",
+    problem1: "Time wasted searching for paper files",
+    problem2: "Appointments lost in WhatsApp chats",
+    problem3: "Important medical details forgotten",
+    outcomeTitle: "With TabibDesk",
+    outcome1: "Patient history ready in 1 second",
+    outcome2: "Clear queue & organized staff tasks",
+    outcome3: "Accurate EGP billing & 2-min daily closing",
 
     // How it works
-    step1: "Open patient",
-    step2: "Speak/write... notes get ready",
-    step3: "Close visit: plan + tasks + follow-up date",
-    controlNote: "All AI suggestions need your approval.",
-
-    // What you get
-    module1: "Appointments",
-    module2: "Patient profiles + timeline",
-    module3: "Notes + templates",
-    module4: "Tasks & follow-ups",
-    module5: "Labs/files",
-    module6: "Procedures/therapies",
-    module7: "Basic insights (no-shows, rebooking, overdue follow-ups)",
-    module8: "Online consultation + payments (optional)",
+    howItWorksTitle: "3 Simple Steps",
+    howItWorksSubtitle: "Designed to organize your clinic effortlessly",
+    step1: "Patient Arrival (Staff)",
+    step1Desc: "Staff marks arrival in seconds; patient appears instantly in the doctor's queue.",
+    step2: "Smart Visit (Doctor)",
+    step2Desc: "Record notes via voice or text; AI summarizes the case immediately.",
+    step3: "Report & Follow-up (System)",
+    step3Desc: "System drafts Rx, calculates fees, and schedules the next follow-up.",
+    controlNote: "You're in Control • Approve every draft before saving",
 
     // Pricing
-    pricingTitle: "Pricing",
-    planBasic: "Solo Basic",
-    planBasicPrice: "899",
-    planBasicPeriod: "EGP/month",
-    planBasicDesc: "1 doctor + 1 staff",
-    planPro: "Solo Pro",
-    planProPrice: "1,599",
-    planProPeriod: "EGP/month",
-    planProDesc: "1 doctor + 2 staff",
-    addonAINotes: "AI Notes",
-    addonAINotesPrice: "499",
-    addonVoice: "Voice",
-    addonVoicePrice: "699",
-    addonLabAI: "Lab AI",
-    addonLabAIPrice: "399",
-    addonAIBundle: "AI Bundle",
-    addonAIBundlePrice: "1,199",
-    pricingCancel: "You can cancel anytime.",
+    pricingTitle: "Simple, Transparent Pricing",
+    pricingSubtitle: "Choose the plan that fits your practice",
+    planStarter: "Starter (Solo)",
+    planStarterPrice: "999",
+    planStarterDesc: "1 Doctor + 1 Staff",
+    planPro: "Pro (Solo + AI)",
+    planProPrice: "1,999",
+    planProDesc: "1 Doctor + AI Features",
+    planClinic: "Clinic (Small Team)",
+    planClinicPrice: "3,999",
+    planClinicDesc: "Multiple Doctors + Staff",
+    planPeriod: "EGP/mo",
+    pricingCancel: "No long contracts, cancel anytime.",
+    
+    // Add-ons
+    addonTitle: "Optional Add-ons",
+    addonWhatsApp: "WhatsApp Message Pack",
+    addonAI: "Extra AI Minutes",
 
-    // Trust
-    trust1: "Your data is secure",
-    trust2: "Permissions for staff",
-    trust3: "Change log (Audit log)",
+    // Navigation
+    navPricing: "Pricing",
+    navFeatures: "Features",
+    navDemo: "Demo",
+    navLogin: "Login",
+    navSignup: "Sign up",
 
     // Final CTA
-    finalCTATitle: "Try TabibDesk",
-    finalCTASubtitle: "Book a demo",
+    finalCTATitle: "Save Time, Focus on Patients",
+    finalCTASubtitle: "Try Live Demo Now • No Signup • 1 Minute",
 
     // Language toggle
     langAr: "العربية",
@@ -153,4 +145,3 @@ export const translations = {
 } as const
 
 export type Language = "ar" | "en"
-
