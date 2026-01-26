@@ -15,7 +15,6 @@ import { mockData } from "@/data/mock/mock-data"
 import { HorizontalTabNav, Tab } from "@/components/patient/HorizontalTabNav"
 import { ClinicalNotesTab } from "@/components/patient/ClinicalNotesTab"
 import { GeneralTab } from "@/components/patient/GeneralTab"
-import { BasicTab } from "@/components/patient/BasicTab"
 import { PrescriptionsTab } from "@/components/patient/PrescriptionsTab"
 import { FilesTab } from "@/components/patient/FilesTab"
 import { TasksTab } from "@/components/patient/TasksTab"
@@ -27,8 +26,9 @@ import { update as updatePatient } from "@/api/patients.api"
 import { useToast } from "@/hooks/useToast"
 import type { CreateTaskPayload } from "@/features/tasks/tasks.types"
 import { AddPrescriptionDrawer } from "@/features/prescriptions/AddPrescriptionDrawer"
-import { createPrescription, getPastMedicationsByPatient } from "@/features/prescriptions/prescriptions.api"
-import type { CreatePrescriptionPayload } from "@/features/prescriptions/prescriptions.types"
+import { AddPastMedicationModal } from "@/components/patient/AddPastMedicationModal"
+import { createPrescription, getPastMedicationsByPatient, createPastMedication } from "@/features/prescriptions/prescriptions.api"
+import type { CreatePrescriptionPayload, CreatePastMedicationPayload } from "@/features/prescriptions/prescriptions.types"
 import {
   RiFileTextLine,
   RiUserLine,
@@ -37,7 +37,6 @@ import {
   RiTaskLine,
   RiTimeLine,
   RiHistoryLine,
-  RiInformationLine,
 } from "@remixicon/react"
 
 export default function PatientDetailPage() {
@@ -52,6 +51,7 @@ export default function PatientDetailPage() {
   const [activeTab, setActiveTab] = useState<string>("clinicalNotes")
   const [showAddTaskDrawer, setShowAddTaskDrawer] = useState(false)
   const [showAddPrescriptionDrawer, setShowAddPrescriptionDrawer] = useState(false)
+  const [showAddPastMedicationModal, setShowAddPastMedicationModal] = useState(false)
 
   // Data for tabs
   const [weightLogs, setWeightLogs] = useState<any[]>([])
@@ -133,6 +133,8 @@ export default function PatientDetailPage() {
       // Refresh tasks
       await fetchTasks()
       showToast("Task created successfully", "success")
+      // Switch to tasks tab to show the newly added task
+      setActiveTab("tasks")
     } catch (error) {
       console.error("Failed to create task:", error)
       showToast("Failed to create task", "error")
@@ -293,7 +295,6 @@ export default function PatientDetailPage() {
   const tabs: Tab[] = [
     { id: "clinicalNotes", label: "Notes", icon: RiFileTextLine },
     { id: "general", label: "General", icon: RiUserLine },
-    { id: "basic", label: "Basic", icon: RiInformationLine },
     { id: "medications", label: "Prescription", icon: RiCapsuleLine },
     { id: "tasks", label: "Tasks", icon: RiTaskLine },
     { id: "files", label: "Files", icon: RiFolderLine },
@@ -371,13 +372,10 @@ export default function PatientDetailPage() {
             weightLogs={weightLogs}
             pastMedications={pastMedications}
             onAddPastMedication={() => {
-              // TODO: Open add past medication modal
-              console.log("Add past medication")
+              setShowAddPastMedicationModal(true)
             }}
+            onUpdatePatient={handleUpdatePatient}
           />
-        )}
-        {activeTab === "basic" && (
-          <BasicTab patient={patient} onUpdate={handleUpdatePatient} />
         )}
         {activeTab === "medications" && <PrescriptionsTab prescriptions={prescriptions} />}
         {activeTab === "files" && (
@@ -395,30 +393,28 @@ export default function PatientDetailPage() {
           />
         )}
         {activeTab === "tasks" && (
-          <>
-            <TasksTab
-              tasks={tasks}
-              patientId={patientId}
-              onToggleStatus={handleToggleTaskStatus}
-              onEditTask={(taskId) => {
-                // TODO: Open edit task modal
-                console.log("Edit task:", taskId)
-              }}
-              onDeleteTask={(taskId) => {
-                // TODO: Open delete confirmation modal
-                console.log("Delete task:", taskId)
-              }}
-            />
-            <AddTaskDrawer
-              open={showAddTaskDrawer}
-              onOpenChange={setShowAddTaskDrawer}
-              onSubmit={handleCreateTask}
-              defaultPatientId={patientId}
-              currentUserId={currentUser?.id || "user-001"}
-              clinicId={currentClinic?.id || currentUser?.clinicId || "clinic-001"}
-            />
-          </>
+          <TasksTab
+            tasks={tasks}
+            patientId={patientId}
+            onToggleStatus={handleToggleTaskStatus}
+            onEditTask={(taskId) => {
+              // TODO: Open edit task modal
+              console.log("Edit task:", taskId)
+            }}
+            onDeleteTask={(taskId) => {
+              // TODO: Open delete confirmation modal
+              console.log("Delete task:", taskId)
+            }}
+          />
         )}
+        <AddTaskDrawer
+          open={showAddTaskDrawer}
+          onOpenChange={setShowAddTaskDrawer}
+          onSubmit={handleCreateTask}
+          defaultPatientId={patientId}
+          currentUserId={currentUser?.id || "user-001"}
+          clinicId={currentClinic?.id || currentUser?.clinicId || "clinic-001"}
+        />
         <AddPrescriptionDrawer
           open={showAddPrescriptionDrawer}
           onOpenChange={setShowAddPrescriptionDrawer}
@@ -432,6 +428,8 @@ export default function PatientDetailPage() {
                 // TODO: Fetch from API when integrated
               }
               showToast("Prescription created successfully", "success")
+              // Switch to prescriptions tab to show the newly added prescription
+              setActiveTab("medications")
             } catch (error) {
               console.error("Failed to create prescription:", error)
               showToast("Failed to create prescription", "error")
@@ -442,6 +440,30 @@ export default function PatientDetailPage() {
           clinicId={currentClinic?.id || currentUser?.clinicId || "clinic-001"}
           doctorId={currentUser?.id}
         />
+        <AddPastMedicationModal
+          open={showAddPastMedicationModal}
+          onOpenChange={setShowAddPastMedicationModal}
+          onSubmit={async (payload: CreatePastMedicationPayload) => {
+            try {
+              const newMed = await createPastMedication(payload)
+              if (isDemoMode) {
+                setPastMedications([newMed, ...pastMedications])
+                // Also update mockData
+                mockData.pastMedications.push(newMed as any)
+              } else {
+                // Refresh from API
+                const meds = await getPastMedicationsByPatient(patientId)
+                setPastMedications(meds)
+              }
+              showToast("Past medication added successfully", "success")
+            } catch (error) {
+              console.error("Failed to add past medication:", error)
+              showToast("Failed to add past medication", "error")
+              throw error
+            }
+          }}
+          patientId={patientId}
+        />
         {activeTab === "history" && (
           <Card>
             <CardContent className="p-6">
@@ -449,6 +471,7 @@ export default function PatientDetailPage() {
                 clinicId={patient.clinic_id || "clinic-001"}
                 patientId={patientId}
                 appointments={appointments}
+                tasks={tasks}
               />
             </CardContent>
           </Card>

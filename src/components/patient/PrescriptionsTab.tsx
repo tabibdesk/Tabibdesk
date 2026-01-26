@@ -1,9 +1,10 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Badge } from "@/components/Badge"
 import { RiCapsuleLine, RiTimeLine } from "@remixicon/react"
 import type { Prescription } from "@/features/prescriptions/prescriptions.types"
+import { format } from "date-fns"
+import { cx } from "@/lib/utils"
 
 interface PrescriptionsTabProps {
   prescriptions: Prescription[]
@@ -15,123 +16,108 @@ export function PrescriptionsTab({ prescriptions }: PrescriptionsTabProps) {
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
 
-  const formatRelativeTime = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 0) return "Today"
-    if (diffDays === 1) return "Yesterday"
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
-    return date.toLocaleDateString()
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-  }
-
   if (sortedPrescriptions.length === 0) {
     return (
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RiCapsuleLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">No prescriptions yet</p>
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">Get started by adding a prescription.</p>
-          </CardContent>
-        </Card>
+      <div className="flex flex-col items-center justify-center py-12 text-center bg-gray-50 dark:bg-gray-900/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">
+        <RiCapsuleLine className="size-12 text-gray-300 mb-2" />
+        <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">No prescriptions yet</p>
+        <p className="text-xs text-gray-500 dark:text-gray-500">Add a prescription to see it here.</p>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {sortedPrescriptions.map((prescription) => (
-        <Card key={prescription.id}>
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-sm">
-                  {formatDate(prescription.createdAt)}
-                </CardTitle>
-                <div className="mt-1 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                  <RiTimeLine className="size-4" />
-                  <span>{formatRelativeTime(prescription.createdAt)}</span>
-                  {prescription.visitType && (
-                    <>
-                      <span className="mx-1">•</span>
-                      <Badge variant="neutral" className="text-xs">
-                        {prescription.visitType === "in_clinic" ? "In Clinic" : "Online"}
-                      </Badge>
-                    </>
-                  )}
-                </div>
+        <div
+          key={prescription.id}
+          className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 shadow-sm"
+        >
+          {/* Prescription Header */}
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 px-4 py-2.5">
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                {format(new Date(prescription.createdAt), "MMMM d, yyyy")}
+              </p>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 border-l border-gray-200 dark:border-gray-800 pl-3">
+                <RiTimeLine className="size-3.5" />
+                {format(new Date(prescription.createdAt), "h:mm a")}
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Diagnosis */}
+            {prescription.visitType && (
+              <Badge variant="neutral" className="text-xs h-5 px-2 uppercase font-bold tracking-wider">
+                {prescription.visitType === "in_clinic" ? "In Clinic" : "Online"}
+              </Badge>
+            )}
+          </div>
+
+          <div className="p-4 space-y-4">
+            {/* Diagnosis Section */}
             {prescription.diagnosisText && (
-              <div>
-                <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Diagnosis</p>
-                <p className="text-sm text-gray-900 dark:text-gray-50">{prescription.diagnosisText}</p>
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Diagnosis</p>
+                <p className="text-sm text-gray-800 dark:text-gray-200 leading-snug font-medium">
+                  {prescription.diagnosisText}
+                </p>
               </div>
             )}
 
-            {/* Medications List */}
-            <div>
-              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Medications</p>
-              <div className="space-y-3">
+            {/* Medications Section */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Medications</p>
+              <div className="grid gap-2">
                 {prescription.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-start gap-3 rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 p-3"
+                    className="flex items-start gap-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/20 p-2.5"
                   >
-                    <div className="flex size-8 items-center justify-center rounded-full bg-secondary-100 dark:bg-secondary-900/20 shrink-0">
-                      <RiCapsuleLine className="size-4 text-secondary-600 dark:text-secondary-400" />
+                    <div className="flex size-7 items-center justify-center rounded-md bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shrink-0 mt-0.5 shadow-sm">
+                      <RiCapsuleLine className="size-4 text-primary-600 dark:text-primary-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-50">
-                            {item.name}
-                            {item.strength && <span className="text-gray-600 dark:text-gray-400"> {item.strength}</span>}
-                            {item.form && <span className="text-gray-500 dark:text-gray-500"> ({item.form})</span>}
-                          </h4>
-                          <p className="mt-1 text-xs text-gray-700 dark:text-gray-300">{item.sig}</p>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+                          {item.name}
+                          {item.strength && <span className="text-gray-500 font-normal ml-1.5 text-xs">({item.strength})</span>}
+                        </h4>
+                        {item.form && (
+                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{item.form}</span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-xs text-gray-600 dark:text-gray-400 font-medium leading-relaxed">{item.sig}</p>
+                      
+                      {(item.duration || item.notes) && (
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
                           {item.duration && (
-                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                              <span>Duration: {item.duration}</span>
+                            <div className="flex items-center gap-1 text-xs text-gray-500 font-medium bg-white dark:bg-gray-900 px-2 py-0.5 rounded border border-gray-100 dark:border-gray-800 shadow-sm">
+                              <RiTimeLine className="size-3" />
+                              {item.duration}
                             </div>
                           )}
                           {item.notes && (
-                            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400 italic">{item.notes}</p>
+                            <p className="text-xs text-gray-400 italic font-medium">Note: {item.notes}</p>
                           )}
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Notes to Patient */}
+            {/* Patient Notes Section */}
             {prescription.notesToPatient && (
-              <div className="pt-2 border-t border-gray-200 dark:border-gray-800">
-                <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Notes to Patient</p>
-                <p className="text-sm text-gray-900 dark:text-gray-50">{prescription.notesToPatient}</p>
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Notes to Patient</p>
+                <div className="rounded-lg bg-amber-50/30 dark:bg-amber-900/10 p-2.5 border border-amber-100/50 dark:border-amber-900/20">
+                  <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed font-medium">
+                    {prescription.notesToPatient}
+                  </p>
+                </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   )

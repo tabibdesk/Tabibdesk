@@ -37,15 +37,21 @@ export function TasksTab({
   onToggleStatus,
 }: TasksTabProps) {
 
-  // Sort tasks: pending first, then by date
-  const sortedTasks = [...tasks].sort((a, b) => {
-    const aPending = a.status === "pending"
-    const bPending = b.status === "pending"
+  // Filter to show only in-progress tasks (pending, not completed)
+  const inProgressTasks = tasks.filter((task) => {
+    const isDone = task.status === "completed" || task.status === "done"
+    return !isDone && !task.ignored_at
+  })
 
-    if (aPending && !bPending) return -1
-    if (!aPending && bPending) return 1
+  // Sort tasks: overdue first, then by due date
+  const sortedTasks = [...inProgressTasks].sort((a, b) => {
+    const aOverdue = isOverdue(a.due_date)
+    const bOverdue = isOverdue(b.due_date)
 
-    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    if (aOverdue && !bOverdue) return -1
+    if (!aOverdue && bOverdue) return 1
+
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
   })
 
   return (
@@ -53,7 +59,8 @@ export function TasksTab({
       {sortedTasks.length === 0 ? (
         <div className="py-12 text-center bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">
           <RiTaskLine className="mx-auto size-12 text-gray-300" />
-          <p className="mt-2 text-sm text-gray-500">No tasks for this patient yet.</p>
+          <p className="mt-2 text-sm text-gray-500">No in-progress tasks for this patient.</p>
+          <p className="mt-1 text-xs text-gray-400">Completed tasks are shown in the History tab.</p>
         </div>
       ) : (
         <div className="space-y-3">

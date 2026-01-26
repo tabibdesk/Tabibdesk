@@ -9,12 +9,11 @@ import {
   DrawerTitle,
 } from "@/components/Drawer"
 import { Button } from "@/components/Button"
-import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
-import { Select } from "@/components/Select"
 import { Textarea } from "@/components/Textarea"
 import { RiAddLine, RiCloseLine } from "@remixicon/react"
 import type { CreatePrescriptionPayload, PrescriptionItem } from "./prescriptions.types"
+import { MedicationFormFields } from "./MedicationFormFields"
 
 interface AddPrescriptionDrawerProps {
   open: boolean
@@ -24,18 +23,6 @@ interface AddPrescriptionDrawerProps {
   clinicId: string
   doctorId?: string
 }
-
-const MEDICATION_FORMS = ["Tablets", "Capsules", "Syrup", "Cream", "Ointment", "Injection", "Drops", "Inhaler", "Other"]
-const COMMON_MEDICATIONS = [
-  "Paracetamol 500mg",
-  "Ibuprofen 400mg",
-  "Amoxicillin 500mg",
-  "Metformin 500mg",
-  "Amlodipine 5mg",
-  "Omeprazole 20mg",
-  "Levothyroxine 50mcg",
-  "Aspirin 81mg",
-]
 
 export function AddPrescriptionDrawer({
   open,
@@ -166,92 +153,10 @@ export function AddPrescriptionDrawer({
                         </div>
 
                         {/* Medication Details */}
-                        <div className="space-y-4">
-                          {/* Name */}
-                          <div className="space-y-2">
-                            <Label htmlFor={`item-name-${index}`}>
-                              Medication Name <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                              id={`item-name-${index}`}
-                              value={item.name}
-                              onChange={(e) => updateItem(index, { name: e.target.value })}
-                              placeholder="e.g., Paracetamol 500mg"
-                              list={`medications-list-${index}`}
-                              required
-                            />
-                            <datalist id={`medications-list-${index}`}>
-                              {COMMON_MEDICATIONS.map((med) => (
-                                <option key={med} value={med} />
-                              ))}
-                            </datalist>
-                          </div>
-
-                          {/* Strength and Form */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor={`item-strength-${index}`}>Strength</Label>
-                              <Input
-                                id={`item-strength-${index}`}
-                                value={item.strength || ""}
-                                onChange={(e) => updateItem(index, { strength: e.target.value })}
-                                placeholder="e.g., 500mg"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor={`item-form-${index}`}>Form</Label>
-                              <Select
-                                id={`item-form-${index}`}
-                                value={item.form || ""}
-                                onChange={(e) => updateItem(index, { form: e.target.value })}
-                              >
-                                <option value="">Select form</option>
-                                {MEDICATION_FORMS.map((form) => (
-                                  <option key={form} value={form}>
-                                    {form}
-                                  </option>
-                                ))}
-                              </Select>
-                            </div>
-                          </div>
-
-                          {/* Instructions */}
-                          <div className="space-y-2">
-                            <Label htmlFor={`item-sig-${index}`}>
-                              Instructions (Sig) <span className="text-red-500">*</span>
-                            </Label>
-                            <Textarea
-                              id={`item-sig-${index}`}
-                              value={item.sig}
-                              onChange={(e) => updateItem(index, { sig: e.target.value })}
-                              placeholder="e.g., Take 1 tablet twice daily after meals"
-                              rows={2}
-                              required
-                            />
-                          </div>
-
-                          {/* Duration */}
-                          <div className="space-y-2">
-                            <Label htmlFor={`item-duration-${index}`}>Duration</Label>
-                            <Input
-                              id={`item-duration-${index}`}
-                              value={item.duration || ""}
-                              onChange={(e) => updateItem(index, { duration: e.target.value })}
-                              placeholder="e.g., 5 days"
-                            />
-                          </div>
-
-                          {/* Notes */}
-                          <div className="space-y-2">
-                            <Label htmlFor={`item-notes-${index}`}>Notes (Optional)</Label>
-                            <Input
-                              id={`item-notes-${index}`}
-                              value={item.notes || ""}
-                              onChange={(e) => updateItem(index, { notes: e.target.value })}
-                              placeholder="Additional notes"
-                            />
-                          </div>
-                        </div>
+                        <MedicationFormFields
+                          data={item}
+                          onChange={(updates) => updateItem(index, updates)}
+                        />
                       </div>
                     ))}
                   </div>

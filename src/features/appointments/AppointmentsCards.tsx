@@ -45,8 +45,12 @@ export function AppointmentsCards({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {appointments.map((appointment) => (
-        <Card key={appointment.id} className="transition-shadow hover:shadow-lg">
+      {appointments.map((appointment) => {
+        // Add white background for slot cards (cancelled/no_show with Fill Slot button)
+        const isSlotCard = appointment.status === "cancelled" || appointment.status === "no_show"
+        
+        return (
+        <Card key={appointment.id} className={`transition-shadow hover:shadow-lg ${isSlotCard ? 'bg-white dark:bg-white' : ''}`}>
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -171,7 +175,7 @@ export function AppointmentsCards({
             </div>
           </CardContent>
         </Card>
-      ))}
+      )})}
     </div>
   )
 }

@@ -253,19 +253,19 @@ export function FilesTab({
                           >
                             <div className="flex items-center gap-3">
                               {isExpanded(date) ? (
-                                <RiArrowDownSLine className="size-5 text-gray-500" />
+                                <RiArrowDownSLine className="size-5 text-gray-400" />
                               ) : (
-                                <RiArrowRightSLine className="size-5 text-gray-500" />
+                                <RiArrowRightSLine className="size-5 text-gray-400" />
                               )}
                               <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                                <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">
                                   {new Date(date).toLocaleDateString("en-US", {
-                                    month: "short",
+                                    month: "long",
                                     day: "numeric",
                                     year: "numeric",
                                   })}
                                 </p>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 font-medium">
                                   {hasLabResults && `${dateData.labResults.length} ${dateData.labResults.length === 1 ? 'test' : 'tests'}`}
                                   {hasLabResults && hasAttachments && ' • '}
                                   {hasAttachments && `${dateData.attachments.length} ${dateData.attachments.length === 1 ? 'file' : 'files'}`}
@@ -288,7 +288,7 @@ export function FilesTab({
                                   className="h-8 w-8 p-0"
                                   onClick={() => window.open("/mock/samplereport.png", "_blank")}
                                 >
-                                  <RiFileDownloadLine className="size-5" />
+                                  <RiFileDownloadLine className="size-5 text-gray-500" />
                                 </Button>
                               </div>
                             )}
@@ -303,16 +303,16 @@ export function FilesTab({
                                     <table className="w-full text-sm">
                                       <thead className="bg-gray-50 dark:bg-gray-900/50">
                                         <tr>
-                                          <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Test</th>
-                                          <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Value</th>
-                                          <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                          <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                          <th className="px-3 py-2 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Test</th>
+                                          <th className="px-3 py-2 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Value</th>
+                                          <th className="px-3 py-2 text-left text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Status</th>
+                                          <th className="px-3 py-2 text-right text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Actions</th>
                                         </tr>
                                       </thead>
                                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                                         {dateData.labResults.map((result) => (
                                   <tr key={result.id}>
-                                    <td className="px-3 py-2">
+                                    <td className="px-3 py-2.5">
                                       {editingId === result.id ? (
                                         <Input
                                           value={editValues.test_name || ""}
@@ -320,10 +320,10 @@ export function FilesTab({
                                           className="h-7 text-xs"
                                         />
                                       ) : (
-                                        <div className="font-medium text-gray-900 dark:text-gray-50">{result.test_name}</div>
+                                        <div className="text-sm font-semibold text-gray-900 dark:text-gray-50">{result.test_name}</div>
                                       )}
                                     </td>
-                                    <td className="px-3 py-2">
+                                    <td className="px-3 py-2.5">
                                       {editingId === result.id ? (
                                         <div className="flex items-center gap-1">
                                           <Input
@@ -334,17 +334,17 @@ export function FilesTab({
                                           <span className="text-xs text-gray-500">{result.unit}</span>
                                         </div>
                                       ) : (
-                                        <div className="text-gray-600 dark:text-gray-400">
-                                          {result.value} <span className="text-[10px] opacity-70">{result.unit}</span>
+                                        <div className="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                          {result.value} <span className="text-[11px] text-gray-500 font-normal ml-0.5">{result.unit}</span>
                                         </div>
                                       )}
                                     </td>
-                                    <td className="px-3 py-2">
-                                      <span className={cx("text-sm font-medium", getStatusColor(result.status))}>
+                                    <td className="px-3 py-2.5">
+                                      <span className={cx("text-xs font-bold uppercase tracking-wider", getStatusColor(result.status))}>
                                         {result.status}
                                       </span>
                                     </td>
-                                    <td className="px-3 py-2 text-right">
+                                    <td className="px-3 py-2.5 text-right">
                                       <div className="flex justify-end gap-1">
                                         {editingId === result.id ? (
                                           <>
@@ -358,9 +358,9 @@ export function FilesTab({
                                         ) : (
                                           <>
                                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleEdit(result)}>
-                                              <RiEditLine className="size-4" />
+                                              <RiEditLine className="size-4 text-gray-400" />
                                             </Button>
-                                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500" onClick={() => handleDelete(result.id)}>
+                                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500/70 hover:text-red-500" onClick={() => handleDelete(result.id)}>
                                               <RiDeleteBinLine className="size-4" />
                                             </Button>
                                           </>
@@ -373,7 +373,7 @@ export function FilesTab({
                                     </table>
                                   </div>
                                   <div className="mt-2 flex justify-end">
-                                    <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleAddRow(date)}>
+                                    <Button variant="ghost" size="sm" className="h-7 text-xs font-medium" onClick={() => handleAddRow(date)}>
                                       <RiAddLine className="mr-1 size-4" />
                                       Add Test
                                     </Button>
@@ -386,16 +386,16 @@ export function FilesTab({
                                 <div className={cx("mt-4", hasLabResults && "pt-4 border-t border-gray-200 dark:border-gray-800")}>
                                   <div className="space-y-2">
                                     {dateData.attachments.map((attachment) => (
-                                      <div key={attachment.id} className="group flex items-center justify-between p-3 rounded-lg hover:bg-white dark:hover:bg-gray-950 transition-colors bg-gray-50/50 dark:bg-gray-900/30">
+                                      <div key={attachment.id} className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-white dark:hover:bg-gray-950 transition-colors bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800">
                                         <div className="flex items-center gap-3 overflow-hidden flex-1">
                                           <div className="flex-shrink-0">
                                             {getFileIcon(attachment.file_type)}
                                           </div>
                                           <div className="overflow-hidden flex-1">
-                                            <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-50">
+                                            <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-50">
                                               {attachment.file_name}
                                             </p>
-                                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
                                               <span>{formatFileSize(attachment.file_size)}</span>
                                               <span>•</span>
                                               <span>Document</span>
@@ -409,12 +409,12 @@ export function FilesTab({
                                             className="h-8 w-8 p-0"
                                             onClick={() => window.open(attachment.file_url, "_blank")}
                                           >
-                                            <RiDownloadLine className="size-5" />
+                                            <RiDownloadLine className="size-5 text-gray-500" />
                                           </Button>
                                           <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="h-8 w-8 p-0 text-red-500"
+                                            className="h-8 w-8 p-0 text-red-500/70 hover:text-red-500"
                                             onClick={() => onDeleteAttachment?.(attachment.id)}
                                           >
                                             <RiDeleteBinLine className="size-5" />
@@ -432,27 +432,27 @@ export function FilesTab({
                         // Date with only attachments (no lab results) - show as simple list
                         <div className="p-4">
                           <div className="mb-3">
-                            <p className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-50">
                               {new Date(date).toLocaleDateString("en-US", {
-                                month: "short",
+                                month: "long",
                                 day: "numeric",
                                 year: "numeric",
                               })}
                             </p>
-                            <p className="text-xs text-gray-500">{dateData.attachments.length} {dateData.attachments.length === 1 ? 'file' : 'files'}</p>
+                            <p className="text-xs text-gray-500 font-medium">{dateData.attachments.length} {dateData.attachments.length === 1 ? 'file' : 'files'}</p>
                           </div>
                           <div className="space-y-2">
                             {dateData.attachments.map((attachment) => (
-                              <div key={attachment.id} className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors bg-gray-50/50 dark:bg-gray-900/30">
+                              <div key={attachment.id} className="group flex items-center justify-between p-2.5 rounded-lg hover:bg-white dark:hover:bg-gray-950 transition-colors bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800">
                                 <div className="flex items-center gap-3 overflow-hidden flex-1">
                                   <div className="flex-shrink-0">
                                     {getFileIcon(attachment.file_type)}
                                   </div>
                                   <div className="overflow-hidden flex-1">
-                                    <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-50">
+                                    <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-50">
                                       {attachment.file_name}
                                     </p>
-                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
                                       <span>{formatFileSize(attachment.file_size)}</span>
                                       <span>•</span>
                                       <span>Document</span>
@@ -466,12 +466,12 @@ export function FilesTab({
                                     className="h-8 w-8 p-0"
                                     onClick={() => window.open(attachment.file_url, "_blank")}
                                   >
-                                    <RiDownloadLine className="size-5" />
+                                    <RiDownloadLine className="size-5 text-gray-500" />
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-8 w-8 p-0 text-red-500"
+                                    className="h-8 w-8 p-0 text-red-500/70 hover:text-red-500"
                                     onClick={() => onDeleteAttachment?.(attachment.id)}
                                   >
                                     <RiDeleteBinLine className="size-5" />
