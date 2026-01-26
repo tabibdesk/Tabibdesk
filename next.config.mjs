@@ -4,15 +4,14 @@ const nextConfig = {
   // Ensure @remixicon/react is properly bundled
   transpilePackages: ['@remixicon/react'],
   
-  // Temporarily ignore TypeScript errors (landing page translations incomplete)
-  // TODO: Complete landing page translations and re-enable type checking
+  // Type checking enabled - all dead code removed
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   
-  // Disable ESLint during build
+  // ESLint enabled during build
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
 };
 

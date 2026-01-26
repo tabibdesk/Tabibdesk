@@ -201,7 +201,7 @@ export async function updateStatus(appointmentId: string, status: AppointmentSta
         // Create invoice for arrived appointment
         await createInvoiceForArrivedAppointment({
           id: appointment.id,
-          clinic_id: appointment.clinic_id,
+          clinic_id: appointment.clinic_id || "",
           doctor_id: appointment.doctor_id || "",
           patient_id: appointment.patient_id,
           type: appointment.type,
@@ -217,7 +217,7 @@ export async function updateStatus(appointmentId: string, status: AppointmentSta
   // Create follow-up task when appointment is cancelled or no-show
   if (status === "cancelled" || status === "no_show") {
     try {
-      const rules = await getFollowUpRules(appointment.clinic_id)
+      const rules = await getFollowUpRules(appointment.clinic_id || "")
       const shouldCreateTask =
         (status === "cancelled" && rules.followUpOnCancelled) ||
         (status === "no_show" && rules.followUpOnNoShow)
@@ -225,7 +225,7 @@ export async function updateStatus(appointmentId: string, status: AppointmentSta
       if (shouldCreateTask) {
         // Check if an open follow-up task already exists
         const hasExisting = await hasOpenFollowUpTask(
-          appointment.clinic_id,
+          appointment.clinic_id || "",
           appointmentId,
           status === "cancelled" ? "cancelled" : "no_show"
         )
@@ -239,7 +239,7 @@ export async function updateStatus(appointmentId: string, status: AppointmentSta
 
           // Create follow-up task
           await createFollowUpTask({
-            clinicId: appointment.clinic_id,
+            clinicId: appointment.clinic_id || "",
             patientId: appointment.patient_id,
             appointmentId,
             kind: status === "cancelled" ? "cancelled" : "no_show",
@@ -256,7 +256,7 @@ export async function updateStatus(appointmentId: string, status: AppointmentSta
 
   // Log activity
   await logActivity({
-    clinicId: appointment.clinic_id,
+    clinicId: appointment.clinic_id || "",
     actorUserId: "user-001", // TODO: Get current user ID
     actorName: "Dr. Ahmed Hassan", // TODO: Get current user name
     actorRole: "doctor",
@@ -388,7 +388,7 @@ export async function listByDay(params: {
         patientName: apt.patient_name,
         patientPhone: patient?.phone || "",
         doctorId: apt.doctor_id || "",
-        clinicId: apt.clinic_id,
+        clinicId: apt.clinic_id || "",
         startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
         durationMinutes,
@@ -452,7 +452,7 @@ export async function updateAppointmentTime(
     
     // Log reschedule activity
     await logActivity({
-      clinicId: appointment.clinic_id,
+      clinicId: appointment.clinic_id || "",
       actorUserId: options?.rescheduledBy || "user-001",
       actorName: options?.rescheduledByName || "Assistant",
       actorRole: options?.rescheduledByRole || "assistant",
@@ -470,7 +470,7 @@ export async function updateAppointmentTime(
   } else {
     // Log regular update activity
     await logActivity({
-      clinicId: appointment.clinic_id,
+      clinicId: appointment.clinic_id || "",
       actorUserId: options?.rescheduledBy || "user-001",
       actorName: options?.rescheduledByName || "Assistant",
       actorRole: options?.rescheduledByRole || "assistant",
@@ -552,7 +552,7 @@ export async function updateAppointmentTime(
     patientName: appointment.patient_name,
     patientPhone: patient?.phone || "",
     doctorId: appointment.doctor_id || "",
-    clinicId: appointment.clinic_id,
+    clinicId: appointment.clinic_id || "",
     startAt: newStartAt,
     endAt: calculatedEndAt,
     durationMinutes,

@@ -11,6 +11,7 @@ import type {
   CreateTaskPayload,
   UpdateTaskStatusPayload,
   AssignTaskPayload,
+  TaskStatus,
 } from "./tasks.types"
 
 // In-memory store for tasks (demo mode only)
@@ -469,7 +470,7 @@ export async function snoozeTask(
     actorUserId: "user-001",
     actorName: "Dr. Ahmed Hassan",
     actorRole: "doctor",
-    action: "snooze",
+    action: "update", // "snooze" is not a valid ActivityAction, using "update"
     entityType: "task",
     entityId: task.id,
     entityLabel: task.title,

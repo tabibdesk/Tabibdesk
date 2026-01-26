@@ -141,7 +141,7 @@ export function TasksPage({
         clinicId,
         patientId: task.patientId,
         appointmentId: task.entity_id,
-        kind: task.follow_up_kind,
+        kind: task.follow_up_kind as "cancelled" | "no_show",
         dueAt: dueDate.toISOString(),
         attempt: nextAttempt,
       })

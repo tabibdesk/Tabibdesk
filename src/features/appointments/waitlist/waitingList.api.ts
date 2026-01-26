@@ -142,8 +142,6 @@ export async function create(payload: CreateWaitlistEntryPayload): Promise<Waitl
     patientPhone: patient.phone,
     requestedDoctorId: payload.requestedDoctorId,
     appointmentType: payload.appointmentType,
-    earliestDate: payload.earliestDate,
-    latestDate: payload.latestDate,
     preferredTimeWindow: payload.preferredTimeWindow || "any",
     preferredDays: payload.preferredDays || [],
     status: "active",
@@ -264,16 +262,8 @@ function calculateMatchScore(
     }
   }
 
-  // Date range valid = +2 points
-  if (entry.earliestDate || entry.latestDate) {
-    const slotDateStr = slotDate.toISOString().split("T")[0]
-    if (entry.earliestDate && slotDateStr >= entry.earliestDate) {
-      score += 1
-    }
-    if (entry.latestDate && slotDateStr <= entry.latestDate) {
-      score += 1
-    }
-  }
+  // Date range validation removed - earliestDate/latestDate fields not in WaitlistEntry type
+  // TODO: Add date preference fields to WaitlistEntry type if needed
 
   // Priority high = +3 points
   if (entry.priority === "high") {

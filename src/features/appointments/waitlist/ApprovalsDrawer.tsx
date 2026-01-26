@@ -241,7 +241,7 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
                           Approve
                         </Button>
                         <Button
-                          variant="error"
+                          variant="destructive"
                           size="sm"
                           onClick={() => handleReject(request)}
                           className="flex-1 sm:flex-none"

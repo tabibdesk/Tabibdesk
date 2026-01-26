@@ -8,7 +8,7 @@ import { DropdownUserProfile } from "./DropdownUserProfile"
 
 export const UserProfileDesktop = () => {
   return (
-    <DropdownUserProfile>
+    <DropdownUserProfile mode="dropdown">
       <Button
         aria-label="User settings"
         variant="ghost"
@@ -37,7 +37,7 @@ export const UserProfileDesktop = () => {
 
 export const UserProfileMobile = () => {
   return (
-    <DropdownUserProfile align="end">
+    <DropdownUserProfile mode="dropdown" align="end">
       <Button
         aria-label="User settings"
         variant="ghost"

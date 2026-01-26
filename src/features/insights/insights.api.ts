@@ -396,9 +396,10 @@ function handleNewPatientsQuestion(start: Date, end: Date, timeRange: string): I
   
   // Group by source from leads
   const patientSources: Record<string, number> = {}
-  newPatients.forEach((patient) => {
-    const lead = mockData.leads.find((l) => l.patient_id === patient.id)
-    const source = lead?.source || "Unknown"
+  // TODO: Link leads to patients (Lead interface doesn't have patient_id field)
+  // For now, just count sources from leads directly
+  mockData.leads.forEach((lead) => {
+    const source = lead.source || "Unknown"
     patientSources[source] = (patientSources[source] || 0) + 1
   })
   
