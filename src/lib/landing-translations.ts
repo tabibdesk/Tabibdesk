@@ -2,7 +2,7 @@
 export const translations = {
   ar: {
     // Hero
-    heroEyebrow: "للعيادات الخاصة",
+    heroEyebrow: "مدعوم بالذكاء الاصطناعي",
     heroHeadline: "نظم عيادتك في 5 دقائق",
     heroSubheadline: "مواعيد • ملفات مرضى • نوتات ذكية • كاشير EGP",
     ctaPrimary: "ابدأ الآن",
@@ -73,8 +73,8 @@ export const translations = {
   },
   en: {
     // Hero
-    heroEyebrow: "For Private Clinics",
-    heroHeadline: "Organize Your Clinic in 5 Minutes",
+    heroEyebrow: "Powered by AI",
+    heroHeadline: "A system that learns your clinic",
     heroSubheadline: "Appointments • Patient Files • Smart Notes • EGP Billing",
     ctaPrimary: "Start Now",
     ctaSecondary: "Live Demo",

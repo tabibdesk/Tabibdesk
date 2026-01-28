@@ -1,17 +1,18 @@
 "use client"
 
-import { Badge } from "@/components/Badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card"
-import { RiPhoneLine, RiStethoscopeLine } from "@remixicon/react"
+import { RiPhoneLine, RiStethoscopeLine, RiUserLine } from "@remixicon/react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type { PatientListItem } from "./patients.types"
-import { calculateAge, getStatusBadgeVariant, getStatusLabel } from "./patients.utils"
+import { calculateAge } from "./patients.utils"
 
 interface PatientsCardsProps {
   patients: PatientListItem[]
 }
 
 export function PatientsCards({ patients }: PatientsCardsProps) {
+  const router = useRouter()
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—"
     const date = new Date(dateString)
@@ -19,54 +20,65 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col gap-3">
       {patients.map((patient) => {
         const age = calculateAge(patient.date_of_birth, patient.age)
         const ageDisplay = typeof age === "number" ? `${age}y` : age
 
         return (
-          <Card
+          <div
             key={patient.id}
-            className="cursor-pointer transition-shadow hover:shadow-lg"
+            role="button"
+            tabIndex={0}
+            onClick={() => router.push(`/patients/${patient.id}`)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                router.push(`/patients/${patient.id}`)
+              }
+            }}
+            className="card-surface flex cursor-pointer items-center gap-4 px-5 py-4"
           >
-            <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <Link href={`/patients/${patient.id}`}>
-                    <CardTitle className="text-lg text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
-                      {patient.first_name} {patient.last_name}
-                    </CardTitle>
-                  </Link>
-                  <CardDescription className="mt-1 text-xs">
-                    {ageDisplay} • {patient.gender || "—"}
-                  </CardDescription>
-                </div>
-                <Badge variant={getStatusBadgeVariant(patient.status)} className="text-xs shrink-0">
-                  {getStatusLabel(patient.status)}
-                </Badge>
+            {/* Avatar */}
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+              <RiUserLine className="size-5 text-gray-500 dark:text-gray-400" aria-hidden />
+            </div>
+
+            {/* Demographics & complaint */}
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={`/patients/${patient.id}`}
+                  className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {patient.first_name} {patient.last_name}
+                </Link>
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                  {ageDisplay}
+                </span>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
               {patient.complaint && (
-                <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <RiStethoscopeLine className="mt-0.5 size-4 shrink-0" />
-                  <span className="line-clamp-2 overflow-hidden text-ellipsis">{patient.complaint}</span>
+                <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                  <RiStethoscopeLine className="size-4 shrink-0" aria-hidden />
+                  <span className="line-clamp-1 overflow-hidden text-ellipsis italic">
+                    {patient.complaint}
+                  </span>
                 </div>
               )}
-              <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-                <div className="flex items-center gap-1.5">
-                  <RiPhoneLine className="size-3.5 shrink-0" />
-                  <span>{patient.phone}</span>
-                </div>
-                {patient.lastAppointmentDate && (
-                  <>
-                    <span className="text-gray-400 dark:text-gray-500">•</span>
-                    <span>Last visit: {formatDate(patient.lastAppointmentDate)}</span>
-                  </>
-                )}
+            </div>
+
+            {/* Phone & last visited - right-aligned */}
+            <div className="hidden shrink-0 text-right sm:block">
+              <div className="flex items-center justify-end gap-1.5 text-sm text-gray-900 dark:text-gray-100">
+                <RiPhoneLine className="size-4 shrink-0 text-gray-500 dark:text-gray-400" aria-hidden />
+                <span>{patient.phone}</span>
               </div>
-            </CardContent>
-          </Card>
+              <div className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
+                Visited {formatDate(patient.lastAppointmentDate)}
+              </div>
+            </div>
+          </div>
         )
       })}
     </div>

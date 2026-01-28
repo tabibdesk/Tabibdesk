@@ -8,7 +8,7 @@ import { Badge } from "@/components/Badge"
 import { useInvoices } from "../hooks/useInvoices"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { AccountingToolbar, type DateRangePreset } from "../components/AccountingToolbar"
-import { MarkPaidDrawer } from "../components/MarkPaidDrawer"
+import { CapturePaymentDrawer } from "../components/CapturePaymentDrawer"
 import { mockData } from "@/data/mock/mock-data"
 import { RiPhoneLine, RiWhatsappLine, RiMoneyDollarCircleLine } from "@remixicon/react"
 import { startOfToday, startOfMonth } from "date-fns"
@@ -296,7 +296,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
         </>
       )}
 
-      <MarkPaidDrawer
+      <CapturePaymentDrawer
         open={showMarkPaidModal}
         onOpenChange={setShowMarkPaidModal}
         invoice={selectedInvoice}

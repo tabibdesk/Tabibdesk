@@ -121,7 +121,7 @@ export function AppointmentsCards({
                 <>
                   <Button
                     variant="primary"
-                    className="flex-1 text-sm"
+                    className="btn-card-action flex-1"
                     onClick={() => onReschedule(appointment)}
                   >
                     <RiCalendarEventLine className="mr-1 size-4" />
@@ -129,7 +129,7 @@ export function AppointmentsCards({
                   </Button>
                   <Button
                     variant="ghost"
-                    className="text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                    className="btn-card-action text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                     onClick={() => onCancel(appointment.id)}
                   >
                     <RiCloseLine className="mr-1 size-4" />
@@ -138,7 +138,7 @@ export function AppointmentsCards({
                 </>
               )}
               {appointment.status === "completed" && (
-                <Button variant="secondary" className="flex-1 text-sm" disabled>
+                <Button variant="secondary" className="btn-card-action flex-1" disabled>
                   <RiCheckLine className="mr-1 size-4" />
                   Completed
                 </Button>
@@ -148,14 +148,14 @@ export function AppointmentsCards({
                   {onFillSlot ? (
                     <Button
                       variant="primary"
-                      className="flex-1 text-sm"
+                      className="btn-card-action flex-1"
                       onClick={() => onFillSlot(appointment)}
                     >
                       <RiUserAddLine className="mr-1 size-4" />
                       Fill Slot
                     </Button>
                   ) : (
-                    <Button variant="ghost" className="flex-1 text-sm text-gray-500" disabled>
+                    <Button variant="ghost" className="btn-card-action flex-1 text-gray-500" disabled>
                       <RiCloseLine className="mr-1 size-4" />
                       Cancelled
                     </Button>
@@ -165,7 +165,7 @@ export function AppointmentsCards({
               {appointment.status === "no_show" && onFillSlot && (
                 <Button
                   variant="primary"
-                  className="flex-1 text-sm"
+                  className="btn-card-action flex-1"
                   onClick={() => onFillSlot(appointment)}
                 >
                   <RiUserAddLine className="mr-1 size-4" />

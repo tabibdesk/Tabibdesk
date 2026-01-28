@@ -12,7 +12,7 @@ import { mockAppointments } from "@/data/mock/mock-data"
 import { updateStatus as updateAppointmentStatus, updateAppointmentTime } from "@/features/appointments/appointments.api"
 import { listPayments } from "@/api/payments.api"
 import { getInvoiceByAppointmentId, createInvoiceForArrivedAppointment, markInvoiceUnpaid } from "@/api/invoices.api"
-import { MarkPaidDrawer } from "@/features/accounting/components/MarkPaidDrawer"
+import { CapturePaymentDrawer } from "@/features/accounting/components/CapturePaymentDrawer"
 import { useToast } from "@/hooks/useToast"
 import type { Invoice } from "@/types/invoice"
 import {
@@ -68,7 +68,8 @@ export default function DashboardPage() {
   const [showUnmarkPaidModal, setShowUnmarkPaidModal] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState<DashboardAppointment | null>(null)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
-  const [loadingInvoice, setLoadingInvoice] = useState(false)
+  const [loadingInvoiceFor, setLoadingInvoiceFor] = useState<string | null>(null)
+  const [invoiceByAppointmentId, setInvoiceByAppointmentId] = useState<Record<string, Invoice>>({})
 
   useEffect(() => {
     fetchDashboardData()
@@ -490,6 +491,27 @@ export default function DashboardPage() {
           return apt
         })
       )
+
+      // Create Due (invoice) immediately so Paid opens instantly
+      if (currentClinic) {
+        try {
+          const invoice = await createInvoiceForArrivedAppointment({
+            id: selectedAppointment.id,
+            clinic_id: currentClinic.id,
+            doctor_id: currentUser.id,
+            patient_id: selectedAppointment.patient_id,
+            type: selectedAppointment.type || "Consultation",
+          })
+          setInvoiceByAppointmentId((prev) => ({ ...prev, [selectedAppointment.id]: invoice }))
+        } catch (error) {
+          // Pricing missing / invoice creation failed
+          showToast(
+            "Could not create due (invoice). Please set pricing for this appointment type.",
+            "error"
+          )
+        }
+      }
+
       setShowArrivedModal(false)
     } catch (error) {
       showToast("Failed to mark patient as arrived", "error")
@@ -523,45 +545,22 @@ export default function DashboardPage() {
     }
   }
 
-  const handleMarkPaidClick = async () => {
-    if (!selectedAppointment || !currentClinic) return
-    
-    // Only allow marking as paid if appointment is arrived (invoice should exist)
-    if (selectedAppointment.status !== "arrived") {
+  const handleMarkPaidClick = async (apt: DashboardAppointment) => {
+    // Only allow marking as paid if appointment is arrived (due should already exist)
+    if (apt.status !== "arrived") {
       showToast("Please mark appointment as 'Arrived' first", "error")
       return
     }
-    
-    setLoadingInvoice(true)
-    try {
-      // Get existing invoice (should exist since appointment is arrived)
-      let invoice = await getInvoiceByAppointmentId(selectedAppointment.id)
-      
-      // If no invoice exists, try to create one (fallback for edge cases)
-      if (!invoice) {
-        try {
-          invoice = await createInvoiceForArrivedAppointment({
-            id: selectedAppointment.id,
-            clinic_id: currentClinic.id,
-            doctor_id: currentUser.id,
-            patient_id: selectedAppointment.patient_id,
-            type: selectedAppointment.type || "consultation",
-          })
-        } catch (error) {
-          showToast("Failed to create invoice. Please set pricing for this appointment type.", "error")
-          setLoadingInvoice(false)
-          return
-        }
-      }
-      
-      setSelectedInvoice(invoice)
-      setShowPaidModal(true)
-    } catch (error) {
-      console.error("Failed to load invoice:", error)
-      showToast("Failed to load invoice details", "error")
-    } finally {
-      setLoadingInvoice(false)
+
+    const invoice = invoiceByAppointmentId[apt.id]
+    if (!invoice) {
+      showToast("Due not ready yet. Please wait a moment.", "error")
+      return
     }
+
+    setSelectedAppointment(apt)
+    setSelectedInvoice(invoice)
+    setShowPaidModal(true)
   }
 
   const handleMarkPaidSuccess = () => {
@@ -746,6 +745,8 @@ export default function DashboardPage() {
                   const badgeVariant = isNow ? "success" : isNext ? "default" : "neutral"
                   const badgeText = isNow ? "now" : isNext ? "next" : null
                   
+                  const isBusy = markingArrived === apt.id || markingPaid === apt.id || loadingInvoiceFor === apt.id
+
                   return (
                   <div
                     key={apt.id}
@@ -755,14 +756,19 @@ export default function DashboardPage() {
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, index)}
                     onDragEnd={handleDragEnd}
-                    className={`widget-row cursor-move ${
+                    className={`widget-row cursor-move relative ${
                       draggedIndex === index
                         ? "opacity-50 bg-primary-50/30 dark:bg-primary-900/10"
                         : dragOverIndex === index
                         ? "bg-primary-50/50 dark:bg-primary-900/20"
                         : ""
-                    }`}
+                    } ${isBusy ? "opacity-60" : ""}`}
                   >
+                    {isBusy && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-white/40 dark:bg-black/20">
+                        <div className="size-6 animate-spin rounded-full border-2 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400" />
+                      </div>
+                    )}
                     <div className="widget-content-stack">
                       <div className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-colors ${getIconBackgroundClass(index)}`}>
                         <RiMenuLine className={`size-4 ${getIconColorClass(index)}`} />
@@ -855,10 +861,9 @@ export default function DashboardPage() {
                             variant="secondary"
                             onClick={(e) => { 
                               e.stopPropagation(); 
-                              setSelectedAppointment(apt);
-                              handleMarkPaidClick(); 
+                              handleMarkPaidClick(apt); 
                             }}
-                            disabled={markingPaid === apt.id || loadingInvoice}
+                            disabled={markingPaid === apt.id || markingArrived === apt.id || loadingInvoiceFor === apt.id}
                             className="btn-secondary-widget text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-100 shrink-0 whitespace-nowrap"
                             title="Mark as Paid"
                           >
@@ -931,7 +936,7 @@ export default function DashboardPage() {
         isLoading={!!markingArrived}
       />
 
-      <MarkPaidDrawer
+      <CapturePaymentDrawer
         open={showPaidModal}
         onOpenChange={(open) => {
           setShowPaidModal(open)

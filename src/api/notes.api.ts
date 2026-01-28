@@ -61,6 +61,34 @@ export async function create(payload: CreateNotePayload): Promise<VisitNote> {
 }
 
 /**
+ * Update a visit note
+ */
+export async function update(id: string, note: string): Promise<VisitNote> {
+  const index = notesStore.findIndex((n) => n.id === id)
+  if (index === -1) throw new Error("Note not found")
+
+  notesStore[index] = { ...notesStore[index], note }
+
+  // Update mock data
+  const mockIndex = mockData.doctorNotes.findIndex((n) => n.id === id)
+  if (mockIndex !== -1) {
+    mockData.doctorNotes[mockIndex].note = note
+  }
+
+  return notesStore[index]
+}
+
+/**
+ * Delete a visit note
+ */
+export async function remove(id: string): Promise<void> {
+  notesStore = notesStore.filter((n) => n.id !== id)
+
+  // Update mock data
+  mockData.doctorNotes = mockData.doctorNotes.filter((n) => n.id !== id)
+}
+
+/**
  * Get notes for a patient
  */
 export async function getByPatientId(patientId: string): Promise<VisitNote[]> {

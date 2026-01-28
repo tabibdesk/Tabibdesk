@@ -15,6 +15,7 @@ import { mockData } from "@/data/mock/mock-data"
 import { HorizontalTabNav, Tab } from "@/components/patient/HorizontalTabNav"
 import { ClinicalNotesTab } from "@/components/patient/ClinicalNotesTab"
 import { GeneralTab } from "@/components/patient/GeneralTab"
+import { DoctorTab } from "@/components/patient/DoctorTab"
 import { PrescriptionsTab } from "@/components/patient/PrescriptionsTab"
 import { FilesTab } from "@/components/patient/FilesTab"
 import { TasksTab } from "@/components/patient/TasksTab"
@@ -37,6 +38,7 @@ import {
   RiTaskLine,
   RiTimeLine,
   RiHistoryLine,
+  RiStethoscopeLine,
 } from "@remixicon/react"
 
 export default function PatientDetailPage() {
@@ -295,6 +297,7 @@ export default function PatientDetailPage() {
   const tabs: Tab[] = [
     { id: "clinicalNotes", label: "Notes", icon: RiFileTextLine },
     { id: "general", label: "General", icon: RiUserLine },
+    { id: "doctor", label: "Dr", icon: RiStethoscopeLine },
     { id: "medications", label: "Prescription", icon: RiCapsuleLine },
     { id: "tasks", label: "Tasks", icon: RiTaskLine },
     { id: "files", label: "Files", icon: RiFolderLine },
@@ -357,9 +360,6 @@ export default function PatientDetailPage() {
       <div>
         {activeTab === "clinicalNotes" && (
           <ClinicalNotesTab
-            notes={notes}
-            transcriptions={transcriptions}
-            patient={patient}
             onSaveNote={(note) => {
               // TODO: Implement save note
               console.log("Save note:", note)
@@ -375,6 +375,17 @@ export default function PatientDetailPage() {
               setShowAddPastMedicationModal(true)
             }}
             onUpdatePatient={handleUpdatePatient}
+          />
+        )}
+        {activeTab === "doctor" && (
+          <DoctorTab
+            patient={patient}
+            notes={notes}
+            weightLogs={weightLogs}
+            pastMedications={pastMedications}
+            onAddPastMedication={() => {
+              setShowAddPastMedicationModal(true)
+            }}
           />
         )}
         {activeTab === "medications" && <PrescriptionsTab prescriptions={prescriptions} />}

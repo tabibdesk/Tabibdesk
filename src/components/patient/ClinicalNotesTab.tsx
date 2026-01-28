@@ -4,27 +4,7 @@ import { useClinicalNotes } from "./useClinicalNotes"
 import { ClinicalNotesDesktop } from "./ClinicalNotesDesktop"
 import { ClinicalNotesMobile } from "./ClinicalNotesMobile"
 
-interface DoctorNote {
-  id: string
-  patient_id: string
-  note: string
-  created_at: string
-}
-
-interface Transcription {
-  id: string
-  patient_id: string
-  audio_url: string | null
-  transcription_text: string
-  duration_seconds: number
-  created_at: string
-  status: "processing" | "completed" | "failed"
-}
-
 interface ClinicalNotesTabProps {
-  notes: DoctorNote[]
-  transcriptions: Transcription[]
-  patient?: any
   onSaveNote?: (note: string) => void
 }
 

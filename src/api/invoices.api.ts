@@ -139,6 +139,105 @@ export async function createInvoiceForArrivedAppointment(appointment: {
 }
 
 /**
+ * Create an invoice with a specific amount (e.g. partial payment or balance due).
+ * Used when recording partial payments: one invoice for amount paid, one for remainder (due).
+ */
+export async function createInvoiceWithAmount(params: {
+  clinicId: string
+  doctorId: string
+  patientId: string
+  appointmentId: string
+  appointmentType: string
+  amount: number
+}): Promise<Invoice> {
+  await delay(200)
+
+  if (params.amount <= 0) {
+    throw new Error("Invoice amount must be positive")
+  }
+
+  const invoice: Invoice = {
+    id: `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    clinicId: params.clinicId,
+    doctorId: params.doctorId,
+    patientId: params.patientId,
+    appointmentId: params.appointmentId,
+    appointmentType: params.appointmentType,
+    amount: params.amount,
+    status: "unpaid",
+    createdAt: new Date().toISOString(),
+  }
+
+  invoicesStore.push(invoice)
+  return invoice
+}
+
+export interface RecordPartialPaymentWithDueParams {
+  clinicId: string
+  doctorId: string
+  patientId: string
+  appointmentId: string
+  appointmentType: string
+  amountPaid: number
+  serviceAmount: number
+  createDueForRemainder: boolean
+  createdByUserId: string
+}
+
+export interface RecordPartialPaymentWithDueResult {
+  paidInvoice: Invoice
+  dueInvoice: Invoice | null
+}
+
+/**
+ * Record a partial payment in the data store and optionally create a due record
+ * for the remaining amount. All writes (invoices + payment) happen here.
+ */
+export async function recordPartialPaymentWithOptionalDue(
+  params: RecordPartialPaymentWithDueParams
+): Promise<RecordPartialPaymentWithDueResult> {
+  await delay(200)
+
+  const remainder = params.serviceAmount - params.amountPaid
+  const createDue = params.createDueForRemainder && remainder > 0.01
+
+  const paidInvoice = await createInvoiceWithAmount({
+    clinicId: params.clinicId,
+    doctorId: params.doctorId,
+    patientId: params.patientId,
+    appointmentId: params.appointmentId,
+    appointmentType: params.appointmentType,
+    amount: params.amountPaid,
+  })
+
+  const { createPayment } = await import("./payments.api")
+  await createPayment({
+    clinicId: params.clinicId,
+    invoiceId: paidInvoice.id,
+    patientId: params.patientId,
+    appointmentId: params.appointmentId,
+    amount: params.amountPaid,
+    method: "cash",
+    createdByUserId: params.createdByUserId,
+  })
+  await markInvoicePaid(paidInvoice.id)
+
+  let dueInvoice: Invoice | null = null
+  if (createDue) {
+    dueInvoice = await createInvoiceWithAmount({
+      clinicId: params.clinicId,
+      doctorId: params.doctorId,
+      patientId: params.patientId,
+      appointmentId: params.appointmentId,
+      appointmentType: params.appointmentType,
+      amount: remainder,
+    })
+  }
+
+  return { paidInvoice, dueInvoice }
+}
+
+/**
  * List invoices with filtering and pagination
  */
 export async function listInvoices(params: ListInvoicesParams): Promise<ListInvoicesResponse> {
@@ -267,4 +366,24 @@ export async function getInvoiceById(invoiceId: string): Promise<Invoice | null>
   
   const invoice = invoicesStore.find((inv) => inv.id === invoiceId)
   return invoice || null
+}
+
+/**
+ * Mark invoice as void (e.g. when replacing with partial paid + due pair)
+ */
+export async function voidInvoice(invoiceId: string): Promise<Invoice> {
+  await delay(200)
+
+  const index = invoicesStore.findIndex((inv) => inv.id === invoiceId)
+  if (index === -1) {
+    throw new Error("Invoice not found")
+  }
+
+  const updated: Invoice = {
+    ...invoicesStore[index],
+    status: "void",
+  }
+
+  invoicesStore[index] = updated
+  return updated
 }

@@ -8,7 +8,7 @@ import { translations, Language } from "@/lib/landing-translations"
 import {
   RiArrowRightLine,
   RiPlayFill,
-  RiStarSFill,
+  RiSparklingLine,
   RiRadioButtonLine,
   RiTimeZoneLine,
 } from "@remixicon/react"
@@ -32,7 +32,7 @@ export function Hero({ lang }: HeroProps) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12 lg:items-center">
           <div className="flex flex-col text-center lg:text-left rtl:lg:text-right">
             <div className="inline-flex self-center lg:self-start items-center gap-2 rounded-full bg-primary-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-700 ring-1 ring-inset ring-primary-600/10 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-500/30">
-              <RiStarSFill className="size-3 fill-current" />
+              <RiSparklingLine className="size-3" />
               <span>{t.heroEyebrow}</span>
             </div>
             

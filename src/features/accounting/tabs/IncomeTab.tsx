@@ -8,10 +8,12 @@ import { useUserClinic } from "@/contexts/user-clinic-context"
 import { AccountingToolbar, type DateRangePreset } from "../components/AccountingToolbar"
 import { startOfToday } from "date-fns"
 import Link from "next/link"
-import { RiFileLine, RiMoneyDollarCircleLine } from "@remixicon/react"
+import { Button } from "@/components/Button"
+import { RiAddLine, RiFileLine, RiMoneyDollarCircleLine } from "@remixicon/react"
 import { mockData } from "@/data/mock/mock-data"
 import { ProofViewerModal } from "../components/ProofViewerModal"
 import type { Payment } from "@/types/payment"
+import { CapturePaymentDrawer } from "../components/CapturePaymentDrawer"
 
 interface IncomeTabProps {
   dateRangePreset: DateRangePreset
@@ -23,6 +25,7 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [selectedProofFileId, setSelectedProofFileId] = useState<string | undefined>(undefined)
   const [showProofModal, setShowProofModal] = useState(false)
+  const [showCaptureDrawer, setShowCaptureDrawer] = useState(false)
 
   // Calculate date range
   const getDateRange = () => {
@@ -178,11 +181,20 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
         </Card>
       ) : (
         <>
-          {/* Search Bar - Above List */}
-          <AccountingToolbar
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-          />
+          {/* Search Bar and Capture Button - Above List */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1 min-w-0">
+              <AccountingToolbar searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
+            </div>
+            <Button
+              onClick={() => setShowCaptureDrawer(true)}
+              className="w-full sm:w-auto shrink-0 md:h-9 md:py-1.5 md:text-sm"
+            >
+              <RiAddLine className="mr-2 size-4" />
+              <span className="hidden sm:inline">Capture</span>
+              <span className="sm:hidden">Capture</span>
+            </Button>
+          </div>
 
           {/* Desktop Table */}
           <div className="hidden md:block overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
@@ -283,6 +295,15 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
         onOpenChange={setShowProofModal}
         fileId={selectedProofFileId}
         title="Proof of Payment"
+      />
+
+      <CapturePaymentDrawer
+        open={showCaptureDrawer}
+        onOpenChange={setShowCaptureDrawer}
+        onSuccess={() => {
+          refetch()
+          setShowCaptureDrawer(false)
+        }}
       />
     </div>
   )

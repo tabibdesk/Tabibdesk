@@ -69,9 +69,19 @@
     @apply h-9 px-4 text-xs font-semibold rounded-full;
   }
 
-  /* Widget Row Layout */
+  /* Card action buttons (e.g. Reschedule, Cancel, Fill Slot) – use text-sm */
+  .btn-card-action {
+    @apply text-sm;
+  }
+
+  /* Shared card surface: border, shadow, rounded, background – used by widget rows (Now Queue) and list cards (e.g. patient cards) */
+  .card-surface {
+    @apply rounded-xl border border-gray-100 bg-white shadow-sm transition-colors dark:border-gray-800 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700;
+  }
+
+  /* Widget Row Layout (Now Queue, Today's Appointments) */
   .widget-row {
-    @apply flex items-center justify-between p-3 transition-colors bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 shadow-sm;
+    @apply card-surface flex items-center justify-between p-3;
   }
 
   /* Widget Content Groups */
