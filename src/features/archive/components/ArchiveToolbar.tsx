@@ -1,6 +1,6 @@
 "use client"
 
-import { DateRangePicker } from "@/components/DatePicker"
+import { DateRangePicker } from "@tremor/react"
 import { SearchInput } from "@/components/SearchInput"
 import type { DateRange } from "react-day-picker"
 import type { DateRangePreset } from "../archive.types"
@@ -47,9 +47,8 @@ export function ArchiveToolbar({
           {showCustomDatePicker && (
             <DateRangePicker
               value={customDateRange}
-              onChange={onCustomDateRangeChange}
+              onValueChange={(v) => onCustomDateRangeChange(v as DateRange)}
               className="w-full sm:w-fit"
-              align="end"
             />
           )}
         </div>

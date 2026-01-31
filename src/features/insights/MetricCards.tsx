@@ -1,10 +1,8 @@
 "use client"
 
-import { Card, CardContent } from "@/components/Card"
-import { Badge } from "@/components/Badge"
+import { MetricCard } from "@/components/shared/MetricCard"
 import { mockData, DEMO_CLINIC_ID } from "@/data/mock/mock-data"
 import { calculatePercentageChange } from "./insights.utils"
-import { AreaChart } from "@/components/AreaChart"
 import { useEffect, useState } from "react"
 import { listPayments } from "@/api/payments.api"
 
@@ -210,115 +208,60 @@ export function MetricCards() {
   const previousReturnRate = previousPatientsEligibleForFollowUp.size > 0 ? (previousPatientsWithFollowUp.size / previousPatientsEligibleForFollowUp.size) * 100 : 0
   const returnRateChange = calculatePercentageChange(returnRate, previousReturnRate)
 
-  // Mock Sparkline Data
-  const generateSparkline = (base: number) => {
-    return Array.from({ length: 10 }, (_, i) => ({
-      date: i,
-      value: base + Math.floor(Math.random() * 20) - 10,
-    }))
-  }
-
   const metrics = [
     {
       id: "slot-fill-rate",
       label: "Slot Fill Rate",
       value: `${slotFillRate.toFixed(1)}%`,
       change: slotFillRateChange.value,
-      changeType: slotFillRateChange.type,
-      data: generateSparkline(slotFillRate),
-      color: "blue" as const,
+      isPositive: slotFillRateChange.type === "positive",
     },
     {
       id: "no-show-rate",
       label: "No-Show Rate",
       value: `${noShowRate.toFixed(1)}%`,
       change: noShowRateChange.value,
-      changeType: noShowRateChange.type === "positive" ? "negative" : noShowRateChange.type === "negative" ? "positive" : "neutral",
-      data: generateSparkline(noShowRate),
-      color: "pink" as const,
+      isPositive: noShowRateChange.type === "negative", // increase in no-show is bad
     },
     {
       id: "cancellation-rate",
       label: "Cancellation Rate",
       value: `${cancellationRate.toFixed(1)}%`,
       change: cancellationRateChange.value,
-      changeType: cancellationRateChange.type === "positive" ? "negative" : cancellationRateChange.type === "negative" ? "positive" : "neutral",
-      data: generateSparkline(cancellationRate),
-      color: "amber" as const,
+      isPositive: cancellationRateChange.type === "negative", // increase in cancellation is bad
     },
     {
       id: "revenue-collected",
       label: "Revenue Collected",
       value: `EGP ${revenueCollected.toLocaleString()}`,
       change: revenueChange.value,
-      changeType: revenueChange.type,
-      data: generateSparkline(revenueCollected / 100),
-      color: "emerald" as const,
+      isPositive: revenueChange.type === "positive",
     },
     {
       id: "new-patients",
       label: "New Patients",
       value: newPatients.toString(),
       change: newPatientsChange.value,
-      changeType: newPatientsChange.type,
-      data: generateSparkline(newPatients),
-      color: "indigo" as const,
+      isPositive: newPatientsChange.type === "positive",
     },
     {
       id: "return-rate",
       label: "Return Rate",
       value: `${returnRate.toFixed(1)}%`,
       change: returnRateChange.value,
-      changeType: returnRateChange.type,
-      data: generateSparkline(returnRate),
-      color: "violet" as const,
+      isPositive: returnRateChange.type === "positive",
     },
   ]
 
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {metrics.map((metric) => (
-        <Card key={metric.id} className="overflow-hidden">
-          <CardContent className="p-4 flex flex-col h-full justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  {metric.label}
-                </p>
-                {metric.change && (
-                  <Badge
-                    variant={
-                      metric.changeType === "positive"
-                        ? "success"
-                        : metric.changeType === "negative"
-                        ? "error"
-                        : "neutral"
-                    }
-                    className="text-[10px] h-4 px-1"
-                  >
-                    {metric.change}
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">{metric.value}</p>
-              </div>
-            </div>
-
-            <div className="h-10 w-full -mx-4 -mb-2">
-              <AreaChart
-                data={metric.data}
-                index="date"
-                categories={["value"]}
-                colors={[metric.color as "indigo" | "blue" | "emerald" | "violet" | "amber" | "gray" | "cyan" | "pink"]}
-                showXAxis={false}
-                showYAxis={false}
-                showTooltip={false}
-                className="h-full w-full"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <MetricCard
+          key={metric.id}
+          title={metric.label}
+          value={metric.value}
+          trend={metric.change ? { value: metric.change, isPositive: metric.isPositive } : undefined}
+        />
       ))}
     </div>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { DateRangePicker } from "@/components/DatePicker"
+import { DateRangePicker } from "@tremor/react"
 import { subYears } from "date-fns"
 import { DateRange } from "react-day-picker"
 
@@ -38,11 +38,10 @@ export function Filterbar({
     <div className="w-full sm:flex sm:items-center sm:gap-2">
       <DateRangePicker
         value={selectedDates}
-        onChange={onDatesChange}
+        onValueChange={(v) => onDatesChange(v as DateRange)}
         className="w-full sm:w-fit"
-        toDate={maxDate}
-        fromDate={minDate}
-        align="start"
+        maxDate={maxDate}
+        minDate={minDate}
       />
     </div>
   )

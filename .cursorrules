@@ -48,6 +48,10 @@
    - Check component interfaces before using them
    - Example: `SidebarUserProfile` requires `mode` prop
 
+## Tremor Components
+
+Prefer Tremor components whenever possible before building new custom components. Tremor provides charts, cards, metric displays, and other UI primitives—check the Tremor library first and use existing components before creating custom implementations. Only build custom components when Tremor does not offer a suitable option.
+
 ### Pre-Deployment Checklist
 Before pushing to production:
 - [ ] Run `npm run build` locally and ensure it succeeds

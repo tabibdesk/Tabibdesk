@@ -1,5 +1,5 @@
+import { BadgeDelta } from "@tremor/react"
 import { PeriodValue } from "@/app/(main)/overview/page"
-import { Badge } from "@/components/Badge"
 import { LineChart } from "@/components/LineChart"
 import { overviews } from "@/data/overview-data"
 import { OverviewData } from "@/data/schema"
@@ -26,17 +26,15 @@ const formattingMap = {
   unit: formatters.unit,
 }
 
-export const getBadgeType = (value: number) => {
+type DeltaType = "increase" | "moderateIncrease" | "decrease" | "moderateDecrease" | "unchanged"
+
+export const getDeltaType = (value: number): DeltaType => {
   if (value > 0) {
-    return "success"
+    return value >= 50 ? "increase" : "moderateIncrease"
   } else if (value < 0) {
-    if (value < -50) {
-      return "warning"
-    }
-    return "error"
-  } else {
-    return "neutral"
+    return value < -50 ? "moderateDecrease" : "decrease"
   }
+  return "unchanged"
 }
 
 export function ChartCard({
@@ -125,9 +123,9 @@ export function ChartCard({
             {title}
           </dt>
           {selectedPeriod !== "no-comparison" && (
-            <Badge variant={getBadgeType(evolution)}>
+            <BadgeDelta deltaType={getDeltaType(evolution)}>
               {percentageFormatter(evolution)}
-            </Badge>
+            </BadgeDelta>
           )}
         </div>
       </div>

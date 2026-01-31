@@ -1,7 +1,14 @@
-import { Badge } from "@/components/Badge"
+import { BadgeDelta } from "@tremor/react"
 import { cx } from "@/lib/utils"
 
 import type { KpiEntryExtended } from "@/app/(main)/overview/page"
+
+function getDeltaTypeFromChange(change: string): "increase" | "moderateIncrease" | "decrease" | "moderateDecrease" | "unchanged" {
+  const trimmed = change.trim()
+  if (trimmed.startsWith("+")) return "increase"
+  if (trimmed.startsWith("-")) return "decrease"
+  return "unchanged"
+}
 
 export type CardProps = {
   title: string
@@ -34,7 +41,7 @@ export function CategoryBarCard({
             <h3 className="font-bold text-gray-900 sm:text-sm dark:text-gray-50">
               {title}
             </h3>
-            <Badge variant="neutral">{change}</Badge>
+            <BadgeDelta deltaType={getDeltaTypeFromChange(change)}>{change}</BadgeDelta>
           </div>
           <p className="mt-2 flex items-baseline gap-2">
             <span className="text-xl text-gray-900 dark:text-gray-50">

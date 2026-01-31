@@ -28,8 +28,8 @@ import {
 } from "@/lib/chartUtils"
 import { useOnWindowResize } from "@/lib/useOnWindowResize"
 import { cx, percentageFormatter } from "@/lib/utils"
-import { Badge } from "./Badge"
-import { getBadgeType } from "./ui/overview/DashboardChartCard"
+import { BadgeDelta } from "@tremor/react"
+import { getDeltaType } from "./ui/overview/DashboardChartCard"
 
 //#region Legend
 
@@ -430,9 +430,9 @@ const OverviewChartTooltip = ({
             {title}
           </p>
           {evolution !== undefined && (
-            <Badge variant={getBadgeType(evolution)}>
+            <BadgeDelta deltaType={getDeltaType(evolution)}>
               {percentageFormatter(evolution)}
-            </Badge>
+            </BadgeDelta>
           )}
         </div>
         <div className={cx("space-y-1 p-2")}>

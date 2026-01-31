@@ -1,7 +1,14 @@
-import { Badge } from "@/components/Badge"
+import { BadgeDelta } from "@tremor/react"
 import { ProgressBar } from "@/components/ProgressBar"
 
 import { KpiEntry } from "@/app/(main)/overview/page"
+
+function getDeltaTypeFromChange(change: string): "increase" | "moderateIncrease" | "decrease" | "moderateDecrease" | "unchanged" {
+  const trimmed = change.trim()
+  if (trimmed.startsWith("+")) return "increase"
+  if (trimmed.startsWith("-")) return "decrease"
+  return "unchanged"
+}
 
 export type CardProps = {
   title: string
@@ -32,7 +39,7 @@ export function ProgressBarCard({
             <dt className="font-bold text-gray-900 sm:text-sm dark:text-gray-50">
               {title}
             </dt>
-            <Badge variant="neutral">{change}</Badge>
+            <BadgeDelta deltaType={getDeltaTypeFromChange(change)}>{change}</BadgeDelta>
           </div>
           <dd className="mt-2 flex items-baseline gap-2">
             <span className="text-xl text-gray-900 dark:text-gray-50">
