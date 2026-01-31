@@ -242,13 +242,15 @@ export async function recordPartialPaymentWithOptionalDue(
  */
 export async function listInvoices(params: ListInvoicesParams): Promise<ListInvoicesResponse> {
   await delay(200)
-  
+
+  const clinicId = params.clinicId?.trim() || "clinic-001"
+
   // Ensure initialization has run
   if (invoicesStore.length === 0) {
     await initializeMockInvoices()
   }
-  
-  let filtered = invoicesStore.filter((inv) => inv.clinicId === params.clinicId)
+
+  let filtered = invoicesStore.filter((inv) => inv.clinicId === clinicId)
   
   // Filter by status
   if (params.status) {

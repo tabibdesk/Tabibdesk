@@ -7,7 +7,7 @@ import {
   DrawerBody,
   DrawerContent,
   DrawerHeader,
-  DrawerHeaderTitle,
+  DrawerTitle,
 } from "@/components/Drawer"
 import { Button } from "@/components/Button"
 import { RiUploadLine, RiFlaskLine, RiHeartPulseLine, RiFileTextLine } from "@remixicon/react"
@@ -135,10 +135,7 @@ export function AddFileDrawer({
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerContent side="right" className="w-full sm:max-w-md">
         <DrawerHeader>
-          <DrawerHeaderTitle
-            icon={<RiUploadLine className="size-5 text-primary-600 dark:text-primary-400" />}
-            title="Upload files"
-          />
+          <DrawerTitle>Upload files</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
           {!pendingFiles || pendingFiles.length === 0 ? (

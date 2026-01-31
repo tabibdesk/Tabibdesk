@@ -12,7 +12,7 @@ type AccountingTab = "in" | "out" | "dues"
 
 export function AccountingPage() {
   const [activeTab, setActiveTab] = useState<AccountingTab>("in")
-  const [dateRangePreset, setDateRangePreset] = useState<DateRangePreset>("thismonth")
+  const [dateRangePreset, setDateRangePreset] = useState<DateRangePreset>("30days")
 
   return (
     <div className="page-content">

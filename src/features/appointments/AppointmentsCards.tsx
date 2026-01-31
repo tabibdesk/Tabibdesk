@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import {
@@ -71,7 +72,7 @@ export function AppointmentsCards({
                     {" · "}
                     {appointment.appointment_time}
                   </span>
-                  <Badge variant={getStatusBadgeVariant(appointment.status)} className="text-xs">
+                  <Badge color={getBadgeColor(getStatusBadgeVariant(appointment.status))} size="xs">
                     {getStatusIcon(appointment.status)}
                     <span className="ml-1 capitalize">{getStatusLabel(appointment.status)}</span>
                   </Badge>
@@ -114,7 +115,7 @@ export function AppointmentsCards({
                   </CardTitle>
                 </Link>
                 <CardDescription className="mt-1">
-                  <Badge variant={getStatusBadgeVariant(appointment.status)} className="text-xs">
+                  <Badge color={getBadgeColor(getStatusBadgeVariant(appointment.status))} size="xs">
                     {getStatusIcon(appointment.status)}
                     <span className="ml-1 capitalize">{getStatusLabel(appointment.status)}</span>
                   </Badge>
@@ -134,8 +135,8 @@ export function AppointmentsCards({
               </span>
               {appointment.rescheduled && (
                 <Badge 
-                  variant="warning" 
-                  className="h-4 px-1.5 text-[10px] font-semibold"
+                  color="amber"
+                  size="xs"
                   title={`Rescheduled ${appointment.reschedule_count || 1} time${(appointment.reschedule_count || 1) > 1 ? 's' : ''}`}
                 >
                   <RiHistoryLine className="size-2.5 mr-0.5" />

@@ -118,10 +118,7 @@ export function Hero({ lang }: HeroProps) {
                         <p className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
                           Sarah Ahmed
                         </p>
-                        <Badge
-                          variant="success"
-                          className="h-4 px-1.5 text-xs font-bold lowercase tracking-wider"
-                        >
+                        <Badge color="emerald" size="xs">
                           now
                         </Badge>
                       </div>
@@ -155,10 +152,7 @@ export function Hero({ lang }: HeroProps) {
                           <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                             Mohamed Aly
                           </p>
-                          <Badge
-                            variant="default"
-                            className="h-4 px-1.5 text-xs font-bold lowercase tracking-wider"
-                          >
+                          <Badge color="indigo" size="xs">
                             next
                           </Badge>
                         </div>

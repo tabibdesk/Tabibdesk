@@ -138,7 +138,7 @@ export function AiAlertsPanel({ onAlertAction }: AiAlertsPanelProps) {
                   <h4 className="font-medium text-gray-900 dark:text-gray-50">
                     {alert.title}
                   </h4>
-                  <Badge variant="neutral">
+                  <Badge color="gray" size="xs">
                     {alert.count}
                   </Badge>
                 </div>

@@ -1,10 +1,10 @@
 "use client"
 
-import { Card, CardContent } from "@/components/Card"
+import { Card, AreaChart } from "@tremor/react"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { mockData, DEMO_CLINIC_ID } from "@/data/mock/mock-data"
 import { calculatePercentageChange } from "./insights.utils"
-import { AreaChart } from "@/components/AreaChart"
 import { useEffect, useState } from "react"
 import { listPayments } from "@/api/payments.api"
 
@@ -278,46 +278,48 @@ export function MetricCards() {
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {metrics.map((metric) => (
-        <Card key={metric.id} className="overflow-hidden">
-          <CardContent className="p-4 flex flex-col h-full justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  {metric.label}
-                </p>
-                {metric.change && (
-                  <Badge
-                    variant={
-                      metric.changeType === "positive"
-                        ? "success"
-                        : metric.changeType === "negative"
-                        ? "error"
-                        : "neutral"
-                    }
-                    className="text-xs h-4 px-1"
-                  >
-                    {metric.change}
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-baseline gap-2">
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-50">{metric.value}</p>
-              </div>
+        <Card key={metric.id} className="overflow-hidden p-4 flex flex-col h-full justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold uppercase tracking-wider text-tremor-content-subtle dark:text-dark-tremor-content-subtle">
+                {metric.label}
+              </p>
+              {metric.change && (
+                <Badge
+                  color={getBadgeColor(
+                    metric.changeType === "positive"
+                      ? "success"
+                      : metric.changeType === "negative"
+                      ? "error"
+                      : "neutral"
+                  )}
+                  size="xs"
+                >
+                  {metric.change}
+                </Badge>
+              )}
             </div>
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-tremor-content-strong dark:text-dark-tremor-content-strong">
+                {metric.value}
+              </p>
+            </div>
+          </div>
 
-            <div className="h-10 w-full -mx-4 -mb-2">
-              <AreaChart
-                data={metric.data}
-                index="date"
-                categories={["value"]}
-                colors={[metric.color as "indigo" | "blue" | "emerald" | "violet" | "amber" | "gray" | "cyan" | "pink"]}
-                showXAxis={false}
-                showYAxis={false}
-                showTooltip={false}
-                className="h-full w-full"
-              />
-            </div>
-          </CardContent>
+          <div className="h-10 w-full -mx-2 -mb-1">
+            <AreaChart
+              data={metric.data}
+              index="date"
+              categories={["value"]}
+              colors={[metric.color]}
+              showXAxis={false}
+              showYAxis={false}
+              showTooltip={false}
+              showLegend={false}
+              showGridLines={false}
+              className="h-full w-full"
+            />
+          </div>
         </Card>
       ))}
     </div>

@@ -61,7 +61,7 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
 
   const dateRange = getDateRange()
   const { data, loading, error, refetch } = usePayments({
-    clinicId: currentClinic?.id || "",
+    clinicId: currentClinic?.id || "clinic-001",
     from: dateRange.from,
     to: dateRange.to,
     query: debouncedSearch || undefined,
@@ -87,14 +87,9 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
     return patient ? `${patient.first_name} ${patient.last_name}` : "Unknown"
   }
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
-  }
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
   }
 
   if (error) {
@@ -202,10 +197,10 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
           {/* Desktop Table */}
           <div className="hidden md:block overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px]">
+              <table className="w-full min-w-[800px]">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Time</th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold">Date</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Patient</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Amount</th>
                     <th className="px-4 py-3 text-left text-sm font-semibold">Method</th>
@@ -215,14 +210,11 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
                   {payments.map((payment) => (
                     <tr key={payment.id} className="hover:bg-gray-50 dark:hover:bg-gray-900">
-                      <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                        {formatTime(payment.createdAt)}
-                        <div className="text-xs text-gray-500">{formatDate(payment.createdAt)}</div>
-                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">{formatDate(payment.createdAt)}</td>
                       <td className="px-4 py-4">
                         <Link
                           href={`/patients/${payment.patientId}`}
-                          className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                          className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
                         >
                           {getPatientName(payment.patientId)}
                         </Link>
@@ -257,20 +249,20 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
             {payments.map((payment) => (
               <Card key={payment.id}>
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <Link
                         href={`/patients/${payment.patientId}`}
-                        className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 break-words"
+                        className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 break-words"
                       >
                         {getPatientName(payment.patientId)}
                       </Link>
                       <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {formatTime(payment.createdAt)} • {formatDate(payment.createdAt)}
+                        {formatDate(payment.createdAt)}
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="font-semibold whitespace-nowrap">{payment.amount.toFixed(2)} EGP</p>
+                      <p className="text-sm font-semibold whitespace-nowrap">{payment.amount.toFixed(2)} EGP</p>
                       <p className="text-xs capitalize text-gray-600 dark:text-gray-400">{payment.method}</p>
                     </div>
                   </div>

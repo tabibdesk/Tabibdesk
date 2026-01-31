@@ -66,7 +66,7 @@ export function ClinicalNotesMobile({
       {/* Top Action Bar */}
       <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 px-4 py-3 bg-white dark:bg-gray-950 shadow-sm">
         <div className="flex items-center gap-2">
-          <Badge variant="default" className="px-2 py-0.5 text-[10px] animate-pulse">Active Session</Badge>
+          <Badge color="indigo" size="xs">Active Session</Badge>
           {isRecording && (
             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 rounded-full">
               <div className="size-1.5 rounded-full bg-red-600 animate-pulse" />

@@ -137,10 +137,7 @@ export function ViewInvoiceDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent side="right" className="w-full sm:max-w-md">
         <DrawerHeader>
-          <DrawerTitle className="flex items-center gap-2">
-            <RiFileLine className="size-5 text-primary-600" />
-            Invoice details
-          </DrawerTitle>
+          <DrawerTitle>Invoice details</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
           {loading ? (

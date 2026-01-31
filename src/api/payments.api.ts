@@ -171,13 +171,15 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
  */
 export async function listPayments(params: ListPaymentsParams): Promise<ListPaymentsResponse> {
   await delay(200)
-  
+
+  const clinicId = params.clinicId?.trim() || "clinic-001"
+
   // Ensure initialization has run
   if (paymentsStore.length === 0) {
     await syncPaymentsWithInvoices()
   }
-  
-  let filtered = paymentsStore.filter((p) => p.clinicId === params.clinicId)
+
+  let filtered = paymentsStore.filter((p) => p.clinicId === clinicId)
   
   // Filter by patient
   if (params.patientId) {

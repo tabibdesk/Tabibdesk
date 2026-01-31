@@ -21,7 +21,9 @@ export interface Patient {
 
 interface PatientSelectorProps {
   initialPatient?: Patient | null
-  onPatientSelect: (patient: Patient) => void
+  onPatientSelect: (patient: Patient | null) => void
+  /** When true, only show search (no Existing/New toggle, no create-patient form). */
+  searchOnly?: boolean
   showEmail?: boolean
   required?: boolean
 }
@@ -29,6 +31,7 @@ interface PatientSelectorProps {
 export function PatientSelector({
   initialPatient = null,
   onPatientSelect,
+  searchOnly = false,
   showEmail = false,
   required = true,
 }: PatientSelectorProps) {
@@ -53,11 +56,13 @@ export function PatientSelector({
   const [isCreatingPatient, setIsCreatingPatient] = useState(false)
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof PatientFormData, string>>>({})
 
-  // Reset when initialPatient changes
+  // Sync when initialPatient changes (so passed patient shows as selected)
   useEffect(() => {
-    if (initialPatient) {
+    if (initialPatient != null) {
       setSelectedPatient(initialPatient)
       setPatientMode("existing")
+    } else {
+      setSelectedPatient(null)
     }
   }, [initialPatient])
 
@@ -165,40 +170,42 @@ export function PatientSelector({
 
   return (
     <div className="space-y-4">
-      {/* Patient Mode Selection - Redesigned as a segmented toggle */}
-      <div className="flex items-center justify-between gap-4">
-        <Label className="text-gray-500 text-sm font-medium">Patient</Label>
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit border border-gray-200 dark:border-gray-700">
-          <button
-            type="button"
-            onClick={() => {
-              setPatientMode("existing")
-              setSelectedPatient(null)
-            }}
-            className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 ${
-              patientMode === "existing"
-                ? "bg-white text-primary-600 shadow-sm dark:bg-gray-700 dark:text-primary-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            }`}
-          >
-            Existing
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setPatientMode("new")
-              setSelectedPatient(null)
-            }}
-            className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 ${
-              patientMode === "new"
-                ? "bg-white text-primary-600 shadow-sm dark:bg-gray-700 dark:text-primary-400"
-                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            }`}
-          >
-            New
-          </button>
+      {/* Patient Mode Selection - only when not searchOnly */}
+      {!searchOnly && (
+        <div className="flex items-center justify-between gap-4">
+          <Label className="text-gray-500 text-sm font-medium">Patient</Label>
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit border border-gray-200 dark:border-gray-700">
+            <button
+              type="button"
+              onClick={() => {
+                setPatientMode("existing")
+                setSelectedPatient(null)
+              }}
+              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 ${
+                patientMode === "existing"
+                  ? "bg-white text-primary-600 shadow-sm dark:bg-gray-700 dark:text-primary-400"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
+            >
+              Existing
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPatientMode("new")
+                setSelectedPatient(null)
+              }}
+              className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 ${
+                patientMode === "new"
+                  ? "bg-white text-primary-600 shadow-sm dark:bg-gray-700 dark:text-primary-400"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
+            >
+              New
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Selected Patient Display - Redesigned to be compact */}
       {selectedPatient && (
@@ -223,6 +230,7 @@ export function PatientSelector({
               setSelectedPatient(null)
               setSearchTerm("")
               setSearchResults([])
+              onPatientSelect(null)
             }}
           >
             Change
@@ -230,8 +238,8 @@ export function PatientSelector({
         </div>
       )}
 
-      {/* Existing Patient Search */}
-      {patientMode === "existing" && !selectedPatient && (
+      {/* Existing Patient Search - show when (existing mode or searchOnly) and no selection */}
+      {(patientMode === "existing" || searchOnly) && !selectedPatient && (
         <div className="space-y-3">
           <SearchInput
             id="patient-search"
@@ -274,8 +282,8 @@ export function PatientSelector({
         </div>
       )}
 
-      {/* New Patient Form */}
-      {patientMode === "new" && !selectedPatient && (
+      {/* New Patient Form - only when not searchOnly */}
+      {!searchOnly && patientMode === "new" && !selectedPatient && (
         <form onSubmit={handleNewPatientSubmit} className="space-y-4">
           <PatientFormFields
             formData={newPatientForm}

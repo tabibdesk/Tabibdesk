@@ -7,12 +7,11 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
-  DrawerHeaderTitle,
+  DrawerTitle,
 } from "@/components/Drawer"
 import { Button } from "@/components/Button"
+import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
-import { DatePicker } from "@/components/DatePicker"
-import { RiCapsuleLine } from "@remixicon/react"
 import { MedicationFormFields } from "@/features/prescriptions/MedicationFormFields"
 import type { CreatePastMedicationPayload } from "@/features/prescriptions/prescriptions.types"
 
@@ -36,8 +35,8 @@ export function AddPastMedicationDrawer({
     form: "",
     duration: "",
     notes: "",
-    takenFrom: new Date(),
-    takenTo: undefined as Date | undefined,
+    takenFrom: new Date().toISOString().split('T')[0],
+    takenTo: undefined as string | undefined,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,8 +53,8 @@ export function AddPastMedicationDrawer({
         patientId,
         name: nameWithDetails,
         duration: formData.duration,
-        takenFrom: formData.takenFrom.toISOString(),
-        takenTo: formData.takenTo?.toISOString() || null,
+        takenFrom: new Date(formData.takenFrom).toISOString(),
+        takenTo: formData.takenTo ? new Date(formData.takenTo).toISOString() : null,
         notes: formData.notes,
       })
       onOpenChange(false)
@@ -65,7 +64,7 @@ export function AddPastMedicationDrawer({
         form: "",
         duration: "",
         notes: "",
-        takenFrom: new Date(),
+        takenFrom: new Date().toISOString().split('T')[0],
         takenTo: undefined,
       })
     } catch (error) {
@@ -79,10 +78,7 @@ export function AddPastMedicationDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent side="right" className="w-full sm:max-w-xl">
         <DrawerHeader>
-          <DrawerHeaderTitle
-            icon={<RiCapsuleLine className="size-5 text-primary-600 dark:text-primary-400" />}
-            title="Add Past Medication"
-          />
+          <DrawerTitle>Add Past Medication</DrawerTitle>
         </DrawerHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
           <DrawerBody>
@@ -96,16 +92,18 @@ export function AddPastMedicationDrawer({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Started Taking</Label>
-                  <DatePicker
+                  <Input
+                    type="date"
                     value={formData.takenFrom}
-                    onChange={(date) => date && setFormData((prev) => ({ ...prev, takenFrom: date }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, takenFrom: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Stopped Taking (Optional)</Label>
-                  <DatePicker
-                    value={formData.takenTo}
-                    onChange={(date) => setFormData((prev) => ({ ...prev, takenTo: date }))}
+                  <Input
+                    type="date"
+                    value={formData.takenTo || ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, takenTo: e.target.value || undefined }))}
                     placeholder="Still taking (Ongoing)"
                   />
                 </div>

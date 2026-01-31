@@ -39,6 +39,7 @@ export function AddExpenseDrawer({
   const [category, setCategory] = useState<ExpenseCategory>("supplies")
   const [amount, setAmount] = useState("")
   const [vendor, setVendor] = useState("")
+  const [vendorPhone, setVendorPhone] = useState("")
   const [description, setDescription] = useState("")
   const [paymentMethod, setPaymentMethod] = useState<ExpenseMethod>("cash")
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
@@ -51,6 +52,7 @@ export function AddExpenseDrawer({
       setCategory("supplies")
       setAmount("")
       setVendor("")
+      setVendorPhone("")
       setDescription("")
       setPaymentMethod("cash")
       setReceiptFile(null)
@@ -163,7 +165,20 @@ export function AddExpenseDrawer({
                   clinicId={currentClinic.id}
                   value={vendor}
                   onChange={setVendor}
+                  onSelect={(v) => setVendorPhone(v.phone ?? "")}
+                  createVendorPhone={vendorPhone}
                   placeholder="Type to search or add new vendor"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vendorPhone">Vendor phone (optional)</Label>
+                <Input
+                  id="vendorPhone"
+                  type="tel"
+                  value={vendorPhone}
+                  onChange={(e) => setVendorPhone(e.target.value)}
+                  placeholder="Vendor phone number"
                 />
               </div>
 

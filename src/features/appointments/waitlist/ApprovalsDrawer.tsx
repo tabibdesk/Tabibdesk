@@ -192,7 +192,7 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
                             </p>
                           </div>
                         </div>
-                        <Badge variant={request.source === "integration" ? "default" : "neutral"}>
+                        <Badge color={request.source === "integration" ? "indigo" : "gray"} size="xs">
                           {request.source === "integration" ? "Integration" : "Online"}
                         </Badge>
                       </div>

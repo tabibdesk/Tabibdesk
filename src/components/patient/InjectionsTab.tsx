@@ -69,7 +69,7 @@ export function InjectionsTab({ injections, onAddInjection }: InjectionsTabProps
                       })}
                     </p>
                   </div>
-                  <Badge variant="default">{injection.dose}</Badge>
+                  <Badge color="indigo" size="xs">{injection.dose}</Badge>
                 </div>
               </CardHeader>
               <CardContent>
@@ -98,7 +98,7 @@ export function InjectionsTab({ injections, onAddInjection }: InjectionsTabProps
                       </div>
                     </div>
                     {isUpcoming(injection.next_suggested_date) && (
-                      <Badge variant="warning">Upcoming</Badge>
+                      <Badge color="amber" size="xs">Upcoming</Badge>
                     )}
                   </div>
                 )}
@@ -129,7 +129,7 @@ export function InjectionsTab({ injections, onAddInjection }: InjectionsTabProps
                       {new Date(injection.injection_date).toLocaleDateString()}
                     </p>
                   </div>
-                  <Badge variant="neutral">{injection.dose}</Badge>
+                  <Badge color="gray" size="xs">{injection.dose}</Badge>
                 </div>
               ))}
             </div>

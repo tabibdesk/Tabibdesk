@@ -70,14 +70,7 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
         </DrawerTrigger>
         <DrawerContent side={isRtl ? "right" : "left"} className="w-72">
           <DrawerHeader>
-            <DrawerTitle>
-              <div className="flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded bg-primary-600 dark:bg-primary-500">
-                  <span className="text-sm font-bold text-white">TD</span>
-                </div>
-                <span className="text-lg font-semibold">TabibDesk</span>
-              </div>
-            </DrawerTitle>
+            <DrawerTitle className="text-lg font-semibold">TabibDesk</DrawerTitle>
           </DrawerHeader>
           <DrawerBody className="flex flex-col gap-6">
             <nav
@@ -107,7 +100,7 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
                             <span>{item.name}</span>
                           </div>
                           {item.badge && item.badge > 0 && (
-                            <Badge variant="count">{item.badge}</Badge>
+                            <Badge color="indigo" size="xs">{item.badge}</Badge>
                           )}
                         </Link>
                       </DrawerClose>

@@ -227,7 +227,7 @@ export function PaymentProofModal({
                 <span className="font-semibold text-primary-900 dark:text-primary-100">
                   AI Extracted Details
                 </span>
-                <Badge variant={parsed.confidence > 0.8 ? "success" : "warning"}>
+                <Badge color={parsed.confidence > 0.8 ? "emerald" : "amber"} size="xs">
                   {Math.round(parsed.confidence * 100)}% confidence
                 </Badge>
               </div>

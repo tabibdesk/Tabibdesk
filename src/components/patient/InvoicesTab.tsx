@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { getDraftDueForPatient } from "@/api/draft-due.api"
 import { listInvoices } from "@/api/invoices.api"
 import { ViewInvoiceDrawer } from "@/components/patient/ViewInvoiceDrawer"
@@ -175,8 +176,8 @@ export function InvoicesTab({ patientId, clinicId, refreshTrigger = 0 }: Invoice
                     </span>
                     {statusLabel && (
                       <Badge
-                        variant={it.type === "draft" ? "neutral" : getInvoiceBadgeVariant(it.status!)}
-                        className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                        color={getBadgeColor(it.type === "draft" ? "neutral" : getInvoiceBadgeVariant(it.status!))}
+                        size="xs"
                       >
                         {statusLabel}
                       </Badge>

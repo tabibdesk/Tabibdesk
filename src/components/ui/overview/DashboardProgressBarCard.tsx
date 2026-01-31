@@ -1,5 +1,4 @@
-import { BadgeDelta } from "@tremor/react"
-import { ProgressBar } from "@/components/ProgressBar"
+import { BadgeDelta, ProgressBar } from "@tremor/react"
 
 import { KpiEntry } from "@/app/(main)/overview/page"
 
@@ -64,7 +63,7 @@ export function ProgressBarCard({
                 </p>
                 <ProgressBar
                   value={item.percentage}
-                  className="mt-2 [&>*]:h-1.5"
+                  className="mt-2 [&>div:first-child]:h-1.5"
                 />
               </li>
             ))}

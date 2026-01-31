@@ -101,7 +101,7 @@ export function DietTab({ diets, onEditDiet: _onEditDiet }: DietTabProps) {
                 <div>
                   <div className="flex items-center gap-2">
                     <CardTitle>Current Diet Plan</CardTitle>
-                    <Badge variant="success">Active</Badge>
+                    <Badge color="emerald" size="xs">Active</Badge>
                   </div>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Version {activeDiet.version} • Last updated{" "}
@@ -147,7 +147,7 @@ export function DietTab({ diets, onEditDiet: _onEditDiet }: DietTabProps) {
                             <p className="font-semibold text-gray-900 dark:text-gray-50">
                               Version {diet.version}
                             </p>
-                            {diet.is_active && <Badge variant="success">Current</Badge>}
+                            {diet.is_active && <Badge color="emerald" size="xs">Current</Badge>}
                           </div>
                           <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                             Created: {new Date(diet.created_at).toLocaleDateString()} • Updated:{" "}

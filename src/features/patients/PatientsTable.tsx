@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { RiPhoneLine, RiStethoscopeLine } from "@remixicon/react"
 import Link from "next/link"
 import type { PatientListItem } from "./patients.types"
@@ -76,9 +77,9 @@ export function PatientsTable({ patients }: PatientsTableProps) {
                     {formatDate(patient.lastAppointmentDate)}
                   </td>
                   <td className="px-4 py-4">
-                    <Badge variant={getStatusBadgeVariant(patient.status)}>
-                      {getStatusLabel(patient.status)}
-                    </Badge>
+<Badge color={getBadgeColor(getStatusBadgeVariant(patient.status))} size="xs">
+                    {getStatusLabel(patient.status)}
+                  </Badge>
                   </td>
                 </tr>
               )

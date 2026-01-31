@@ -227,7 +227,7 @@ export function AiSummaryTab() {
               <h3 className="font-semibold text-gray-900 dark:text-gray-50">
                 AI Smart Alerts
               </h3>
-              <Badge variant="warning">{alerts.length}</Badge>
+              <Badge color="amber" size="xs">{alerts.length}</Badge>
             </div>
 
             <div className="space-y-3">
@@ -242,7 +242,7 @@ export function AiSummaryTab() {
                       <h4 className="font-medium text-gray-900 dark:text-gray-50">
                         {alert.title}
                       </h4>
-                      <Badge variant="neutral">{alert.count}</Badge>
+                      <Badge color="gray" size="xs">{alert.count}</Badge>
                     </div>
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       {alert.description}
@@ -286,7 +286,7 @@ export function AiSummaryTab() {
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-50">
                       Missing Payments
                     </p>
-                    <Badge variant="warning">{automationStats.missingPayments}</Badge>
+                    <Badge color="amber" size="xs">{automationStats.missingPayments}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Completed appointments without payment recorded
@@ -317,7 +317,7 @@ export function AiSummaryTab() {
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-50">
                       Pending Approvals
                     </p>
-                    <Badge variant="warning">{automationStats.pendingApprovals}</Badge>
+                    <Badge color="amber" size="xs">{automationStats.pendingApprovals}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     Payment proofs waiting for review
@@ -349,7 +349,7 @@ export function AiSummaryTab() {
               <h3 className="font-semibold text-gray-900 dark:text-gray-50">
                 Today&apos;s AI Summary
               </h3>
-              <Badge variant="neutral">{dailyReport.date}</Badge>
+              <Badge color="gray" size="xs">{dailyReport.date}</Badge>
             </div>
 
             {/* AI Summary Text */}

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
-import { Badge } from "@/components/Badge"
 import { useInvoices } from "../hooks/useInvoices"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { AccountingToolbar, type DateRangePreset } from "../components/AccountingToolbar"
@@ -59,7 +58,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
 
   const dateRange = getDateRange()
   const { data, loading, error, refetch } = useInvoices({
-    clinicId: currentClinic?.id || "",
+    clinicId: currentClinic?.id || "clinic-001",
     status: "unpaid",
     from: dateRange.from,
     to: dateRange.to,
@@ -176,7 +175,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                         <td className="px-4 py-4">
                           <Link
                             href={`/patients/${invoice.patientId}`}
-                            className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
                           >
                             {getPatientName(invoice.patientId)}
                           </Link>
@@ -185,16 +184,14 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                             <span>{patientPhone}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-4">
-                          <Badge variant="error" className="font-semibold">
-                            {invoice.amount.toFixed(2)} EGP
-                          </Badge>
+                        <td className="px-4 py-4 text-sm font-medium">
+                          {invoice.amount.toFixed(2)} EGP
                         </td>
                         <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
                           {appointmentData ? (
                             <>
-                              {appointmentData.date}
-                              <div className="text-xs">{appointmentData.time}</div>
+                              <span>{appointmentData.date}</span>
+                              <div className="text-xs text-gray-500">{appointmentData.time}</div>
                             </>
                           ) : (
                             "—"
@@ -249,7 +246,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/patients/${invoice.patientId}`}
-                          className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 break-words"
+                          className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 break-words"
                         >
                           {getPatientName(invoice.patientId)}
                         </Link>
@@ -258,9 +255,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                           <span className="break-all">{patientPhone}</span>
                         </div>
                       </div>
-                      <Badge variant="error" className="font-semibold shrink-0">
-                        {invoice.amount.toFixed(2)} EGP
-                      </Badge>
+                      <p className="text-sm font-semibold whitespace-nowrap shrink-0">{invoice.amount.toFixed(2)} EGP</p>
                     </div>
                     {appointmentData && (
                       <div className="mt-3 space-y-1 text-sm text-gray-600 dark:text-gray-400">

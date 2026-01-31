@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { Button } from "@/components/Button"
 import type { CashierRow } from "../accounting.types"
 import {
@@ -61,7 +62,7 @@ export function CashierTable({
                 {row.patientName}
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-sm">
-                <Badge variant={row.appointmentStatus === "completed" ? "success" : "neutral"}>
+                <Badge color={row.appointmentStatus === "completed" ? "emerald" : "gray"} size="xs">
                   {row.appointmentStatus}
                 </Badge>
               </td>
@@ -70,7 +71,7 @@ export function CashierTable({
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-sm">
                 <div className="flex flex-col gap-1">
-                  <Badge variant={getPaymentStatusVariant(row.paymentStatus)}>
+                  <Badge color={getBadgeColor(getPaymentStatusVariant(row.paymentStatus))} size="xs">
                     {row.paymentStatus}
                   </Badge>
                   {row.paymentMethod && (

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { clsx as cx } from "clsx"
+import { cx } from "@/lib/utils"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"

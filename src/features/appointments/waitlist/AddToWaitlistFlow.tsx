@@ -34,9 +34,9 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
     notes: "",
   })
 
-  const handlePatientSelect = (patient: Patient) => {
-    setSelectedPatient(patient)
-    setCurrentStep("preferences")
+  const handlePatientSelect = (patient: Patient | null) => {
+    setSelectedPatient(patient ?? null)
+    if (patient) setCurrentStep("preferences")
   }
 
   const handleDayToggle = (day: string) => {

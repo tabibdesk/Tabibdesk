@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { SearchInput } from "@/components/SearchInput"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { PageHeader } from "@/components/shared/PageHeader"
 import {
   RiUserAddLine,
@@ -68,7 +69,7 @@ export default function AssistantLeadsPage() {
       converted: "success",
       lost: "error",
     }
-    return <Badge variant={variants[status] || "neutral"}>{status}</Badge>
+    return <Badge color={getBadgeColor(variants[status] || "neutral")} size="xs">{status}</Badge>
   }
 
   return (

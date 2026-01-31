@@ -77,7 +77,7 @@ export function PastMedications({ medications, onAddMedication }: PastMedication
                         {medication.name}
                       </h4>
                       {!medication.takenTo && (
-                        <Badge variant="success" className="text-[10px] h-4.5 px-2 font-bold uppercase tracking-wider">
+                        <Badge color="emerald" size="xs">
                           Ongoing
                         </Badge>
                       )}

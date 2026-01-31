@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/Dialog"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import {
   RiCalendarLine,
   RiTimeLine,
@@ -106,7 +107,7 @@ export function AppointmentActionsModal({
         <div className="space-y-4">
           {/* Status Badge */}
           <div className="flex items-center justify-between">
-            <Badge variant={getStatusColor(appointment.status)}>
+            <Badge color={getBadgeColor(getStatusColor(appointment.status))} size="xs">
               <span className="flex items-center gap-1">
                 {getStatusIcon(appointment.status)}
                 <span className="capitalize">{appointment.status}</span>

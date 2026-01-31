@@ -2,7 +2,6 @@
 
 import { RiPhoneLine, RiStethoscopeLine, RiUserLine } from "@remixicon/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import type { PatientListItem } from "./patients.types"
 import { calculateAge } from "./patients.utils"
 
@@ -11,8 +10,6 @@ interface PatientsCardsProps {
 }
 
 export function PatientsCards({ patients }: PatientsCardsProps) {
-  const router = useRouter()
-
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—"
     const date = new Date(dateString)
@@ -26,18 +23,10 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
         const ageDisplay = typeof age === "number" ? `${age}y` : age
 
         return (
-          <div
+          <Link
             key={patient.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => router.push(`/patients/${patient.id}`)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault()
-                router.push(`/patients/${patient.id}`)
-              }
-            }}
-            className="card-surface flex cursor-pointer items-center gap-4 px-5 py-4"
+            href={`/patients/${patient.id}`}
+            className="card-surface flex cursor-pointer items-center gap-4 px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900/50"
           >
             {/* Avatar */}
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
@@ -47,13 +36,9 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
             {/* Demographics & complaint */}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={`/patients/${patient.id}`}
-                  className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <span className="font-medium text-gray-900 dark:text-gray-100">
                   {patient.first_name} {patient.last_name}
-                </Link>
+                </span>
                 <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                   {ageDisplay}
                 </span>
@@ -78,7 +63,7 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
                 Visited {formatDate(patient.lastAppointmentDate)}
               </div>
             </div>
-          </div>
+          </Link>
         )
       })}
     </div>

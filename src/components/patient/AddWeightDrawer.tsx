@@ -7,14 +7,12 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
-  DrawerHeaderTitle,
+  DrawerTitle,
 } from "@/components/Drawer"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { Textarea } from "@/components/Textarea"
-import { RiLineChartLine } from "@remixicon/react"
-
 export interface AddWeightPayload {
   patientId: string
   weight: number
@@ -68,10 +66,7 @@ export function AddWeightDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent side="right" className="w-full sm:max-w-md">
         <DrawerHeader>
-          <DrawerHeaderTitle
-            icon={<RiLineChartLine className="size-5 text-primary-600 dark:text-primary-400" />}
-            title="Add Weight"
-          />
+          <DrawerTitle>Add Weight</DrawerTitle>
         </DrawerHeader>
         <form onSubmit={handleSubmit}>
           <DrawerBody className="space-y-4">

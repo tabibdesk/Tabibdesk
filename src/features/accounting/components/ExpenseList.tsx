@@ -25,7 +25,7 @@ export function ExpenseList({ expenses }: ExpenseListProps) {
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <Badge variant="neutral">{getExpenseCategoryLabel(expense.category)}</Badge>
+                <Badge color="gray" size="xs">{getExpenseCategoryLabel(expense.category)}</Badge>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   {formatDate(expense.date)}
                 </span>

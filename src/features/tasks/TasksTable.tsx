@@ -9,6 +9,7 @@ import {
   RiArrowRightLine,
 } from "@remixicon/react"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import {
   formatTaskDate,
   isOverdue,
@@ -93,24 +94,21 @@ export function TasksTable({
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-1.5 gap-y-1">
-                <Badge variant={getStatusBadgeVariant(task.status)} className="text-[10px] px-1.5 py-0">
+                <Badge color={getBadgeColor(getStatusBadgeVariant(task.status))} size="xs">
                   {getStatusLabel(task.status)}
                 </Badge>
                 {task.follow_up_kind && (
-                  <Badge variant="warning" className="text-[10px] px-1.5 py-0">
+                  <Badge color="amber" size="xs">
                     Follow-up: {task.follow_up_kind === "cancelled" ? "Cancelled" : task.follow_up_kind === "no_show" ? "No-show" : "Inactive"}
                   </Badge>
                 )}
                 {task.attempt !== undefined && task.follow_up_kind && (
-                  <Badge variant="neutral" className="text-[10px] px-1.5 py-0">
+                  <Badge color="gray" size="xs">
                     Attempt {task.attempt}
                   </Badge>
                 )}
                 {task.dueDate && (
-                  <Badge 
-                    variant={isDone ? "neutral" : overdue ? "error" : "default"} 
-                    className="text-[9px] px-1.5 py-0 font-bold uppercase tracking-widest"
-                  >
+                  <Badge color={getBadgeColor(isDone ? "neutral" : overdue ? "error" : "default")} size="xs">
                     {formatTaskDate(task.dueDate)}
                   </Badge>
                 )}

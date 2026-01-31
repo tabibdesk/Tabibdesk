@@ -295,7 +295,7 @@ function ClinicTeamTab() {
                     <p className="truncate text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
                   </div>
                 </div>
-                <Badge variant="neutral" className="w-fit capitalize sm:shrink-0">
+                <Badge color="gray" size="xs">
                   {user.role}
                 </Badge>
               </div>
@@ -409,7 +409,7 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
                           <p className="font-medium text-gray-900 dark:text-gray-50">{feature.name}</p>
                           {locked && (
                             <Tooltip content={`Upgrade to ${planTier === "solo" ? "Multi" : "More"} plan`}>
-                              <Badge variant="warning" className="flex items-center gap-1">
+                              <Badge color="amber" size="xs">
                                 <RiLockLine className="size-3" />
                                 Upgrade
                               </Badge>

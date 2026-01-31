@@ -14,12 +14,15 @@ const expensesStore: Expense[] = []
  * Initialize mock expenses
  * Creates sample expenses for the current month
  */
+function daysAgo(days: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - days)
+  return d.toISOString()
+}
+
 function initializeMockExpenses() {
   if (expensesStore.length > 0) return // Already initialized
 
-  const now = new Date()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  
   const mockExpenses: Expense[] = [
     {
       id: "exp_mock_001",
@@ -27,11 +30,11 @@ function initializeMockExpenses() {
       amount: 1500,
       category: "supplies",
       method: "cash",
-      vendorName: "Medical Supplies Co.",
+      vendorName: "Memphis Medical Supplies",
       note: "Medical supplies and consumables",
       receiptFileId: "receipt_001",
       createdByUserId: "user-001",
-      createdAt: new Date(monthStart.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days into month
+      createdAt: daysAgo(2),
     },
     {
       id: "exp_mock_002",
@@ -39,10 +42,10 @@ function initializeMockExpenses() {
       amount: 5000,
       category: "rent",
       method: "transfer",
-      vendorName: "Building Management",
+      vendorName: "Mokattam Properties",
       note: "Monthly clinic rent",
       createdByUserId: "user-001",
-      createdAt: new Date(monthStart.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day into month
+      createdAt: daysAgo(1),
     },
     {
       id: "exp_mock_003",
@@ -50,10 +53,10 @@ function initializeMockExpenses() {
       amount: 800,
       category: "utilities",
       method: "cash",
-      vendorName: "Electricity Company",
+      vendorName: "Cairo Electricity Company",
       note: "Monthly electricity bill",
       createdByUserId: "user-001",
-      createdAt: new Date(monthStart.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days into month
+      createdAt: daysAgo(5),
     },
     {
       id: "exp_mock_004",
@@ -61,11 +64,11 @@ function initializeMockExpenses() {
       amount: 1200,
       category: "marketing",
       method: "instapay",
-      vendorName: "Digital Marketing Agency",
+      vendorName: "Cairo Digital Marketing",
       note: "Social media ads campaign",
       receiptFileId: "receipt_004",
       createdByUserId: "user-001",
-      createdAt: new Date(monthStart.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days into month
+      createdAt: daysAgo(7),
     },
     {
       id: "exp_mock_005",
@@ -76,7 +79,7 @@ function initializeMockExpenses() {
       vendorName: "Staff Salaries",
       note: "Monthly staff salaries",
       createdByUserId: "user-001",
-      createdAt: new Date(monthStart.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day into month
+      createdAt: daysAgo(1),
     },
     {
       id: "exp_mock_006",
@@ -84,10 +87,10 @@ function initializeMockExpenses() {
       amount: 450,
       category: "supplies",
       method: "cash",
-      vendorName: "Pharmacy Supplies",
+      vendorName: "Delta Pharma",
       note: "Pharmaceutical supplies",
       createdByUserId: "user-001",
-      createdAt: new Date(monthStart.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days into month
+      createdAt: daysAgo(10),
     },
   ]
 
@@ -156,13 +159,15 @@ export async function createExpense(params: CreateExpenseParams): Promise<Expens
  */
 export async function listExpenses(params: ListExpensesParams): Promise<ListExpensesResponse> {
   await delay(200)
-  
+
+  const clinicId = params.clinicId?.trim() || "clinic-001"
+
   // Ensure initialization has run
   if (expensesStore.length === 0) {
     initializeMockExpenses()
   }
-  
-  let filtered = expensesStore.filter((e) => e.clinicId === params.clinicId)
+
+  let filtered = expensesStore.filter((e) => e.clinicId === clinicId)
   
   // Filter by category
   if (params.category) {

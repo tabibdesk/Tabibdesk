@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { RiCalendarLine } from "@remixicon/react"
 import Link from "next/link"
 import type { AppointmentListItem } from "@/features/appointments/appointments.types"
@@ -61,7 +62,7 @@ export function ArchiveAppointmentsTable({ appointments }: ArchiveAppointmentsTa
                   {appointment.type}
                 </td>
                 <td className="px-4 py-4">
-                  <Badge variant={getStatusBadgeVariant(appointment.status)}>
+                  <Badge color={getBadgeColor(getStatusBadgeVariant(appointment.status))} size="xs">
                     {getStatusLabel(appointment.status)}
                   </Badge>
                 </td>

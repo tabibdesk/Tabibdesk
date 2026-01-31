@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { RiCalendarLine, RiTimeLine, RiHistoryLine, RiTaskLine, RiCheckLine, RiFileList3Line } from "@remixicon/react"
 import { format } from "date-fns"
 import { cx } from "@/lib/utils"
@@ -237,7 +238,7 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
                           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                             Appointment - {item.data.type}
                           </p>
-                          <Badge variant={getStatusBadgeVariant(item.data.status)} className="text-xs">
+                          <Badge color={getBadgeColor(getStatusBadgeVariant(item.data.status))} size="xs">
                             {getStatusLabel(item.data.status)}
                           </Badge>
                         </div>

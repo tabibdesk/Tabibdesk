@@ -7,12 +7,12 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
-  DrawerHeaderTitle,
+  DrawerTitle,
 } from "@/components/Drawer"
 import { Button } from "@/components/Button"
 import { Label } from "@/components/Label"
 import { Textarea } from "@/components/Textarea"
-import { RiAddLine, RiCloseLine, RiFileList3Line } from "@remixicon/react"
+import { RiAddLine, RiCloseLine } from "@remixicon/react"
 import type { CreatePrescriptionPayload, PrescriptionItem } from "./prescriptions.types"
 import { MedicationFormFields } from "./MedicationFormFields"
 
@@ -94,10 +94,7 @@ export function AddPrescriptionDrawer({
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent side="right" className="w-full sm:max-w-2xl">
         <DrawerHeader>
-          <DrawerHeaderTitle
-            icon={<RiFileList3Line className="size-5 text-primary-600 dark:text-primary-400" />}
-            title="New Prescription"
-          />
+          <DrawerTitle>New Prescription</DrawerTitle>
         </DrawerHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
           <DrawerBody>

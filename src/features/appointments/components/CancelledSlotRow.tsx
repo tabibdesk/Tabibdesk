@@ -25,7 +25,7 @@ export function CancelledSlotRow({ slot, onFillSlot }: CancelledSlotRowProps) {
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-gray-600 dark:text-gray-400">{timeRange}</span>
-          <Badge variant="error" className="text-[10px] px-1.5 py-0 uppercase font-bold tracking-wider">
+          <Badge color="red" size="xs">
             Cancelled
           </Badge>
         </div>

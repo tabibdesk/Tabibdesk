@@ -131,7 +131,7 @@ export function ClinicalNotesDesktop({
       {/* Center Pane: Note Entry - same Card/CardHeader as progress card for matching borders */}
       <Card className="flex-1 flex flex-col min-w-0 overflow-hidden border-gray-200 dark:border-gray-800 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-100 dark:border-gray-800">
-          <Badge variant="default" className="px-3 py-1 text-xs animate-pulse w-fit">Active Session</Badge>
+          <Badge color="indigo" size="xs">Active Session</Badge>
           <div className="flex items-center gap-2">
             {isRecording ? (
               <>

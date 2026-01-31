@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { AIExtractionModal } from "./AIExtractionModal"
 import { RiVoiceprintLine, RiTimeLine, RiRobot2Line } from "@remixicon/react"
 import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
@@ -105,7 +106,7 @@ export function TranscriptionsTab({ transcriptions }: TranscriptionsTabProps) {
                       </div>
                     </div>
                   </div>
-                  <Badge variant={getStatusColor(transcription.status)}>
+                  <Badge color={getBadgeColor(getStatusColor(transcription.status))} size="xs">
                     {transcription.status === "completed"
                       ? "Completed"
                       : transcription.status === "processing"

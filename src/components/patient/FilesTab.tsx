@@ -249,7 +249,7 @@ export function FilesTab({
               >
                 {attachment.file_name}
               </button>
-              <Badge variant="neutral" className="shrink-0 text-xs font-medium">{getKindLabel(attachment)}</Badge>
+              <Badge color="gray" size="xs">{getKindLabel(attachment)}</Badge>
             </div>
             <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
           </div>
@@ -426,7 +426,7 @@ export function FilesTab({
               >
                 {attachment.file_name}
               </button>
-              <Badge variant="neutral" className="shrink-0 text-xs font-medium">{getKindLabel(attachment)}</Badge>
+              <Badge color="gray" size="xs">{getKindLabel(attachment)}</Badge>
             </div>
             <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
           </div>

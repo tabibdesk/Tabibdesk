@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Drawer,
   DrawerBody,
@@ -13,10 +13,20 @@ import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { Select } from "@/components/Select"
 import { Textarea } from "@/components/Textarea"
-import { DatePicker } from "@/components/DatePicker"
 import { mockUsers } from "@/data/mock/users-clinics"
 import { mockData } from "@/data/mock/mock-data"
+import { PatientSelector, type Patient } from "@/components/shared/PatientSelector"
 import type { CreateTaskPayload, TaskType } from "./tasks.types"
+
+function toPatientOption(p: (typeof mockData.patients)[number]): Patient {
+  return {
+    id: p.id,
+    first_name: p.first_name,
+    last_name: p.last_name,
+    phone: p.phone,
+    email: p.email,
+  }
+}
 
 interface AddTaskDrawerProps {
   open: boolean
@@ -42,19 +52,27 @@ export function AddTaskDrawer({
   const [type, setType] = useState<TaskType>("follow_up")
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
   const [assignedToUserId, setAssignedToUserId] = useState<string>(defaultAssignedToUserId || "")
-  const [patientId, setPatientId] = useState<string>(defaultPatientId || "")
-  const [patientSearch, setPatientSearch] = useState("")
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(() => {
+    if (!defaultPatientId) return null
+    const p = mockData.patients.find((x) => x.id === defaultPatientId)
+    return p ? toPatientOption(p) : null
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const filteredPatients = patientSearch
-    ? mockData.patients.filter(
-        (p) =>
-          `${p.first_name} ${p.last_name}`.toLowerCase().includes(patientSearch.toLowerCase()) ||
-          p.phone.includes(patientSearch)
-      )
-    : []
-
   const availableUsers = mockUsers
+
+  // When user clears the patient we don't re-apply the default
+  const [userClearedPatient, setUserClearedPatient] = useState(false)
+
+  // When drawer opens with defaultPatientId, pass the patient so PatientSelector shows it as selected on first render
+  const effectiveInitialPatient =
+    selectedPatient ??
+    (open && defaultPatientId && !userClearedPatient
+      ? (() => {
+          const p = mockData.patients.find((x) => x.id === defaultPatientId)
+          return p ? toPatientOption(p) : null
+        })()
+      : null)
 
   useEffect(() => {
     if (open) {
@@ -63,8 +81,13 @@ export function AddTaskDrawer({
       setType("follow_up")
       setDueDate(undefined)
       setAssignedToUserId(defaultAssignedToUserId || "")
-      setPatientId(defaultPatientId || "")
-      setPatientSearch("")
+      setUserClearedPatient(false)
+      if (defaultPatientId) {
+        const p = mockData.patients.find((x) => x.id === defaultPatientId)
+        setSelectedPatient(p ? toPatientOption(p) : null)
+      } else {
+        setSelectedPatient(null)
+      }
     }
   }, [open, defaultAssignedToUserId, defaultPatientId])
 
@@ -80,7 +103,7 @@ export function AddTaskDrawer({
         type,
         dueDate: dueDate?.toISOString(),
         assignedToUserId: assignedToUserId || undefined,
-        patientId: patientId || undefined,
+        patientId: selectedPatient?.id || undefined,
         clinicId,
         createdByUserId: currentUserId,
       })
@@ -155,55 +178,28 @@ export function AddTaskDrawer({
 
               <div className="space-y-2">
                 <Label htmlFor="patient">Patient {defaultPatientId ? "(Pre-filled)" : "(Optional)"}</Label>
-                <div className="space-y-2">
-                  {defaultPatientId ? (
-                    <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                      {(() => {
-                        const patient = mockData.patients.find((p) => p.id === defaultPatientId)
-                        return patient ? (
-                          <p className="text-sm text-gray-900 dark:text-gray-100">
-                            {patient.first_name} {patient.last_name} - {patient.phone}
-                          </p>
-                        ) : (
-                          <p className="text-sm text-gray-500">Patient selected</p>
-                        )
-                      })()}
-                    </div>
-                  ) : (
-                    <>
-                      <Input
-                        id="patient"
-                        value={patientSearch}
-                        onChange={(e) => setPatientSearch(e.target.value)}
-                        placeholder="Search by name or phone"
-                      />
-                      {patientSearch && filteredPatients.length > 0 && (
-                        <Select
-                          value={patientId}
-                          onChange={(e) => {
-                            setPatientId(e.target.value)
-                            setPatientSearch("")
-                          }}
-                        >
-                          <option value="">Select patient</option>
-                          {filteredPatients.map((patient) => (
-                            <option key={patient.id} value={patient.id}>
-                              {patient.first_name} {patient.last_name} - {patient.phone}
-                            </option>
-                          ))}
-                        </Select>
-                      )}
-                    </>
-                  )}
-                </div>
+                <PatientSelector
+                  initialPatient={effectiveInitialPatient}
+                  onPatientSelect={(p) => {
+                    setSelectedPatient(p ?? null)
+                    if (p) setUserClearedPatient(false)
+                    else setUserClearedPatient(true)
+                  }}
+                  searchOnly
+                  required={false}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="dueDate">Due Date (Optional)</Label>
-                <DatePicker
-                  value={dueDate}
-                  onChange={setDueDate}
-                  placeholder="Select due date"
+                <Input
+                  id="dueDate"
+                  type="date"
+                  value={dueDate ? dueDate.toISOString().split('T')[0] : ''}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setDueDate(value ? new Date(value) : undefined)
+                  }}
                 />
               </div>
             </div>

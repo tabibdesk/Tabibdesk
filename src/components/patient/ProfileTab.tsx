@@ -64,7 +64,7 @@ interface DoctorNote {
   created_at: string
 }
 
-interface DoctorTabProps {
+interface ProfileTabProps {
   patient: Patient
   notes: DoctorNote[]
   progressMetrics?: ProgressMetric[]
@@ -77,7 +77,7 @@ interface DoctorTabProps {
   onUpdatePatient?: (updates: Partial<Patient>) => Promise<void>
 }
 
-export function DoctorTab({
+export function ProfileTab({
   patient,
   notes,
   progressMetrics = [],
@@ -88,7 +88,7 @@ export function DoctorTab({
   onAddWeightLog,
   onNoteAdded,
   onUpdatePatient,
-}: DoctorTabProps) {
+}: ProfileTabProps) {
 
   const allMedicalConditions = [
     { id: "is_diabetic", label: "Diabetes", value: patient.is_diabetic },
@@ -129,10 +129,7 @@ export function DoctorTab({
               <h3 className="text-xs font-bold text-blue-900/70 dark:text-blue-100/70 uppercase tracking-widest">
                 AI Medical Summary
               </h3>
-              <Badge
-                variant="default"
-                className="text-[10px] h-4 px-1.5 font-bold uppercase tracking-wider bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-800"
-              >
+              <Badge color="indigo" size="xs">
                 AI Generated
               </Badge>
             </div>
@@ -234,7 +231,7 @@ export function DoctorTab({
                         )}
                       </div>
                       {prescription.visitType && (
-                        <Badge variant="neutral" className="text-xs h-4 px-1.5 font-bold uppercase tracking-wider shrink-0">
+                        <Badge color="gray" size="xs">
                           {prescription.visitType === "in_clinic" ? "In Clinic" : "Online"}
                         </Badge>
                       )}

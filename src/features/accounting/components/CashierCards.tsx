@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/Card"
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { Button } from "@/components/Button"
 import type { CashierRow } from "../accounting.types"
 import {
@@ -42,7 +43,7 @@ export function CashierCards({
                   {formatTime(row.time)}
                 </p>
               </div>
-              <Badge variant={row.appointmentStatus === "completed" ? "success" : "neutral"}>
+              <Badge color={row.appointmentStatus === "completed" ? "emerald" : "gray"} size="xs">
                 {row.appointmentStatus}
               </Badge>
             </div>
@@ -58,7 +59,7 @@ export function CashierCards({
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-400">Payment:</span>
               <div className="flex flex-col items-end gap-1">
-                <Badge variant={getPaymentStatusVariant(row.paymentStatus)}>
+                <Badge color={getBadgeColor(getPaymentStatusVariant(row.paymentStatus))} size="xs">
                   {row.paymentStatus}
                 </Badge>
                 {row.paymentMethod && (

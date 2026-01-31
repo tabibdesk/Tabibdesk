@@ -186,18 +186,14 @@ const DrawerFooter = ({
 DrawerFooter.displayName = "DrawerFooter"
 
 interface DrawerHeaderTitleProps {
-  icon: React.ReactNode
   title: React.ReactNode
   description?: React.ReactNode
 }
 
-function DrawerHeaderTitle({ icon, title, description }: DrawerHeaderTitleProps) {
+function DrawerHeaderTitle({ title, description }: DrawerHeaderTitleProps) {
   return (
     <>
-      <DrawerTitle className="flex items-center gap-2">
-        {icon}
-        {title}
-      </DrawerTitle>
+      <DrawerTitle>{title}</DrawerTitle>
       {description != null && (
         <DrawerDescription className="text-sm mt-0.5 flex items-center gap-1.5">
           {description}

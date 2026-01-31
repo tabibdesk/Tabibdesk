@@ -11,6 +11,8 @@ interface VendorAutocompleteProps {
   value?: string
   onChange: (vendorName: string) => void
   onSelect?: (vendor: Vendor) => void
+  /** Phone to use when creating a new vendor (e.g. from parent form) */
+  createVendorPhone?: string
   placeholder?: string
   className?: string
 }
@@ -20,6 +22,7 @@ export function VendorAutocomplete({
   value = "",
   onChange,
   onSelect,
+  createVendorPhone,
   placeholder = "Type to search or add new vendor",
   className,
 }: VendorAutocompleteProps) {
@@ -36,7 +39,7 @@ export function VendorAutocomplete({
 
   useEffect(() => {
     async function fetchSuggestions() {
-      if (!debouncedInput.trim() || !clinicId) {
+      if (!clinicId) {
         setSuggestions([])
         setShowSuggestions(false)
         return
@@ -94,6 +97,7 @@ export function VendorAutocomplete({
       const newVendor = await createVendor({
         clinicId,
         name: inputValue.trim(),
+        phone: createVendorPhone?.trim() || undefined,
       })
       setInputValue(newVendor.name)
       onChange(newVendor.name)
@@ -117,11 +121,7 @@ export function VendorAutocomplete({
         value={inputValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (suggestions.length > 0) {
-            setShowSuggestions(true)
-          }
-        }}
+        onFocus={() => setShowSuggestions(true)}
         placeholder={placeholder}
       />
 
@@ -140,7 +140,12 @@ export function VendorAutocomplete({
                   onClick={() => handleSelectSuggestion(vendor)}
                   className="w-full px-4 py-2 text-left text-sm text-gray-900 hover:bg-gray-50 dark:text-gray-50 dark:hover:bg-gray-800"
                 >
-                  {vendor.name}
+                  <span className="block font-medium">{vendor.name}</span>
+                  {vendor.phone && (
+                    <span className="block text-xs text-gray-500 dark:text-gray-400">
+                      {vendor.phone}
+                    </span>
+                  )}
                 </button>
               ))}
               {inputValue.trim() && (

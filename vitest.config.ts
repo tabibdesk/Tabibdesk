@@ -17,6 +17,12 @@ export default defineConfig({
         "src/test/**",
         "**/node_modules/**",
       ],
+      thresholds: {
+        lines: 3,
+        functions: 3,
+        statements: 3,
+        branches: 3,
+      },
     },
   },
   resolve: {

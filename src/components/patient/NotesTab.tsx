@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
-import { RiFileTextLine, RiTimeLine, RiEditLine, RiDeleteBinLine, RiCheckLine, RiCloseLine, RiArrowRightSLine, RiAddLine } from "@remixicon/react"
+import { RiFileTextLine, RiEditLine, RiDeleteBinLine, RiCheckLine, RiCloseLine, RiArrowRightSLine, RiAddLine } from "@remixicon/react"
 import { Button } from "@/components/Button"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { Textarea } from "@/components/Textarea"
@@ -15,9 +15,10 @@ import {
   DrawerBody,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
-  DrawerHeaderTitle,
+  DrawerTitle,
 } from "@/components/Drawer"
 
 interface DoctorNote {
@@ -263,27 +264,19 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
       <Drawer open={isDrawerOpen} onOpenChange={handleDrawerOpenChange}>
         <DrawerContent side="right" className="w-full sm:max-w-lg">
           <DrawerHeader>
-            <DrawerHeaderTitle
-              icon={<RiFileTextLine className="size-5 text-primary-600 dark:text-primary-400" />}
-              title={isAddMode ? "Add Clinical Note" : "Clinical Note Details"}
-              description={
-                !isAddMode && selectedNote ? (
-                  <>
-                    <RiTimeLine className="size-3.5 shrink-0" />
-                    <span>
-                      {new Date(selectedNote.created_at).toLocaleDateString("en-US", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </>
-                ) : undefined
-              }
-            />
+            <DrawerTitle>{isAddMode ? "Add Clinical Note" : "Clinical Note Details"}</DrawerTitle>
+            {!isAddMode && selectedNote && (
+              <DrawerDescription className="text-sm mt-0.5">
+                {new Date(selectedNote.created_at).toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </DrawerDescription>
+            )}
           </DrawerHeader>
           <DrawerBody>
             {isEditing || isAddMode ? (

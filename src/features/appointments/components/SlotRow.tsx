@@ -76,7 +76,7 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
           ) : (
             <span className="font-medium text-gray-900 dark:text-gray-100">{timeRange}</span>
           )}
-          <Badge variant="default" className="text-[10px] px-1.5 py-0 uppercase font-bold tracking-wider">
+          <Badge color="indigo" size="xs">
             Booked
           </Badge>
         </div>

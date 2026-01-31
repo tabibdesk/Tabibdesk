@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/Badge"
+import { getBadgeColor } from "@/lib/badgeColors"
 import { Button } from "@/components/Button"
 import {
   DropdownMenu,
@@ -96,8 +97,8 @@ export function AppointmentsTable({
                     </span>
                     {appointment.rescheduled && (
                       <Badge 
-                        variant="warning" 
-                        className="ml-1.5 h-4 px-1.5 text-[10px] font-semibold"
+                        color="amber"
+                        size="xs"
                         title={`Rescheduled ${appointment.reschedule_count || 1} time${(appointment.reschedule_count || 1) > 1 ? 's' : ''}`}
                       >
                         <RiHistoryLine className="size-2.5 mr-0.5" />
@@ -110,7 +111,7 @@ export function AppointmentsTable({
                   {appointment.type}
                 </td>
                 <td className="px-4 py-4">
-                  <Badge variant={getStatusBadgeVariant(appointment.status)}>
+                  <Badge color={getBadgeColor(getStatusBadgeVariant(appointment.status))} size="xs">
                     {getStatusLabel(appointment.status)}
                   </Badge>
                 </td>

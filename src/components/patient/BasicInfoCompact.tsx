@@ -24,7 +24,7 @@ import {
 } from "@remixicon/react"
 import type { Patient } from "@/features/patients/patients.types"
 
-/** Subset of Patient fields used by BasicInfoCompact - accepts full Patient or extended types from DoctorTab/GeneralTab */
+/** Subset of Patient fields used by BasicInfoCompact - accepts full Patient or extended types from ProfileTab */
 export type BasicInfoPatient = Pick<
   Patient,
   "id" | "first_name" | "last_name" | "gender" | "phone" | "complaint" | "created_at" | "updated_at"

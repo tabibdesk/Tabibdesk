@@ -20,36 +20,77 @@ function initializeMockVendors() {
     {
       id: "vendor_001",
       clinicId: "clinic-001",
-      name: "Medical Supplies Co.",
-      normalizedName: normalizeVendorName("Medical Supplies Co."),
+      name: "Memphis Medical Supplies",
+      normalizedName: normalizeVendorName("Memphis Medical Supplies"),
+      phone: "+20 2 2536 1200",
       createdAt: new Date().toISOString(),
     },
     {
       id: "vendor_002",
       clinicId: "clinic-001",
-      name: "Building Management",
-      normalizedName: normalizeVendorName("Building Management"),
+      name: "Delta Pharma",
+      normalizedName: normalizeVendorName("Delta Pharma"),
+      phone: "+20 2 2524 8800",
       createdAt: new Date().toISOString(),
     },
     {
       id: "vendor_003",
       clinicId: "clinic-001",
-      name: "Electricity Company",
-      normalizedName: normalizeVendorName("Electricity Company"),
+      name: "Cairo Electricity Company",
+      normalizedName: normalizeVendorName("Cairo Electricity Company"),
       createdAt: new Date().toISOString(),
     },
     {
       id: "vendor_004",
       clinicId: "clinic-001",
-      name: "Digital Marketing Agency",
-      normalizedName: normalizeVendorName("Digital Marketing Agency"),
+      name: "Egyptian Gas Company",
+      normalizedName: normalizeVendorName("Egyptian Gas Company"),
+      phone: "0800 123 4567",
       createdAt: new Date().toISOString(),
     },
     {
       id: "vendor_005",
       clinicId: "clinic-001",
-      name: "Pharmacy Supplies",
-      normalizedName: normalizeVendorName("Pharmacy Supplies"),
+      name: "Nile Cleaning Services",
+      normalizedName: normalizeVendorName("Nile Cleaning Services"),
+      phone: "+20 100 123 4567",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "vendor_006",
+      clinicId: "clinic-001",
+      name: "Mokattam Properties",
+      normalizedName: normalizeVendorName("Mokattam Properties"),
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "vendor_007",
+      clinicId: "clinic-001",
+      name: "Alexandria Lab Supplies",
+      normalizedName: normalizeVendorName("Alexandria Lab Supplies"),
+      phone: "+20 3 487 2200",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "vendor_008",
+      clinicId: "clinic-001",
+      name: "Cairo Digital Marketing",
+      normalizedName: normalizeVendorName("Cairo Digital Marketing"),
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "vendor_009",
+      clinicId: "clinic-001",
+      name: "El Salam Medical",
+      normalizedName: normalizeVendorName("El Salam Medical"),
+      phone: "+20 2 2345 6789",
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "vendor_010",
+      clinicId: "clinic-001",
+      name: "Telecom Egypt",
+      normalizedName: normalizeVendorName("Telecom Egypt"),
       createdAt: new Date().toISOString(),
     },
   ]
@@ -143,61 +184,75 @@ export async function listVendors(params: ListVendorsParams): Promise<Vendor[]> 
 }
 
 /**
- * Suggest vendors based on input (fuzzy matching)
- * Returns top 5 results with similarity >= 0.75
+ * Suggest vendors based on input (substring match + fuzzy for ranking)
+ * Returns up to 5 results: vendors whose name contains the input (case-insensitive), or first 5 when input is empty
  */
 export async function suggestVendors(params: SuggestVendorsParams): Promise<Vendor[]> {
   await delay(150)
-  
+
+  const inputTrimmed = params.input.trim()
   const inputNormalized = normalizeVendorName(params.input)
   const clinicVendors = vendorsStore.filter((v) => v.clinicId === params.clinicId)
-  
+
   if (!inputNormalized) {
     return clinicVendors.slice(0, 5)
   }
-  
-  // Calculate similarity for each vendor
-  const vendorsWithSimilarity = clinicVendors.map((vendor) => ({
-    vendor,
-    similarity: calculateSimilarity(inputNormalized, vendor.normalizedName),
-  }))
-  
-  // Filter by threshold (>= 0.75) and sort by similarity
-  const filtered = vendorsWithSimilarity
-    .filter((item) => item.similarity >= 0.75)
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 5)
-    .map((item) => item.vendor)
-  
-  return filtered
+
+  // Substring match: include any vendor whose name or normalizedName contains the input
+  const matching = clinicVendors.filter(
+    (v) =>
+      v.normalizedName.includes(inputNormalized) ||
+      v.name.toLowerCase().includes(inputTrimmed.toLowerCase())
+  )
+
+  // Sort: prefix match first, then by position of match, then by name; take top 5
+  const sorted = matching.sort((a, b) => {
+    const aName = a.name.toLowerCase()
+    const bName = b.name.toLowerCase()
+    const q = inputTrimmed.toLowerCase()
+    const aStarts = aName.startsWith(q) ? 1 : 0
+    const bStarts = bName.startsWith(q) ? 1 : 0
+    if (bStarts !== aStarts) return bStarts - aStarts
+    const aIdx = aName.indexOf(q)
+    const bIdx = bName.indexOf(q)
+    if (aIdx !== bIdx) return aIdx - bIdx
+    return a.name.localeCompare(b.name)
+  })
+
+  return sorted.slice(0, 5)
 }
 
 /**
  * Create a new vendor (or return existing if normalized name matches)
  */
-export async function createVendor(params: { clinicId: string; name: string }): Promise<Vendor> {
+export async function createVendor(params: {
+  clinicId: string
+  name: string
+  phone?: string
+}): Promise<Vendor> {
   await delay(200)
-  
+
   const normalizedName = normalizeVendorName(params.name)
-  
+
   // Check if vendor with same normalized name already exists
   const existing = vendorsStore.find(
     (v) => v.clinicId === params.clinicId && v.normalizedName === normalizedName
   )
-  
+
   if (existing) {
     return existing
   }
-  
+
   // Create new vendor
   const newVendor: Vendor = {
     id: `vendor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     clinicId: params.clinicId,
     name: params.name.trim(),
     normalizedName,
+    phone: params.phone?.trim() || undefined,
     createdAt: new Date().toISOString(),
   }
-  
+
   vendorsStore.push(newVendor)
   return newVendor
 }

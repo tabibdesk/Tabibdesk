@@ -140,7 +140,7 @@ export function LabResultsTab({ labResults }: LabResultsTabProps) {
                         day: "numeric",
                       })}
                     </CardTitle>
-                    <Badge variant="neutral" className="text-xs">
+                    <Badge color="gray" size="xs">
                       {groupedResults[date].length} {groupedResults[date].length === 1 ? "test" : "tests"}
                     </Badge>
                   </div>

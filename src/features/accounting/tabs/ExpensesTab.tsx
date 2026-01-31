@@ -58,7 +58,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
 
   const dateRange = getDateRange()
   const { data, loading, error, refetch } = useExpenses({
-    clinicId: currentClinic?.id || "",
+    clinicId: currentClinic?.id || "clinic-001",
     from: dateRange.from,
     to: dateRange.to,
     query: debouncedSearch || undefined,

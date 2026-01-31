@@ -119,9 +119,11 @@ export function Sidebar({ role }: SidebarProps) {
                     <>
                       <span className="flex-1">{item.name}</span>
                       {item.badge && item.badge > 0 && (
-                        <Badge variant="count" className="ms-auto">
-                          {item.badge}
-                        </Badge>
+                        <span className="ms-auto">
+                          <Badge color="indigo" size="xs">
+                            {item.badge}
+                          </Badge>
+                        </span>
                       )}
                     </>
                   )}
