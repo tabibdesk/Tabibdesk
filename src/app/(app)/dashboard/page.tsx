@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { WidgetSkeleton } from "@/components/skeletons"
 import { ConfirmationModal } from "@/components/ConfirmationModal"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useDemo } from "@/contexts/demo-context"
@@ -582,11 +583,7 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-3">
             {loading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
-                ))}
-              </div>
+              <WidgetSkeleton rows={5} />
             ) : appointments.length > 0 ? (
               <div className="space-y-3">
                 {appointments.map((apt, index) => {
@@ -686,11 +683,7 @@ export default function DashboardPage() {
           </div>
           <div className="space-y-3">
             {loading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
-                ))}
-              </div>
+              <WidgetSkeleton rows={5} />
             ) : appointments.length > 0 ? (
               <div className="space-y-3">
                 {appointments.map((apt, index) => {

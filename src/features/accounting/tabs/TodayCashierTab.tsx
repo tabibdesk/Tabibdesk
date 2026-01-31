@@ -11,6 +11,7 @@ import { CashierCards } from "../components/CashierCards"
 import { CollectPaymentModal } from "../components/CollectPaymentModal"
 import { PaymentProofModal } from "../components/PaymentProofModal"
 import { formatCurrency } from "../accounting.utils"
+import { ListSkeleton } from "@/components/skeletons"
 
 export function TodayCashierTab() {
   const { currentClinic } = useUserClinic()
@@ -110,10 +111,8 @@ export function TodayCashierTab() {
 
       {/* Loading State */}
       {loading && (
-        <Card className="p-8">
-          <div className="flex items-center justify-center">
-            <div className="size-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400" />
-          </div>
+        <Card className="p-6">
+          <ListSkeleton rows={6} />
         </Card>
       )}
 

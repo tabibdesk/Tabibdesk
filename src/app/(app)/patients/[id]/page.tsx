@@ -6,6 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import { Card, CardContent } from "@/components/Card"
+import { PageSkeleton } from "@/components/skeletons"
 import { useDemo } from "@/contexts/demo-context"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { mockData, mockAppointments } from "@/data/mock/mock-data"
@@ -259,12 +260,7 @@ export default function PatientDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-10 w-48 animate-pulse rounded bg-gray-100 dark:bg-gray-800"></div>
-        <div className="mt-6 h-64 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800"></div>
-      </div>
-    )
+    return <PageSkeleton showHeader contentBlocks={2} />
   }
 
   if (!patient) {

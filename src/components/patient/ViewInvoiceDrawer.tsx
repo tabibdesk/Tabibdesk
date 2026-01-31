@@ -18,6 +18,7 @@ import { logActivity } from "@/api/activity.api"
 import type { Invoice, ChargeLineItem } from "@/types/invoice"
 import { format } from "date-fns"
 import { RiFileLine, RiPencilLine } from "@remixicon/react"
+import { ListSkeleton } from "@/components/skeletons"
 
 interface ViewInvoiceDrawerProps {
   open: boolean
@@ -143,9 +144,8 @@ export function ViewInvoiceDrawer({
         </DrawerHeader>
         <DrawerBody>
           {loading ? (
-            <div className="flex flex-col items-center gap-3 py-8 text-gray-500 dark:text-gray-400">
-              <div className="size-8 animate-spin rounded-full border-2 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400" />
-              <p className="text-sm">Loading…</p>
+            <div className="space-y-3 py-4">
+              <ListSkeleton rows={5} showHeader />
             </div>
           ) : !invoice ? (
             <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">

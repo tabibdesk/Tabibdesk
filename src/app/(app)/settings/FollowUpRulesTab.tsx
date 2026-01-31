@@ -7,6 +7,7 @@ import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { Switch } from "@/components/Switch"
 import { useUserClinic } from "@/contexts/user-clinic-context"
+import { CardSkeleton } from "@/components/skeletons"
 import * as settingsApi from "@/api/settings.api"
 import type { ClinicFollowUpRules } from "@/features/settings/settings.types"
 
@@ -47,13 +48,7 @@ export function FollowUpRulesTab() {
   }
 
   if (isLoading || !rules) {
-    return (
-      <Card>
-        <CardContent className="py-12">
-          <div className="text-center text-gray-500 dark:text-gray-400">Loading...</div>
-        </CardContent>
-      </Card>
-    )
+    return <CardSkeleton lines={4} />
   }
 
   return (

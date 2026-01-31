@@ -9,6 +9,7 @@ import { BufferGap } from "./BufferGap"
 import { useDailySlots } from "../hooks/useDailySlots"
 import { calculateBufferTime } from "../utils/slotFormatters"
 import { DEMO_DOCTOR_ID } from "@/data/mock/mock-data"
+import { ListSkeleton } from "@/components/skeletons"
 import type { Slot } from "../types"
 
 interface DailyScheduleViewProps {
@@ -57,11 +58,8 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
       <DayNavigation currentDate={currentDate} onDateChange={setCurrentDate} />
       
       {loading ? (
-        <div className="flex h-64 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800">
-          <div className="text-center">
-            <div className="mx-auto size-12 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-800 dark:border-t-primary-400"></div>
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading slots...</p>
-          </div>
+        <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+          <ListSkeleton rows={8} />
         </div>
       ) : (
         <div className="space-y-1">

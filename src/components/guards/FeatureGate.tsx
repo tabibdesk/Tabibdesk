@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { useFeatures } from "@/features/settings/useFeatures"
+import { PageSkeleton } from "@/components/skeletons"
 import type { FeatureKey } from "@/features/settings/settings.types"
 import { RiLockLine, RiSettings3Line } from "@remixicon/react"
 
@@ -50,14 +51,10 @@ export function FeatureGate({
     }
   }, [redirect, loading, isEnabled, router])
 
-  // Show loading state
   if (loading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 size-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
+      <div className="min-h-[400px] py-8">
+        <PageSkeleton showHeader={false} contentBlocks={2} />
       </div>
     )
   }

@@ -6,6 +6,7 @@ import { getDraftDueForPatient } from "@/api/draft-due.api"
 import { listInvoices } from "@/api/invoices.api"
 import { ViewInvoiceDrawer } from "@/components/patient/ViewInvoiceDrawer"
 import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
+import { ListSkeleton } from "@/components/skeletons"
 import type { DraftDue } from "@/types/draft-due"
 import type { Invoice, InvoiceStatus } from "@/types/invoice"
 import { format } from "date-fns"
@@ -120,9 +121,8 @@ export function InvoicesTab({ patientId, clinicId, refreshTrigger = 0 }: Invoice
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
-        <div className="size-8 animate-spin rounded-full border-2 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400" />
-        <p className="mt-3 text-sm">Loading billing…</p>
+      <div className="space-y-3 py-4">
+        <ListSkeleton rows={4} showHeader />
       </div>
     )
   }

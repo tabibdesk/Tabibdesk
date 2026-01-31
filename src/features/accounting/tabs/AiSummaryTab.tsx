@@ -12,6 +12,7 @@ import type { MonthlySummary } from "../accounting.types"
 import { formatCurrency } from "../accounting.utils"
 import { detectMissingPayments, detectPendingApprovals, generateMissingPaymentTaskTitle, generateMissingPaymentTaskDescription } from "../accounting.rules"
 import { createTask } from "@/features/tasks/tasks.api"
+import { SummarySkeleton } from "@/components/skeletons"
 import {
   RiSparklingLine,
   RiArrowRightLine,
@@ -142,13 +143,7 @@ export function AiSummaryTab() {
   }
 
   if (loading) {
-    return (
-      <Card className="p-8">
-        <div className="flex items-center justify-center">
-          <div className="size-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400" />
-        </div>
-      </Card>
-    )
+    return <SummarySkeleton />
   }
 
   if (!summary) {

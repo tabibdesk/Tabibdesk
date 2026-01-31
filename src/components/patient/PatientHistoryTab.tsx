@@ -5,6 +5,7 @@ import { Badge } from "@/components/Badge"
 import { RiCalendarLine, RiTimeLine, RiHistoryLine, RiTaskLine, RiCheckLine, RiFileList3Line } from "@remixicon/react"
 import { format } from "date-fns"
 import { cx } from "@/lib/utils"
+import { ListSkeleton } from "@/components/skeletons"
 import { getStatusBadgeVariant, getStatusLabel } from "@/features/appointments/appointments.utils"
 
 interface Appointment {
@@ -141,14 +142,7 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
   }, [historyItems])
 
   if (loading && historyItems.length === 0) {
-    return (
-      <div className="space-y-3">
-        <div className="h-6 w-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-16 w-full bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse" />
-        ))}
-      </div>
-    )
+    return <ListSkeleton rows={3} showHeader />
   }
 
   const FilterButton = ({ 

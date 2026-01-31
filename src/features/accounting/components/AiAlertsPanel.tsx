@@ -6,6 +6,7 @@ import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useToast } from "@/hooks/useToast"
+import { Skeleton } from "@/components/Skeleton"
 import { getAiAlerts, type AiAlert } from "@/api/accountingAi.api"
 import { getTodayCashierRows } from "@/api/accounting.api"
 import { detectMissingPayments, generateMissingPaymentTaskTitle, generateMissingPaymentTaskDescription } from "../accounting.rules"
@@ -102,8 +103,8 @@ export function AiAlertsPanel({ onAlertAction }: AiAlertsPanelProps) {
     return (
       <Card className="p-4">
         <div className="flex items-center gap-3">
-          <div className="size-4 animate-spin rounded-full border-2 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400" />
-          <p className="text-sm text-gray-600 dark:text-gray-400">Loading AI insights...</p>
+          <Skeleton className="size-4 shrink-0 rounded" />
+          <Skeleton className="h-4 w-32" />
         </div>
       </Card>
     )

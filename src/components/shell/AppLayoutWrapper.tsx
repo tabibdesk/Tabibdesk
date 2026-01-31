@@ -3,22 +3,22 @@
 import { usePathname } from "next/navigation"
 import { AppShell } from "./AppShell"
 
-interface TailAdminLayoutWrapperProps {
+interface AppLayoutWrapperProps {
   children: React.ReactNode
   role?: "doctor" | "assistant"
 }
 
 /**
- * Conditionally wraps children with TailAdmin layout (AppShell)
+ * Conditionally wraps children with App layout (AppShell)
  * Excludes marketing and auth routes
  */
-export function TailAdminLayoutWrapper({
+export function AppLayoutWrapper({
   children,
   role,
-}: TailAdminLayoutWrapperProps) {
+}: AppLayoutWrapperProps) {
   const pathname = usePathname()
 
-  // Routes that should NOT use TailAdmin layout
+  // Routes that should NOT use App layout
   const isAuthRoute = pathname?.startsWith("/login") || pathname?.startsWith("/register")
   // Marketing route is handled by its own layout - root path redirects to marketing
   // Note: Marketing routes use their own layout group, so they're already excluded

@@ -6,6 +6,7 @@ import { Button } from "@/components/Button"
 import { SearchInput } from "@/components/SearchInput"
 import { useWaitlist } from "../hooks/useWaitlist"
 import { RiAddLine, RiPhoneLine, RiCalendarLine, RiUserLine } from "@remixicon/react"
+import { ListSkeleton } from "@/components/skeletons"
 import type { WaitlistEntry } from "../types"
 
 interface WaitlistTabProps {
@@ -26,11 +27,8 @@ function WaitlistTable({
 }) {
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto size-12 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-800 dark:border-t-primary-400"></div>
-          <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading waitlist...</p>
-        </div>
+      <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800 dark:bg-gray-950">
+        <ListSkeleton rows={6} />
       </div>
     )
   }

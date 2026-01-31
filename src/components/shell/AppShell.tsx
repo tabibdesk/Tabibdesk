@@ -19,7 +19,7 @@ function AppShellContent({ children, role: propRole }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-900">
-      {/* Sidebar - TailAdmin style */}
+      {/* Sidebar */}
       <Sidebar role={role} />
 
       {/* Main Content Area */}

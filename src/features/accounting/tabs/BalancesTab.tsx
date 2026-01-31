@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/useToast"
 import { getPatientBalances } from "@/api/accounting.api"
 import type { PatientBalance } from "../accounting.types"
 import { formatCurrency } from "../accounting.utils"
+import { ListSkeleton } from "@/components/skeletons"
 // Simple debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
@@ -66,10 +67,8 @@ export function BalancesTab() {
 
       {/* Loading */}
       {loading && (
-        <Card className="p-8">
-          <div className="flex items-center justify-center">
-            <div className="size-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600" />
-          </div>
+        <Card className="p-6">
+          <ListSkeleton rows={6} />
         </Card>
       )}
 

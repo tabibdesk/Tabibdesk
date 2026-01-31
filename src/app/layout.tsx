@@ -1,4 +1,4 @@
-import { TailAdminLayoutWrapper } from "@/components/shell/TailAdminLayoutWrapper"
+import { AppLayoutWrapper } from "@/components/shell/AppLayoutWrapper"
 import { ConditionalMaxWidthWrapper } from "@/components/shell/ConditionalMaxWidthWrapper"
 import { DemoProvider } from "@/contexts/demo-context"
 import { UserClinicProvider } from "@/contexts/user-clinic-context"
@@ -68,7 +68,7 @@ export default function RootLayout({
             <DemoProvider>
               <UserClinicProvider>
                 <ToastProvider>
-                  <TailAdminLayoutWrapper>{children}</TailAdminLayoutWrapper>
+                  <AppLayoutWrapper>{children}</AppLayoutWrapper>
                 </ToastProvider>
               </UserClinicProvider>
             </DemoProvider>

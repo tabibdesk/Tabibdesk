@@ -38,7 +38,7 @@ export function Sidebar({ role }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop Sidebar - TailAdmin style (collapsible) */}
+      {/* Desktop Sidebar (collapsible) */}
       <aside
         className={cx(
           "fixed start-0 top-0 z-50 hidden h-screen flex-col border-e border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 lg:flex",

@@ -30,6 +30,7 @@ import {
   RiExternalLinkLine,
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
+import { ListSkeleton } from "@/components/skeletons"
 
 export interface ApprovalsDrawerProps {
   open: boolean
@@ -157,11 +158,8 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
 
         <DrawerBody>
           {loading ? (
-            <div className="flex h-64 items-center justify-center">
-              <div className="text-center">
-                <div className="mx-auto size-12 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-800 dark:border-t-primary-400"></div>
-                <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">Loading approvals...</p>
-              </div>
+            <div className="py-4">
+              <ListSkeleton rows={4} />
             </div>
           ) : requests.length === 0 ? (
             <div className="flex h-64 flex-col items-center justify-center text-center">
