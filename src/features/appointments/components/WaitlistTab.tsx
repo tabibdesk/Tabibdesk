@@ -4,14 +4,9 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/Button"
 import { SearchInput } from "@/components/SearchInput"
-import { Badge } from "@/components/Badge"
 import { useWaitlist } from "../hooks/useWaitlist"
-import { createAppointmentFromWaitlist } from "../appointments.api"
-import { remove as removeWaitlistEntry } from "../waitlist/waitingList.api"
-import { RiAddLine, RiPhoneLine, RiCalendarLine } from "@remixicon/react"
-import { cx } from "@/lib/utils"
+import { RiAddLine, RiPhoneLine, RiCalendarLine, RiUserLine } from "@remixicon/react"
 import type { WaitlistEntry } from "../types"
-import type { Slot } from "../types"
 
 interface WaitlistTabProps {
   clinicId: string
@@ -53,59 +48,55 @@ function WaitlistTable({
       {entries.map((entry) => (
         <div
           key={entry.id}
-          className={cx(
-            "group relative flex flex-col sm:flex-row sm:items-center justify-between p-2 sm:p-3 transition-colors bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 shadow-sm"
-          )}
+          className="card-surface flex items-center gap-4 px-5 py-4"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1 min-w-0">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Link
-                  href={`/patients/${entry.patientId}`}
-                  className="text-sm font-semibold text-gray-900 hover:text-primary-600 dark:text-gray-50 dark:hover:text-primary-400"
-                >
-                  {entry.patientName}
-                </Link>
-                {entry.appointmentType && (
-                  <Badge variant="default" className="text-[10px] px-1.5 py-0 h-4 uppercase font-bold tracking-wider">
-                    {entry.appointmentType}
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-gray-600 dark:text-gray-400 font-medium">
-                <div className="flex items-center gap-1">
-                  <RiPhoneLine className="size-3" />
-                  {entry.patientPhone}
-                </div>
-                {entry.preferredTimeWindow && entry.preferredTimeWindow !== "any" && (
-                  <div className="flex items-center gap-1">
-                    <RiCalendarLine className="size-3" />
-                    Prefers: {entry.preferredTimeWindow}
-                  </div>
-                )}
-                {entry.preferredDays && entry.preferredDays.length > 0 && (
-                  <span>Days: {entry.preferredDays.join(", ")}</span>
-                )}
-              </div>
-              
-              {entry.notes && (
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-1 italic">
-                  &quot;{entry.notes}&quot;
-                </p>
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+            <RiUserLine className="size-5 text-gray-500 dark:text-gray-400" aria-hidden />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={`/patients/${entry.patientId}`}
+                className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
+              >
+                {entry.patientName}
+              </Link>
+              {entry.appointmentType && (
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                  {entry.appointmentType}
+                </span>
               )}
             </div>
-            
-            <div className="mt-2 sm:mt-0 flex justify-end">
-              <Button 
-                variant="primary" 
-                size="sm" 
-                onClick={() => onBook(entry)} 
-                className="text-[11px] h-8 px-4 bg-primary-600 shadow-md shadow-primary-500/10 active:scale-[0.98] transition-all"
-              >
-                Book
-              </Button>
+            <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+              <RiPhoneLine className="size-4 shrink-0" aria-hidden />
+              <span>{entry.patientPhone}</span>
             </div>
+            {(entry.preferredTimeWindow && entry.preferredTimeWindow !== "any") || (entry.preferredDays && entry.preferredDays.length > 0) ? (
+              <div className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {entry.preferredTimeWindow && entry.preferredTimeWindow !== "any" && (
+                  <span className="flex items-center gap-1">
+                    <RiCalendarLine className="size-3 shrink-0" />
+                    Prefers: {entry.preferredTimeWindow}
+                  </span>
+                )}
+                {entry.preferredDays && entry.preferredDays.length > 0 && (
+                  <>
+                    {entry.preferredTimeWindow && entry.preferredTimeWindow !== "any" && <span className="text-gray-300 dark:text-gray-600">·</span>}
+                    <span>Days: {entry.preferredDays.join(", ")}</span>
+                  </>
+                )}
+              </div>
+            ) : null}
+            {entry.notes && (
+              <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                <span className="line-clamp-1 overflow-hidden text-ellipsis italic">&quot;{entry.notes}&quot;</span>
+              </div>
+            )}
+          </div>
+          <div className="shrink-0">
+            <Button variant="primary" size="sm" onClick={() => onBook(entry)} className="btn-card-action">
+              Book
+            </Button>
           </div>
         </div>
       ))}

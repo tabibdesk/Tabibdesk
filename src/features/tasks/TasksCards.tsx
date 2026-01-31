@@ -4,7 +4,6 @@ import {
   RiUserLine,
   RiCheckLine,
   RiCheckboxBlankCircleLine,
-  RiUserSharedLine,
   RiWhatsappLine,
   RiTimeLine,
   RiArrowRightLine,
@@ -63,8 +62,63 @@ export function TasksCards({
               "bg-gray-200 dark:bg-gray-700"
             )} />
 
-            <div className="flex items-start justify-between gap-3 ml-1">
-              <div className="flex items-start gap-3 flex-1 min-w-0">
+            {/* Assigning info + chips on same row */}
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 w-full pb-2 mb-2 ml-1 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                {(task.createdByName || task.assignedToName) && (
+                  <span>
+                    {task.createdByName && <>by {task.createdByName}</>}
+                    {task.createdByName && task.assignedToName && " "}
+                    {task.assignedToName && (
+                      <>
+                        to{" "}
+                        {canAssign ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              onAssign(task)
+                            }}
+                            className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors underline-offset-2 hover:underline"
+                          >
+                            {task.assignedToName}
+                          </button>
+                        ) : (
+                          <span>{task.assignedToName}</span>
+                        )}
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 gap-y-1">
+                <Badge variant={getStatusBadgeVariant(task.status)} className="text-[10px] px-1.5 py-0">
+                  {getStatusLabel(task.status)}
+                </Badge>
+                {task.follow_up_kind && (
+                  <Badge variant="warning" className="text-[10px] px-1.5 py-0">
+                    Follow-up: {task.follow_up_kind === "cancelled" ? "Cancelled" : task.follow_up_kind === "no_show" ? "No-show" : "Inactive"}
+                  </Badge>
+                )}
+                {task.attempt !== undefined && task.follow_up_kind && (
+                  <Badge variant="neutral" className="text-[10px] px-1.5 py-0">
+                    Attempt {task.attempt}
+                  </Badge>
+                )}
+                {task.dueDate && (
+                  <Badge 
+                    variant={isDone ? "neutral" : overdue ? "error" : "default"} 
+                    className="text-[9px] px-1.5 py-0 font-bold uppercase tracking-widest"
+                  >
+                    {formatTaskDate(task.dueDate)}
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 ml-1">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 {/* Status Circle / Mark Done Action */}
                 <button
                   onClick={(e) => {
@@ -73,7 +127,7 @@ export function TasksCards({
                   }}
                   disabled={isDone}
                   className={cx(
-                    "flex size-9 shrink-0 items-center justify-center rounded-full transition-all group/done cursor-pointer mt-0.5",
+                    "flex size-9 shrink-0 items-center justify-center rounded-full transition-all group/done cursor-pointer",
                     isDone 
                       ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" 
                       : "bg-gray-50 text-gray-400 hover:bg-green-500 hover:text-white dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-green-600"
@@ -106,32 +160,6 @@ export function TasksCards({
                       task.description || task.title
                     )}
                   </p>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                    {task.createdByName && (
-                      <span>by: {task.createdByName}</span>
-                    )}
-                    <Badge variant={getStatusBadgeVariant(task.status)} className="text-[10px] px-1.5 py-0">
-                      {getStatusLabel(task.status)}
-                    </Badge>
-                    {task.follow_up_kind && (
-                      <Badge variant="warning" className="text-[10px] px-1.5 py-0">
-                        Follow-up: {task.follow_up_kind === "cancelled" ? "Cancelled" : task.follow_up_kind === "no_show" ? "No-show" : "Inactive"}
-                      </Badge>
-                    )}
-                    {task.attempt !== undefined && task.follow_up_kind && (
-                      <Badge variant="neutral" className="text-[10px] px-1.5 py-0">
-                        Attempt {task.attempt}
-                      </Badge>
-                    )}
-                    {task.dueDate && (
-                      <Badge 
-                        variant={isDone ? "neutral" : overdue ? "error" : "default"} 
-                        className="text-[9px] px-1.5 py-0 font-bold uppercase tracking-widest"
-                      >
-                        {formatTaskDate(task.dueDate)}
-                      </Badge>
-                    )}
-                  </div>
                 </div>
               </div>
 
@@ -167,18 +195,6 @@ export function TasksCards({
                   >
                     <RiArrowRightLine className="size-3 mr-1" />
                     Next
-                  </Button>
-                )}
-                {canAssign && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => onAssign(task)}
-                    title="Assign / Reassign"
-                  >
-                    <RiUserSharedLine className="size-4" />
-                    <span className="sr-only">Assign</span>
                   </Button>
                 )}
               </div>

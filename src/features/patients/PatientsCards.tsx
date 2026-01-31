@@ -40,7 +40,7 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
             className="card-surface flex cursor-pointer items-center gap-4 px-5 py-4"
           >
             {/* Avatar */}
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
               <RiUserLine className="size-5 text-gray-500 dark:text-gray-400" aria-hidden />
             </div>
 

@@ -49,11 +49,62 @@ export function AppointmentsCards({
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {appointments.map((appointment) => {
-        // Add white background for slot cards (cancelled/no_show with Fill Slot button)
         const isSlotCard = appointment.status === "cancelled" || appointment.status === "no_show"
-        
+
+        if (isSlotCard) {
+          return (
+            <div
+              key={appointment.id}
+              className="card-surface flex items-center gap-4 px-5 py-4"
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+                <RiCalendarLine className="size-5 text-gray-500 dark:text-gray-400" aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {new Date(appointment.appointment_date).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                    {" · "}
+                    {appointment.appointment_time}
+                  </span>
+                  <Badge variant={getStatusBadgeVariant(appointment.status)} className="text-xs">
+                    {getStatusIcon(appointment.status)}
+                    <span className="ml-1 capitalize">{getStatusLabel(appointment.status)}</span>
+                  </Badge>
+                </div>
+                <div className="mt-1 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <RiTimeLine className="size-4 shrink-0" />
+                  <span>{appointment.duration_minutes} min</span>
+                  {appointment.type && (
+                    <>
+                      <span className="text-gray-300 dark:text-gray-600">·</span>
+                      <span>{appointment.type}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              {!readOnly && onFillSlot && (
+                <div className="shrink-0">
+                  <Button
+                    variant="primary"
+                    className="btn-card-action"
+                    onClick={() => onFillSlot(appointment)}
+                  >
+                    <RiUserAddLine className="mr-1 size-4" />
+                    Fill Slot
+                  </Button>
+                </div>
+              )}
+            </div>
+          )
+        }
+
         return (
-        <Card key={appointment.id} className={`transition-shadow hover:shadow-lg ${isSlotCard ? 'bg-white dark:bg-white' : ''}`}>
+        <Card key={appointment.id} className="transition-shadow hover:shadow-lg">
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -147,35 +198,6 @@ export function AppointmentsCards({
                       Completed
                     </Button>
                   )}
-                  {appointment.status === "cancelled" && (
-                    <>
-                      {onFillSlot ? (
-                        <Button
-                          variant="primary"
-                          className="btn-card-action flex-1"
-                          onClick={() => onFillSlot(appointment)}
-                        >
-                          <RiUserAddLine className="mr-1 size-4" />
-                          Fill Slot
-                        </Button>
-                      ) : (
-                        <Button variant="ghost" className="btn-card-action flex-1 text-gray-500" disabled>
-                          <RiCloseLine className="mr-1 size-4" />
-                          Cancelled
-                        </Button>
-                      )}
-                    </>
-                  )}
-                {appointment.status === "no_show" && onFillSlot && (
-                  <Button
-                    variant="primary"
-                    className="btn-card-action flex-1"
-                    onClick={() => onFillSlot(appointment)}
-                  >
-                    <RiUserAddLine className="mr-1 size-4" />
-                    Fill Slot
-                  </Button>
-                )}
               </div>
             )}
           </CardContent>

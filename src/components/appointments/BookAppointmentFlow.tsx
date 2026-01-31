@@ -393,33 +393,6 @@ export function BookAppointmentFlow({
 
   return (
     <div className="space-y-4">
-      {/* Back/Cancel Navigation */}
-      {currentStep !== "success" && (
-        <div className="flex items-center -ml-1 mb-2">
-          {currentStep === "patient" ? (
-            onCancel && (
-              <Button 
-                variant="link" 
-                onClick={onCancel} 
-                className="text-[11px] font-bold"
-              >
-                <RiArrowLeftLine className="mr-1 size-3.5" />
-                Cancel
-              </Button>
-            )
-          ) : (
-            <Button 
-              variant="link" 
-              onClick={handleBack} 
-              className="text-[11px] font-bold"
-            >
-              <RiArrowLeftLine className="mr-1 size-3.5" />
-              Back
-            </Button>
-          )}
-        </div>
-      )}
-
       {/* Header */}
       {showTitle && (
         <div className="mb-4">
@@ -689,6 +662,33 @@ export function BookAppointmentFlow({
               </div>
             </div>
           )}
+
+      {/* Back/Cancel Navigation - below step content */}
+      {currentStep !== "success" && currentStep !== "confirmation" && (
+        <div className="flex items-center -ml-1 pt-2">
+          {currentStep === "patient" ? (
+            onCancel && (
+              <Button 
+                variant="link" 
+                onClick={onCancel} 
+                className="text-[11px] font-bold"
+              >
+                <RiArrowLeftLine className="mr-1 size-3.5" />
+                Cancel
+              </Button>
+            )
+          ) : (
+            <Button 
+              variant="link" 
+              onClick={handleBack} 
+              className="text-[11px] font-bold"
+            >
+              <RiArrowLeftLine className="mr-1 size-3.5" />
+              Back
+            </Button>
+          )}
+        </div>
+      )}
 
           {/* SUCCESS */}
           {currentStep === "success" && (

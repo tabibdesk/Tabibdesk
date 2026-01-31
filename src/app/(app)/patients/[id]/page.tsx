@@ -16,16 +16,17 @@ import { HorizontalTabNav, Tab, MobileAddButton } from "@/components/patient/Hor
 import { ClinicalNotesTab } from "@/components/patient/ClinicalNotesTab"
 import { DoctorTab } from "@/components/patient/DoctorTab"
 import { FilesTab } from "@/components/patient/FilesTab"
-import { TasksTab } from "@/components/patient/TasksTab"
 import { PatientHistoryTab } from "@/components/patient/PatientHistoryTab"
 import { InvoicesTab } from "@/components/patient/InvoicesTab"
 import { AddTaskDrawer } from "@/features/tasks/AddTaskDrawer"
+import { TasksCards } from "@/features/tasks/TasksCards"
 import { createTask, listTasks, updateTaskStatus } from "@/features/tasks/tasks.api"
+import { isOverdue } from "@/features/tasks/tasks.utils"
+import type { CreateTaskPayload, TaskListItem } from "@/features/tasks/tasks.types"
 import { listInvoices } from "@/api/invoices.api"
 import { update as updatePatient } from "@/api/patients.api"
 import { getByPatientId as getNotesByPatientId } from "@/api/notes.api"
 import { useToast } from "@/hooks/useToast"
-import type { CreateTaskPayload } from "@/features/tasks/tasks.types"
 import { AddPrescriptionDrawer } from "@/features/prescriptions/AddPrescriptionDrawer"
 import { AddPastMedicationDrawer } from "@/components/patient/AddPastMedicationDrawer"
 import { AddWeightDrawer, type AddWeightPayload } from "@/components/patient/AddWeightDrawer"
@@ -48,7 +49,7 @@ export default function PatientDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { isDemoMode } = useDemo()
-  const { currentUser, currentClinic } = useUserClinic()
+  const { currentUser, currentClinic, role } = useUserClinic()
   const patientId = params.id as string
 
   const [loading, setLoading] = useState(true)
@@ -68,7 +69,7 @@ export default function PatientDetailPage() {
   const [prescriptions, setPrescriptions] = useState<any[]>([])
   const [labResults, setLabResults] = useState<any[]>([])
   const [appointments, setAppointments] = useState<any[]>([])
-  const [tasks, setTasks] = useState<any[]>([])
+  const [tasks, setTasks] = useState<TaskListItem[]>([])
   const [notes, setNotes] = useState<any[]>([])
   const [attachments, setAttachments] = useState<any[]>([])
   const [scanExtractions, setScanExtractions] = useState<any[]>([])
@@ -84,7 +85,7 @@ export default function PatientDetailPage() {
   }, [patientId, isDemoMode])
 
   useEffect(() => {
-    if (patientId && !isDemoMode) {
+    if (patientId) {
       fetchTasks()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,7 +105,6 @@ export default function PatientDetailPage() {
         setPrescriptions(mockData.prescriptions.filter((p) => p.patientId === patientId))
         setLabResults(mockData.labResults.filter((l) => l.patient_id === patientId))
         setAppointments(mockData.appointments.filter((a) => a.patient_id === patientId))
-        setTasks(mockData.tasks.filter((t) => t.patient_id === patientId))
         setNotes(mockData.doctorNotes.filter((n) => n.patient_id === patientId))
         setAttachments(mockData.attachments.filter((a) => a.patient_id === patientId))
         setScanExtractions(mockData.scanExtractions.filter((s) => s.patient_id === patientId))
@@ -157,13 +157,6 @@ export default function PatientDetailPage() {
   }
 
   const fetchTasks = async () => {
-    if (isDemoMode) {
-      // In demo mode, use mockData directly
-      const patientTasks = mockData.tasks.filter((t) => t.patient_id === patientId)
-      setTasks(patientTasks)
-      return
-    }
-
     try {
       const clinicId = currentClinic?.id || "clinic-001"
       const response = await listTasks({
@@ -172,25 +165,8 @@ export default function PatientDetailPage() {
         page: 1,
         pageSize: 1000,
       })
-      // Filter tasks for this patient
       const patientTasks = response.tasks.filter((t) => t.patientId === patientId)
-      // Convert to the format expected by TasksTab
-      setTasks(
-        patientTasks.map((t) => ({
-          id: t.id,
-          patient_id: t.patientId || patientId,
-          title: t.title,
-          description: t.description || null,
-          type: t.type,
-          status: t.status,
-          due_date: t.dueDate || new Date().toISOString(),
-          completed_at: t.status === "done" ? new Date().toISOString() : null,
-          ignored_at: null,
-          created_at: t.createdAt,
-          updated_at: null,
-          created_by_name: t.createdByName,
-        }))
-      )
+      setTasks(patientTasks)
     } catch (error) {
       console.error("Failed to fetch tasks:", error)
     }
@@ -198,16 +174,11 @@ export default function PatientDetailPage() {
 
   const handleToggleTaskStatus = async (taskId: string) => {
     if (isDemoMode) {
-      // In demo mode, update local state
       setTasks(
         tasks.map((t) => {
           if (t.id === taskId) {
-            const isDone = t.status === "completed" || t.status === "done"
-            return {
-              ...t,
-              status: isDone ? "pending" : "done",
-              completed_at: isDone ? null : new Date().toISOString(),
-            }
+            const isDone = t.status === "done"
+            return { ...t, status: isDone ? "pending" : "done" }
           }
           return t
         })
@@ -219,9 +190,9 @@ export default function PatientDetailPage() {
       const task = tasks.find((t) => t.id === taskId)
       if (!task) return
 
-      const isDone = task.status === "completed" || task.status === "done"
+      const isDone = task.status === "done"
       const newStatus = isDone ? "pending" : "done"
-      
+
       await updateTaskStatus({ id: taskId, status: newStatus })
       await fetchTasks()
     } catch (error) {
@@ -460,21 +431,34 @@ export default function PatientDetailPage() {
             }}
           />
         )}
-        {activeTab === "tasks" && (
-          <TasksTab
-            tasks={tasks}
-            patientId={patientId}
-            onToggleStatus={handleToggleTaskStatus}
-            onEditTask={(taskId) => {
-              // TODO: Open edit task modal
-              console.log("Edit task:", taskId)
-            }}
-            onDeleteTask={(taskId) => {
-              // TODO: Open delete confirmation modal
-              console.log("Delete task:", taskId)
-            }}
-          />
-        )}
+        {activeTab === "tasks" && (() => {
+          const inProgressTasks = tasks
+            .filter((t) => t.status !== "done" && t.status !== "cancelled")
+            .sort((a, b) => {
+              const aOverdue = isOverdue(a.dueDate)
+              const bOverdue = isOverdue(b.dueDate)
+              if (aOverdue && !bOverdue) return -1
+              if (!aOverdue && bOverdue) return 1
+              return new Date(a.dueDate || 0).getTime() - new Date(b.dueDate || 0).getTime()
+            })
+          if (inProgressTasks.length === 0) {
+            return (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30">
+                <RiTaskLine className="size-10 text-gray-400 dark:text-gray-500 shrink-0" aria-hidden />
+                <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">No in-progress tasks for this patient.</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">Completed tasks are shown in the History tab.</p>
+              </div>
+            )
+          }
+          return (
+            <TasksCards
+              tasks={inProgressTasks}
+              onMarkDone={(task) => handleToggleTaskStatus(task.id)}
+              onAssign={() => {}}
+              role={role}
+            />
+          )
+        })()}
         <AddTaskDrawer
           open={showAddTaskDrawer}
           onOpenChange={setShowAddTaskDrawer}

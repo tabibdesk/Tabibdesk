@@ -21,13 +21,7 @@ import {
   RiCloseLine,
   RiEditLine,
   RiDeleteBinLine,
-  RiFileTextLine,
-  RiFileImageLine,
-  RiFilePdfLine,
-  RiFileWordLine,
-  RiFileExcelLine,
   RiDownloadLine,
-  RiHeartPulseLine,
   RiQuillPenAiLine,
   RiArrowDownSLine,
   RiMore2Line,
@@ -66,6 +60,7 @@ export function FilesTab({
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; fileName: string } | null>(null)
   const [extractConfirm, setExtractConfirm] = useState<{ type: "lab" | "scan" | "document"; attachmentId: string; fileName: string } | null>(null)
   const [simulatedLabResults, setSimulatedLabResults] = useState<Record<string, LabResult[]>>({})
+  const [pendingNewLabRows, setPendingNewLabRows] = useState<Record<string, LabResult[]>>({})
   const [simulatedScanText, setSimulatedScanText] = useState<Record<string, string>>({})
   const [simulatedDocumentText, setSimulatedDocumentText] = useState<Record<string, string>>({})
   const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(new Set())
@@ -95,8 +90,9 @@ export function FilesTab({
 
   const getDisplayLabResults = (attachmentId: string): LabResult[] => {
     const fromApi = getLabResultsForAttachment(attachmentId)
-    if (fromApi.length > 0) return fromApi
-    return simulatedLabResults[attachmentId] ?? []
+    const simulated = simulatedLabResults[attachmentId] ?? []
+    if (fromApi.length > 0) return [...fromApi, ...simulated]
+    return simulated
   }
 
   const getDisplayScanText = (attachmentId: string): string | undefined => {
@@ -137,13 +133,68 @@ export function FilesTab({
   }
 
   const handleSave = () => {
+    const id = editingId
+    if (id?.startsWith("new-") && editValues.lab_file_id) {
+      const attachmentId = editValues.lab_file_id
+      const saved: LabResult = {
+        id: `sim-lab-${attachmentId}-${Date.now()}`,
+        patient_id: editValues.patient_id ?? "",
+        test_name: editValues.test_name ?? "",
+        value: editValues.value ?? "",
+        unit: editValues.unit ?? "",
+        normal_range: editValues.normal_range ?? "",
+        status: (editValues.status as LabResult["status"]) ?? "normal",
+        test_date: editValues.test_date ?? new Date().toISOString().split("T")[0],
+        pdf_url: editValues.pdf_url ?? null,
+        notes: editValues.notes ?? null,
+        lab_file_id: attachmentId,
+      }
+      setSimulatedLabResults((prev) => ({
+        ...prev,
+        [attachmentId]: [...(prev[attachmentId] ?? []), saved],
+      }))
+      setPendingNewLabRows((prev) => ({
+        ...prev,
+        [attachmentId]: (prev[attachmentId] ?? []).filter((r) => r.id !== id),
+      }))
+    }
     setEditingId(null)
     setEditValues({})
   }
 
   const handleCancel = () => {
+    const id = editingId
+    if (id?.startsWith("new-") && editValues.lab_file_id) {
+      const attachmentId = editValues.lab_file_id
+      setPendingNewLabRows((prev) => ({
+        ...prev,
+        [attachmentId]: (prev[attachmentId] ?? []).filter((r) => r.id !== id),
+      }))
+    }
     setEditingId(null)
     setEditValues({})
+  }
+
+  const handleAddTest = (attachmentId: string) => {
+    const newRow: LabResult = {
+      id: `new-${attachmentId}-${Date.now()}`,
+      patient_id: "",
+      test_name: "",
+      value: "",
+      unit: "",
+      normal_range: "",
+      status: "normal",
+      test_date: new Date().toISOString().split("T")[0],
+      pdf_url: null,
+      notes: null,
+      lab_file_id: attachmentId,
+    }
+    setPendingNewLabRows((prev) => ({
+      ...prev,
+      [attachmentId]: [...(prev[attachmentId] ?? []), newRow],
+    }))
+    setEditingId(newRow.id)
+    setEditValues(newRow)
   }
 
   const handleDelete = (id: string) => {
@@ -163,14 +214,6 @@ export function FilesTab({
     }
   }
 
-  const getFileIcon = (fileType: string) => {
-    if (fileType.includes("image")) return <RiFileImageLine className="size-6 text-blue-600 dark:text-blue-400" />
-    if (fileType.includes("pdf")) return <RiFilePdfLine className="size-6 text-red-600 dark:text-red-400" />
-    if (fileType.includes("word") || fileType.includes("document")) return <RiFileWordLine className="size-6 text-blue-700 dark:text-blue-500" />
-    if (fileType.includes("excel") || fileType.includes("spreadsheet")) return <RiFileExcelLine className="size-6 text-green-600 dark:text-green-400" />
-    return <RiFileTextLine className="size-6 text-gray-600 dark:text-gray-400" />
-  }
-
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -184,54 +227,32 @@ export function FilesTab({
 
   const renderLabCard = (attachment: Attachment) => {
     const id = attachment.id
-    const results = getDisplayLabResults(id)
+    const results = [...getDisplayLabResults(id), ...(pendingNewLabRows[id] ?? [])]
     const hasExtracted = results.length > 0
 
     return (
       <div key={id} className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-        {/* Top + expander row: content left, icons column right aligned vertically */}
+        {/* Top row: content left, dropdown right */}
         <div className="flex gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-3">
-              {attachment.thumbnail_url ? (
-                <div className="size-10 shrink-0 overflow-hidden rounded border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
-                  <img src={attachment.thumbnail_url} alt="" className="size-full object-cover" />
-                </div>
-              ) : (
-                <RiFlaskLine className="size-5 shrink-0 text-primary-600 dark:text-primary-400" />
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => window.open(attachment.file_url, "_blank")}
-                    className="max-w-full truncate text-left text-sm font-semibold text-gray-900 hover:text-primary-600 hover:underline dark:text-gray-50 dark:hover:text-primary-400"
-                    title="View in new tab"
-                  >
-                    {attachment.file_name}
-                  </button>
-                  <Badge variant="neutral" className="shrink-0 text-xs font-medium">{getKindLabel(attachment)}</Badge>
-                </div>
-                <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
-              </div>
-            </div>
-            {/* Lower part: expander label (toggle via icon in right column) */}
-            <div className="border-t border-gray-200 mt-3 pt-3 -mx-1 dark:border-gray-800">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={() => toggleCardLower(id)}
-                className="flex w-full items-center gap-2 rounded-lg px-1 py-2 text-left hover:bg-gray-100/80 dark:hover:bg-gray-800/50"
+                onClick={() => window.open(attachment.file_url, "_blank")}
+                className="max-w-full truncate text-left text-sm font-semibold text-gray-900 hover:text-primary-600 hover:underline dark:text-gray-50 dark:hover:text-primary-400"
+                title="View in new tab"
               >
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Lab results</span>
+                {attachment.file_name}
               </button>
+              <Badge variant="neutral" className="shrink-0 text-xs font-medium">{getKindLabel(attachment)}</Badge>
             </div>
+            <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
           </div>
-          {/* Right column: dropdown and expander icons aligned vertically */}
-          <div className="flex shrink-0 flex-col items-center justify-start gap-1 pt-0.5">
+          <div className="flex shrink-0 items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <RiMore2Line className="size-5 text-gray-500" />
+                <Button variant="ghost" size="sm" className="flex h-6 w-6 shrink-0 items-center justify-end p-0">
+                  <RiMore2Line className="size-4 text-gray-500" />
                   <span className="sr-only">Actions</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -263,68 +284,89 @@ export function FilesTab({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <button
-              type="button"
-              onClick={() => toggleCardLower(id)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/50"
-              aria-label={expandedCardIds.has(id) ? "Collapse" : "Expand"}
-            >
-              <RiArrowDownSLine className={cx("size-5 shrink-0 transition-transform dark:text-gray-400", expandedCardIds.has(id) && "rotate-180")} />
-            </button>
           </div>
         </div>
-        {/* Expanded content: no duplicate expander row */}
-        <div className="border-t border-gray-200 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-900/20">
+        {/* Full-width separator + compact collapsible row */}
+        <div className="w-full border-t border-gray-200 dark:border-gray-800">
+            <button
+            type="button"
+            onClick={() => toggleCardLower(id)}
+            className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left bg-gray-50 dark:bg-gray-800/30"
+            aria-label={expandedCardIds.has(id) ? "Collapse" : "Expand"}
+          >
+            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Lab results</span>
+            <RiArrowDownSLine className={cx("size-4 shrink-0 text-gray-500 transition-transform dark:text-gray-400", expandedCardIds.has(id) && "rotate-180")} />
+          </button>
+        </div>
+        {/* Expanded content */}
+        <div className={cx("bg-gray-50/50 dark:bg-gray-900/20", !expandedCardIds.has(id) && "border-t border-gray-200 dark:border-gray-800")}>
           {expandedCardIds.has(id) && (
-            <div className="border-t border-gray-200 px-4 pb-4 pt-3 dark:border-gray-800">
+            <div className="pb-4 pt-0">
               {hasExtracted ? (
                 <>
-                  <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-                    <table className="w-full text-sm">
+                  <div className="w-full min-w-0 overflow-x-auto">
+                    <table className="w-full min-w-0 table-fixed text-xs">
                       <thead className="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
-                          <th className="px-3 py-2 text-left text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Test</th>
-                          <th className="px-3 py-2 text-left text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Value</th>
-                          <th className="px-3 py-2 text-left text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Status</th>
-                          <th className="px-3 py-2 text-right text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Actions</th>
+                          <th className="w-[40%] pl-4 pr-3 py-2 text-left text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">Test</th>
+                          <th className="w-[30%] px-3 py-2 text-left text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">Value</th>
+                          <th className="w-[20%] px-3 py-2 text-left text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">Status</th>
+                          <th className="w-9 shrink-0 pl-2 pr-4 py-2 text-right text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500" aria-label="Actions" />
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                         {results.map((result) => (
                           <tr key={result.id}>
-                            <td className="px-3 py-2.5">
+                            <td className="min-w-0 pl-4 pr-3 py-2.5">
                               {editingId === result.id ? (
                                 <Input value={editValues.test_name ?? ""} onChange={(e) => setEditValues({ ...editValues, test_name: e.target.value })} className="h-7 text-xs" />
                               ) : (
-                                <div className="text-sm font-semibold text-gray-900 dark:text-gray-50">{result.test_name}</div>
+                                <div className="truncate text-xs font-semibold text-gray-900 dark:text-gray-50" title={result.test_name}>{result.test_name}</div>
                               )}
                             </td>
-                            <td className="px-3 py-2.5">
+                            <td className="min-w-0 px-3 py-2.5">
                               {editingId === result.id ? (
                                 <div className="flex items-center gap-1">
                                   <Input value={editValues.value ?? ""} onChange={(e) => setEditValues({ ...editValues, value: e.target.value })} className="h-7 w-16 text-xs" />
                                   <span className="text-xs text-gray-500">{result.unit}</span>
                                 </div>
                               ) : (
-                                <div className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                  {result.value} <span className="ml-0.5 text-[11px] font-normal text-gray-500">{result.unit}</span>
+                                <div className="truncate text-xs font-medium text-gray-800 dark:text-gray-200">
+                                  {result.value} <span className="ml-0.5 font-normal text-gray-500">{result.unit}</span>
                                 </div>
                               )}
                             </td>
                             <td className="px-3 py-2.5">
                               <span className={cx("text-xs font-bold uppercase tracking-wider", getStatusColor(result.status))}>{result.status}</span>
                             </td>
-                            <td className="px-3 py-2.5 text-right">
+                            <td className="pl-2 pr-4 py-2.5 text-right align-middle">
                               {editingId === result.id ? (
-                                <>
-                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleSave}><RiSaveLine className="size-4" /></Button>
-                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleCancel}><RiCloseLine className="size-4" /></Button>
-                                </>
+                                <div className="flex items-center justify-end gap-0.5">
+                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleSave}><RiSaveLine className="size-3.5" /></Button>
+                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleCancel}><RiCloseLine className="size-3.5" /></Button>
+                                </div>
                               ) : (
-                                <>
-                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => handleEdit(result)}><RiEditLine className="size-4 text-gray-400" /></Button>
-                                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500/70 hover:text-red-500" onClick={() => handleDelete(result.id)}><RiDeleteBinLine className="size-4" /></Button>
-                                </>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" aria-label="Row actions">
+                                      <RiMore2Line className="size-4 text-gray-500 dark:text-gray-400" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="min-w-32">
+                                    <DropdownMenuItem onClick={() => handleEdit(result)}>
+                                      <DropdownMenuIconWrapper className="mr-2">
+                                        <RiEditLine className="size-4" />
+                                      </DropdownMenuIconWrapper>
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleDelete(result.id)} className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400">
+                                      <DropdownMenuIconWrapper className="mr-2">
+                                        <RiDeleteBinLine className="size-4" />
+                                      </DropdownMenuIconWrapper>
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               )}
                             </td>
                           </tr>
@@ -332,9 +374,9 @@ export function FilesTab({
                       </tbody>
                     </table>
                   </div>
-                  <div className="mt-2 flex justify-end">
-                    <Button variant="ghost" size="sm" className="h-7 text-xs font-medium" onClick={() => setExtractConfirm({ type: "lab", attachmentId: id, fileName: attachment.file_name })}>
-                      <RiAddLine className="mr-1 size-4" /> Add Test
+                  <div className="mt-2 flex justify-end px-4">
+                    <Button variant="link" className="text-[9px] font-medium" onClick={() => handleAddTest(id)}>
+                      <RiAddLine className="mr-1 size-3" /> Add Test
                     </Button>
                   </div>
                 </>
@@ -366,52 +408,27 @@ export function FilesTab({
 
     return (
       <div key={id} className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-        {/* Content left, icons column right (dropdown + expander aligned vertically) */}
+        {/* Top row: content left, dropdown right */}
         <div className="flex gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-3">
-              {attachment.thumbnail_url ? (
-                <div className="size-10 shrink-0 overflow-hidden rounded border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-800">
-                  <img src={attachment.thumbnail_url} alt="" className="size-full object-cover" />
-                </div>
-              ) : isScan ? (
-                <RiHeartPulseLine className="size-5 shrink-0 text-primary-600 dark:text-primary-400" />
-              ) : (
-                <div className="shrink-0">{getFileIcon(attachment.file_type)}</div>
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => window.open(attachment.file_url, "_blank")}
-                    className="max-w-full truncate text-left text-sm font-semibold text-gray-900 hover:text-primary-600 hover:underline dark:text-gray-50 dark:hover:text-primary-400"
-                    title="View in new tab"
-                  >
-                    {attachment.file_name}
-                  </button>
-                  <Badge variant="neutral" className="shrink-0 text-xs font-medium">{getKindLabel(attachment)}</Badge>
-                </div>
-                <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
-              </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => window.open(attachment.file_url, "_blank")}
+                className="max-w-full truncate text-left text-sm font-semibold text-gray-900 hover:text-primary-600 hover:underline dark:text-gray-50 dark:hover:text-primary-400"
+                title="View in new tab"
+              >
+                {attachment.file_name}
+              </button>
+              <Badge variant="neutral" className="shrink-0 text-xs font-medium">{getKindLabel(attachment)}</Badge>
             </div>
-            {hasExpandableArea && (
-              <div className="border-t border-gray-200 mt-3 pt-3 -mx-1 dark:border-gray-800">
-                <button
-                  type="button"
-                  onClick={() => toggleCardLower(id)}
-                  className="flex w-full items-center gap-2 rounded-lg px-1 py-2 text-left hover:bg-gray-100/80 dark:hover:bg-gray-800/50"
-                >
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{isScan ? "AI note" : "AI summary"}</span>
-                </button>
-              </div>
-            )}
+            <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
           </div>
-          {/* Right column: dropdown and expander icons aligned vertically */}
-          <div className="flex shrink-0 flex-col items-center justify-start gap-1 pt-0.5">
+          <div className="flex shrink-0 items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <RiMore2Line className="size-5 text-gray-500" />
+                <Button variant="ghost" size="sm" className="flex h-6 w-6 shrink-0 items-center justify-end p-0">
+                  <RiMore2Line className="size-4 text-gray-500" />
                   <span className="sr-only">Actions</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -443,24 +460,28 @@ export function FilesTab({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            {hasExpandableArea && (
-              <button
-                type="button"
-                onClick={() => toggleCardLower(id)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/50"
-                aria-label={expandedCardIds.has(id) ? "Collapse" : "Expand"}
-              >
-                <RiArrowDownSLine className={cx("size-5 shrink-0 transition-transform dark:text-gray-400", expandedCardIds.has(id) && "rotate-180")} />
-              </button>
-            )}
           </div>
         </div>
+        {/* Full-width separator + compact collapsible row */}
+        {hasExpandableArea && (
+          <div className="w-full border-t border-gray-200 dark:border-gray-800">
+            <button
+              type="button"
+              onClick={() => toggleCardLower(id)}
+              className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left bg-gray-50 dark:bg-gray-800/30"
+              aria-label={expandedCardIds.has(id) ? "Collapse" : "Expand"}
+            >
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{isScan ? "AI note" : "AI summary"}</span>
+              <RiArrowDownSLine className={cx("size-4 shrink-0 text-gray-500 transition-transform dark:text-gray-400", expandedCardIds.has(id) && "rotate-180")} />
+            </button>
+          </div>
+        )}
         {/* Expanded content for scan and document */}
         {hasExpandableArea && expandedCardIds.has(id) && (
-          <div className="border-t border-gray-200 bg-gray-50/50 px-4 pb-4 pt-3 dark:border-gray-800 dark:bg-gray-900/20">
+          <div className="bg-gray-50/50 px-4 pb-4 pt-3 dark:bg-gray-900/20">
             {isScan ? (
               displayScanText ? (
-                <div className="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-950">
+                <div className="rounded-r-lg border-l-4 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/40 dark:border-gray-600/40 bg-gray-50/80 dark:bg-gray-800/30 py-3 pl-3 pr-3">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">AI extracted note</p>
                   <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{displayScanText}</p>
                 </div>
@@ -476,7 +497,7 @@ export function FilesTab({
               )
             ) : (
               displayDocumentText ? (
-                <div className="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-950">
+                <div className="rounded-r-lg border-l-4 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/40 dark:border-gray-600/40 bg-gray-50/80 dark:bg-gray-800/30 py-3 pl-3 pr-3">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">AI extracted summary</p>
                   <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{displayDocumentText}</p>
                 </div>

@@ -19,26 +19,21 @@ interface Appointment {
   online_call_link?: string
 }
 
-interface Task {
-  id: string
-  patient_id: string
-  title: string
-  description: string | null
-  type: string
-  status: string
-  due_date: string
-  completed_at: string | null
-  ignored_at: string | null
-  created_at: string
-  updated_at: string | null
-  created_by_name?: string
-}
-
 interface PatientHistoryTabProps {
   clinicId: string
   patientId: string
   appointments: Appointment[]
-  tasks?: Task[]
+  /** Completed tasks (TaskListItem or legacy shape with completed_at/created_by_name) */
+  tasks?: Array<{
+    id: string
+    status: string
+    createdAt: string
+    title?: string
+    description?: string
+    completed_at?: string | null
+    created_by_name?: string
+    createdByName?: string
+  }>
 }
 
 type HistoryItem = {
@@ -108,17 +103,16 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
         })
       })
 
-    // Add completed tasks
+    // Add completed tasks (TaskListItem: status "done", date from createdAt)
     tasks
-      .filter((task) => {
-        const isDone = task.status === "completed" || task.status === "done"
-        return isDone && task.completed_at
-      })
+      .filter((task) => task.status === "completed" || task.status === "done")
       .forEach((task) => {
+        const completedAt =
+          typeof task.completed_at === "string" ? task.completed_at : task.createdAt
         items.push({
           id: task.id,
           type: "task",
-          date: new Date(task.completed_at!),
+          date: new Date(completedAt),
           data: task,
         })
       })
@@ -275,9 +269,9 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
                         {item.data.description && (
                           <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{item.data.description}</p>
                         )}
-                        {item.data.created_by_name && (
+                        {(item.data.createdByName ?? item.data.created_by_name) && (
                           <p className="mt-1 text-xs text-gray-500">
-                            Completed by: {item.data.created_by_name}
+                            Completed by: {item.data.createdByName ?? item.data.created_by_name}
                           </p>
                         )}
                       </div>

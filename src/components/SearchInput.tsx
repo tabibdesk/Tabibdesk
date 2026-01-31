@@ -24,12 +24,12 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div
         className={cx(
-          "relative flex w-full items-center rounded-lg border border-gray-200 bg-gray-50/50 shadow-sm transition-all focus-within:border-primary-500 focus-within:bg-white dark:border-gray-700 dark:bg-gray-800/50 dark:focus-within:border-primary-500 dark:focus-within:bg-gray-900",
+          "group/search relative flex w-full items-center rounded-lg border border-gray-200 bg-gray-50/50 shadow-sm transition-all focus-within:border-primary-500 focus-within:bg-white dark:border-gray-700 dark:bg-gray-800/50 dark:focus-within:border-primary-500 dark:focus-within:bg-gray-900",
           "h-9",
           className
         )}
       >
-        <span className="pointer-events-none flex shrink-0 items-center gap-1 pl-3 text-gray-400 transition-colors focus-within:text-primary-500 dark:text-gray-500">
+        <span className="pointer-events-none flex shrink-0 items-center gap-1 rounded-l-lg bg-gray-50/50 pl-3 text-gray-400 transition-colors focus-within:text-primary-500 dark:bg-gray-800/50 dark:text-gray-500 group-focus-within/search:dark:bg-gray-900">
           <RiSearchLine className="size-4" />
           <RiSparkling2Line className="size-3.5 opacity-70" />
         </span>
