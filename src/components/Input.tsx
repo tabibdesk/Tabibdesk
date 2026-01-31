@@ -8,8 +8,8 @@ import { cx, focusInput, focusRing, hasErrorInput } from "@/lib/utils"
 
 const inputStyles = tv({
   base: [
-    // base
-    "relative block w-full appearance-none truncate rounded-md border px-2.5 py-1.5 shadow-sm outline-none transition sm:text-sm",
+    // base (h-9 matches Select and SearchInput for consistent form control height)
+    "relative block w-full h-9 appearance-none truncate rounded-md border px-2.5 py-1.5 shadow-sm outline-none transition sm:text-sm",
     // border color
     "border-gray-300 dark:border-gray-800",
     // text color

@@ -153,8 +153,8 @@ TimeInput.displayName = "TimeInput"
 
 const triggerStyles = tv({
   base: [
-    // base
-    "peer flex w-full cursor-pointer appearance-none items-center gap-x-2 truncate rounded-md border px-3 py-2 shadow-sm outline-none transition-all sm:text-sm",
+    // base (h-9 matches Input, Select, SearchInput for consistent form control height)
+    "peer flex h-9 w-full cursor-pointer appearance-none items-center gap-x-2 truncate rounded-md border px-3 py-2 shadow-sm outline-none transition-all sm:text-sm",
     // background color
     "bg-white dark:bg-gray-950",
     // border color
