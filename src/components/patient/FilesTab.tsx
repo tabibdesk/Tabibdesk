@@ -44,7 +44,10 @@ function getKind(att: Attachment): AttachmentKind {
 
 function getKindLabel(att: Attachment): string {
   const k = getKind(att)
-  return k === "lab" ? "Lab" : k === "scan" ? "Scan" : "Document"
+  if (k === "lab") return "Lab"
+  if (k === "scan") return "Scan"
+  if (k === "ecg") return "ECG"
+  return "Document"
 }
 
 export function FilesTab({
@@ -58,7 +61,7 @@ export function FilesTab({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Partial<LabResult>>({})
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; fileName: string } | null>(null)
-  const [extractConfirm, setExtractConfirm] = useState<{ type: "lab" | "scan" | "document"; attachmentId: string; fileName: string } | null>(null)
+  const [extractConfirm, setExtractConfirm] = useState<{ type: "lab" | "scan" | "document" | "ecg"; attachmentId: string; fileName: string } | null>(null)
   const [simulatedLabResults, setSimulatedLabResults] = useState<Record<string, LabResult[]>>({})
   const [pendingNewLabRows, setPendingNewLabRows] = useState<Record<string, LabResult[]>>({})
   const [simulatedScanText, setSimulatedScanText] = useState<Record<string, string>>({})
@@ -115,8 +118,10 @@ export function FilesTab({
       ]
       setSimulatedLabResults((prev) => ({ ...prev, [attachmentId]: simulated }))
       onExtractLab?.(attachmentId)
-    } else if (type === "scan") {
-      const simulatedText = "AI extracted summary: No acute findings. Structures are within normal limits. No focal lesion or significant abnormality identified. Impression: Normal study."
+    } else if (type === "scan" || type === "ecg") {
+      const simulatedText = type === "ecg"
+        ? "AI extracted summary: Sinus rhythm, rate 72 bpm. Normal axis. No ST elevation or depression. No significant arrhythmia. Impression: Normal ECG."
+        : "AI extracted summary: No acute findings. Structures are within normal limits. No focal lesion or significant abnormality identified. Impression: Normal study."
       setSimulatedScanText((prev) => ({ ...prev, [attachmentId]: simulatedText }))
       onExtractScan?.(attachmentId, simulatedText)
     } else {
@@ -401,10 +406,11 @@ export function FilesTab({
     const id = attachment.id
     const kind = getKind(attachment)
     const isScan = kind === "scan"
+    const isEcg = kind === "ecg"
     const isDocument = kind === "document"
-    const displayScanText = isScan ? getDisplayScanText(id) : undefined
+    const displayScanText = (isScan || isEcg) ? getDisplayScanText(id) : undefined
     const displayDocumentText = isDocument ? getDisplayDocumentText(id) : undefined
-    const hasExpandableArea = isScan || isDocument
+    const hasExpandableArea = isScan || isEcg || isDocument
 
     return (
       <div key={id} className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
@@ -433,7 +439,7 @@ export function FilesTab({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-36">
-                <DropdownMenuItem onClick={() => setExtractConfirm({ type: isScan ? "scan" : "document", attachmentId: id, fileName: attachment.file_name })}>
+                <DropdownMenuItem onClick={() => setExtractConfirm({ type: isEcg ? "ecg" : isScan ? "scan" : "document", attachmentId: id, fileName: attachment.file_name })}>
                   <DropdownMenuIconWrapper className="mr-2">
                     <RiQuillPenAiLine className="size-4" />
                   </DropdownMenuIconWrapper>
@@ -471,7 +477,7 @@ export function FilesTab({
               className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left bg-gray-50 dark:bg-gray-800/30"
               aria-label={expandedCardIds.has(id) ? "Collapse" : "Expand"}
             >
-              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{isScan ? "AI note" : "AI summary"}</span>
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{isScan || isEcg ? "AI note" : "AI summary"}</span>
               <RiArrowDownSLine className={cx("size-4 shrink-0 text-gray-500 transition-transform dark:text-gray-400", expandedCardIds.has(id) && "rotate-180")} />
             </button>
           </div>
@@ -479,7 +485,7 @@ export function FilesTab({
         {/* Expanded content for scan and document */}
         {hasExpandableArea && expandedCardIds.has(id) && (
           <div className="bg-gray-50/50 px-4 pb-4 pt-3 dark:bg-gray-900/20">
-            {isScan ? (
+            {isScan || isEcg ? (
               displayScanText ? (
                 <div className="rounded-r-lg border-l-4 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/40 dark:border-gray-600/40 bg-gray-50/80 dark:bg-gray-800/30 py-3 pl-3 pr-3">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400">AI extracted note</p>
@@ -490,7 +496,7 @@ export function FilesTab({
                   <RiQuillPenAiLine className="size-10 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
                   <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">No AI note yet</p>
                   <p className="mt-1 text-xs text-gray-500">Extract findings from this scan with AI to get started.</p>
-                  <Button variant="primary" size="sm" onClick={() => setExtractConfirm({ type: "scan", attachmentId: id, fileName: attachment.file_name })} className="mt-4 gap-1.5">
+                  <Button variant="primary" size="sm" onClick={() => setExtractConfirm({ type: isEcg ? "ecg" : "scan", attachmentId: id, fileName: attachment.file_name })} className="mt-4 gap-1.5">
                     <RiQuillPenAiLine className="size-4" /> Extract with AI
                   </Button>
                 </div>

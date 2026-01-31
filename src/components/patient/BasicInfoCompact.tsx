@@ -34,6 +34,7 @@ interface Patient {
   address: string | null
   height: number | null
   job: string | null
+  social_status?: string | null
   source?: string | null
   source_other?: string | null
   complaint: string | null
@@ -56,6 +57,7 @@ interface FormData {
   address: string
   job: string
   height: string
+  social_status: string
   source: string
   source_other: string
   complaint: string
@@ -75,6 +77,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
     address: patient.address || "",
     job: patient.job || "",
     height: patient.height?.toString() || "",
+    social_status: (patient as any).social_status || "",
     source: (patient as any).source || "",
     source_other: (patient as any).source_other || "",
     complaint: patient.complaint || "",
@@ -154,6 +157,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
         address: formData.address?.trim() || null,
         job: formData.job?.trim() || null,
         height: formData.height ? parseFloat(formData.height) : null,
+        social_status: formData.social_status?.trim() || null,
         complaint: formData.complaint?.trim() || null,
         source: formData.source || null,
         source_other: formData.source === "other" ? formData.source_other?.trim() || null : null,
@@ -181,6 +185,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
       address: patient.address || "",
       job: patient.job || "",
       height: patient.height?.toString() || "",
+      social_status: (patient as any).social_status || "",
       source: (patient as any).source || "",
       source_other: (patient as any).source_other || "",
       complaint: patient.complaint || "",
@@ -301,6 +306,9 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
             ) : null}
             {patient.job ? (
               <InfoItem icon={RiBriefcaseLine} label="Occupation" value={patient.job} />
+            ) : null}
+            {(patient as any).social_status ? (
+              <InfoItem icon={RiUserLine} label="Social status" value={(patient as any).social_status} />
             ) : null}
             {patient.height ? (
               <InfoItem icon={RiRulerLine} label="Height" value={`${patient.height} cm`} />
@@ -473,6 +481,21 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                 {errors.height && (
                   <p className="text-sm text-red-600 dark:text-red-400">{errors.height}</p>
                 )}
+              </FieldWrapper>
+
+              <FieldWrapper icon={RiUserLine} label="Social status">
+                <Select
+                  id="social_status"
+                  value={formData.social_status}
+                  onChange={(e) => updateField("social_status", e.target.value)}
+                >
+                  <option value="">Select social status</option>
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                  <option value="Divorced">Divorced</option>
+                  <option value="Widowed">Widowed</option>
+                  <option value="Other">Other</option>
+                </Select>
               </FieldWrapper>
 
               <FieldWrapper icon={RiUserLine} label="Source">

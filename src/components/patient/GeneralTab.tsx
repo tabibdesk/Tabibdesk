@@ -39,26 +39,16 @@ interface Patient {
   ai_diagnosis_updated_at?: string | null
 }
 
-interface WeightLog {
-  id: string
-  patient_id: string
-  weight: number
-  recorded_date: string
-  notes: string | null
-}
-
 interface GeneralTabProps {
   patient: Patient
-  weightLogs?: WeightLog[]
   pastMedications?: PastMedication[]
   onAddPastMedication?: () => void
   onUpdatePatient?: (updates: Partial<Patient>) => Promise<void>
 }
 
-export function GeneralTab({ patient, weightLogs = [], pastMedications = [], onAddPastMedication, onUpdatePatient }: GeneralTabProps) {
+export function GeneralTab({ patient, pastMedications = [], onAddPastMedication, onUpdatePatient }: GeneralTabProps) {
   // Keeping this tab intentionally minimal: only the first widget (BasicInfoCompact).
   // Everything else that used to be here moved to the Doctor tab.
-  void weightLogs
   void pastMedications
   void onAddPastMedication
 

@@ -3,7 +3,7 @@
  * API: attachment create/update accepts attachment_kind; scan extraction has its own endpoint shape.
  */
 
-export type AttachmentKind = "lab" | "scan" | "document"
+export type AttachmentKind = "lab" | "scan" | "document" | "ecg"
 
 export interface Attachment {
   id: string
@@ -14,7 +14,7 @@ export interface Attachment {
   file_url: string
   uploaded_at: string
   uploaded_by: string
-  /** Lab = lab report (AI can extract table); Scan = imaging (AI can extract text note); Document = generic file. */
+  /** Lab = lab report (AI can extract table); Scan = imaging (AI can extract text note); Document = generic file; ECG = ECG file. */
   attachment_kind?: AttachmentKind
   /** Data URL or URL of thumbnail (e.g. generated on upload for images). */
   thumbnail_url?: string

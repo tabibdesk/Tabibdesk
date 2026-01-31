@@ -4,7 +4,13 @@ import { useClinicalNotes } from "./useClinicalNotes"
 import { ClinicalNotesDesktop } from "./ClinicalNotesDesktop"
 import { ClinicalNotesMobile } from "./ClinicalNotesMobile"
 
+export interface MetricToRecord {
+  id: string
+  label: string
+}
+
 interface ClinicalNotesTabProps {
+  metricsToRecord?: MetricToRecord[]
   onSaveNote?: (note: string) => void
 }
 

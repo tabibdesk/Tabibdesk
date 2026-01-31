@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/Button"
@@ -26,6 +26,10 @@ import type { CreateTaskPayload, TaskListItem } from "@/features/tasks/tasks.typ
 import { listInvoices } from "@/api/invoices.api"
 import { update as updatePatient } from "@/api/patients.api"
 import { getByPatientId as getNotesByPatientId } from "@/api/notes.api"
+import { getProgressByPatientId } from "@/api/progress.api"
+import { getClinicSettings } from "@/api/settings.api"
+import type { ProgressMetric } from "@/types/progress"
+import { getMetricsToRecord } from "@/types/progress"
 import { useToast } from "@/hooks/useToast"
 import { AddPrescriptionDrawer } from "@/features/prescriptions/AddPrescriptionDrawer"
 import { AddPastMedicationDrawer } from "@/components/patient/AddPastMedicationDrawer"
@@ -44,6 +48,23 @@ import {
   RiMoneyDollarCircleLine,
   RiTimeLine,
 } from "@remixicon/react"
+
+function orderProgressMetricsByTracked(
+  metrics: ProgressMetric[],
+  trackedIds: string[]
+): ProgressMetric[] {
+  if (trackedIds.length === 0) return metrics
+  const byId = new Map(metrics.map((m) => [m.id, m]))
+  const ordered: ProgressMetric[] = []
+  for (const id of trackedIds) {
+    const m = byId.get(id)
+    if (m && m.points.length >= 2) ordered.push(m)
+  }
+  for (const m of metrics) {
+    if (!trackedIds.includes(m.id)) ordered.push(m)
+  }
+  return ordered
+}
 
 export default function PatientDetailPage() {
   const params = useParams()
@@ -64,7 +85,8 @@ export default function PatientDetailPage() {
   const [invoicesRefreshTrigger, setInvoicesRefreshTrigger] = useState(0)
 
   // Data for tabs
-  const [weightLogs, setWeightLogs] = useState<any[]>([])
+  const [progressMetrics, setProgressMetrics] = useState<ProgressMetric[]>([])
+  const [enabledProgressMetricIds, setEnabledProgressMetricIds] = useState<string[]>([])
   const [medications, setMedications] = useState<any[]>([])
   const [prescriptions, setPrescriptions] = useState<any[]>([])
   const [labResults, setLabResults] = useState<any[]>([])
@@ -91,6 +113,26 @@ export default function PatientDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patientId, isDemoMode])
 
+  useEffect(() => {
+    const clinicId = currentClinic?.id
+    if (!clinicId) return
+    getClinicSettings(clinicId).then((settings) => {
+      setEnabledProgressMetricIds(settings.enabledProgressMetricIds ?? [])
+    })
+  }, [currentClinic?.id])
+
+  const defaultMetricIds = useMemo(
+    () => ["weight", "bmi", "bp", "pulse", "blood_sugar"],
+    []
+  )
+  const metricsToRecord = useMemo(
+    () =>
+      getMetricsToRecord(
+        enabledProgressMetricIds.length > 0 ? enabledProgressMetricIds : defaultMetricIds
+      ),
+    [enabledProgressMetricIds, defaultMetricIds]
+  )
+
   const fetchPatientData = async () => {
     setLoading(true)
 
@@ -100,7 +142,7 @@ export default function PatientDetailPage() {
         setPatient(foundPatient)
 
         // Load all related data
-        setWeightLogs(mockData.weightLogs.filter((w) => w.patient_id === patientId))
+        getProgressByPatientId(patientId).then((res) => setProgressMetrics(res.metrics))
         setMedications(mockData.medications.filter((m) => m.patient_id === patientId))
         setPrescriptions(mockData.prescriptions.filter((p) => p.patientId === patientId))
         setLabResults(mockData.labResults.filter((l) => l.patient_id === patientId))
@@ -372,6 +414,7 @@ export default function PatientDetailPage() {
       <div>
         {activeTab === "note" && (
           <ClinicalNotesTab
+            metricsToRecord={metricsToRecord}
             onSaveNote={(note) => {
               // TODO: Implement save note
               console.log("Save note:", note)
@@ -382,7 +425,7 @@ export default function PatientDetailPage() {
           <DoctorTab
             patient={patient}
             notes={notes}
-            weightLogs={weightLogs}
+            progressMetrics={orderProgressMetricsByTracked(progressMetrics, [])}
             pastMedications={pastMedications}
             prescriptions={prescriptions}
             onAddPastMedication={() => setShowAddPastMedicationDrawer(true)}
@@ -557,7 +600,8 @@ export default function PatientDetailPage() {
                 notes: payload.notes ?? null,
               }
               mockData.weightLogs.push(newLog as any)
-              setWeightLogs(mockData.weightLogs.filter((w) => w.patient_id === patientId))
+              const res = await getProgressByPatientId(patientId)
+              setProgressMetrics(res.metrics)
             }
             showToast("Weight recorded successfully", "success")
           }}

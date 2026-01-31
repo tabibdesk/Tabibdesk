@@ -13,11 +13,13 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       <select
         ref={ref}
         className={cx(
-          "flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900",
+          // Match Input height and styling: same padding as Input (py-1.5), extra right for icon + margin
+          "block w-full min-w-0 truncate rounded-md border border-gray-300 bg-white py-1.5 pl-2.5 pr-8 text-left text-sm text-gray-900 shadow-sm",
           "focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50",
           "dark:focus:border-primary-400 dark:focus:ring-primary-400",
+          "transition outline-none",
           className,
         )}
         {...props}

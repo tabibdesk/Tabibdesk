@@ -67,6 +67,8 @@ export interface ClinicSettings {
   bufferMinutes?: number // buffer time between appointments (default 5)
   appointmentSettings?: AppointmentSettings
   followUpRules?: ClinicFollowUpRules
+  /** Metric ids enabled for this clinic (note reminder + available for progress charts). All enabled metrics with data show in patient Progress section. */
+  enabledProgressMetricIds?: string[]
 }
 
 // Effective features result (what user actually has access to)

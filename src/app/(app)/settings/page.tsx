@@ -32,10 +32,13 @@ import {
   RiVoiceprintLine,
   RiScan2Line,
   RiRefreshLine,
+  RiLineChartLine,
+  RiUserHeartLine,
 } from "@remixicon/react"
 import { FollowUpRulesTab } from "./FollowUpRulesTab"
+import { getBasicMetrics, getSpecialtyMetrics } from "@/types/progress"
 
-type TabId = "profile" | "clinic-team" | "modules" | "preferences" | "followup"
+type TabId = "profile" | "clinic-team" | "modules" | "preferences" | "followup" | "patient"
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("modules")
@@ -46,6 +49,7 @@ export default function SettingsPage() {
     { id: "clinic-team" as const, label: "Clinic & Team", icon: RiBuildingLine },
     { id: "modules" as const, label: "Modules", icon: RiPuzzleLine },
     { id: "followup" as const, label: "Follow-up Rules", icon: RiRefreshLine },
+    { id: "patient" as const, label: "Patient", icon: RiUserHeartLine },
     { id: "preferences" as const, label: "Appointments", icon: RiCalendarLine },
   ]
 
@@ -96,6 +100,7 @@ export default function SettingsPage() {
         {activeTab === "clinic-team" && <ClinicTeamTab />}
         {activeTab === "modules" && <ModulesTab canEdit={canEditModules} />}
         {activeTab === "followup" && <FollowUpRulesTab />}
+        {activeTab === "patient" && <PatientTab />}
         {activeTab === "preferences" && <PreferencesTab />}
       </div>
     </div>
@@ -445,6 +450,106 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+const DEFAULT_ENABLED_METRIC_IDS = ["weight", "bmi", "bp", "pulse", "blood_sugar"]
+
+// Patient tab: progress metrics (enable/disable; all enabled metrics show in patient Progress section)
+function PatientTab() {
+  const { currentClinic } = useUserClinic()
+  const [enabledIds, setEnabledIds] = useState<Set<string>>(new Set())
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    settingsApi.getClinicSettings(currentClinic.id).then((settings) => {
+      const enabled =
+        settings.enabledProgressMetricIds && settings.enabledProgressMetricIds.length > 0
+          ? settings.enabledProgressMetricIds
+          : DEFAULT_ENABLED_METRIC_IDS
+      setEnabledIds(new Set(enabled))
+    })
+  }, [currentClinic.id])
+
+  const toggleMetric = (id: string) => {
+    setEnabledIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      await settingsApi.updateClinicSettings(currentClinic.id, {
+        enabledProgressMetricIds: Array.from(enabledIds),
+      })
+    } catch (error) {
+      console.error("Failed to save progress settings:", error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const basicMetrics = getBasicMetrics()
+  const specialtyMetrics = getSpecialtyMetrics()
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Progress Metrics</CardTitle>
+          <CardDescription>
+            Enable metrics to remind doctors to record them in notes and to show them in the patient Progress section. Toggle basic vitals and specialty metrics below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Basic metrics</h4>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {basicMetrics.map((m) => (
+                  <div key={m.id} className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-2">
+                    <div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{m.label}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({m.unit})</span>
+                    </div>
+                    <Switch
+                      checked={enabledIds.has(m.id)}
+                      onCheckedChange={() => toggleMetric(m.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Specialty metrics</h4>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {specialtyMetrics.map((m) => (
+                  <div key={m.id} className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-2">
+                    <div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{m.label}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">({m.unit})</span>
+                    </div>
+                    <Switch
+                      checked={enabledIds.has(m.id)}
+                      onCheckedChange={() => toggleMetric(m.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button variant="primary" onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
+              {isSaving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 

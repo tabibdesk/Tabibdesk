@@ -12,7 +12,7 @@ import type { Attachment, AttachmentKind, CreateAttachmentPayload, ExtractScanPa
 /**
  * Create attachment for a patient (upload file with kind).
  * API: POST .../patients/:patientId/attachments
- * Body should include attachment_kind: "lab" | "scan" | "document".
+ * Body should include attachment_kind: "lab" | "scan" | "document" | "ecg".
  */
 export async function createAttachment(
   _patientId: string,

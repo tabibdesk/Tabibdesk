@@ -13,6 +13,11 @@ import {
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
 
+interface MetricToRecord {
+  id: string
+  label: string
+}
+
 interface ClinicalNotesDesktopProps {
   // Hook state
   newNote: string
@@ -26,6 +31,8 @@ interface ClinicalNotesDesktopProps {
   totalCount: number
   completenessPercentage: number
   checklistItems: any[]
+  metricsToRecord?: MetricToRecord[]
+  metricsChecklist?: Record<string, boolean>
   
   handleSendNote: () => void
   handleStartRecording: () => void
@@ -43,6 +50,8 @@ export function ClinicalNotesDesktop({
   checklist,
   completenessPercentage,
   checklistItems,
+  metricsToRecord = [],
+  metricsChecklist = {},
   handleSendNote,
   handleStartRecording,
   handleStopRecording,
@@ -89,6 +98,32 @@ export function ClinicalNotesDesktop({
                 </div>
               ))}
             </div>
+            {metricsToRecord.length > 0 && (
+              <>
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <div className="grid grid-cols-1 gap-4">
+                    {metricsToRecord.map((m) => (
+                      <div key={m.id} className="flex items-center gap-3">
+                        <div className={cx(
+                          "size-5 rounded-full border flex items-center justify-center transition-all duration-300",
+                          metricsChecklist[m.id]
+                            ? "bg-primary-600 border-primary-600 text-white scale-110 shadow-sm"
+                            : "border-gray-200 dark:border-gray-700"
+                        )}>
+                          {metricsChecklist[m.id] && <RiCheckboxCircleLine className="size-3.5" />}
+                        </div>
+                        <span className={cx(
+                          "text-sm transition-colors",
+                          metricsChecklist[m.id] ? "text-gray-900 dark:text-gray-100 font-semibold" : "text-gray-400"
+                        )}>
+                          {m.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -48,6 +48,7 @@ export interface CreatePatientPayload {
   age?: number
   height?: number
   job?: string
+  socialStatus?: string
   complaint?: string
 }
 
@@ -114,6 +115,7 @@ export async function create(payload: CreatePatientPayload): Promise<Patient> {
     date_of_birth: null,
     complaint: payload.complaint || null,
     job: payload.job || null,
+    social_status: payload.socialStatus || null,
     source: payload.source || null,
     source_other: payload.sourceOther || null,
     doctor_id: null,

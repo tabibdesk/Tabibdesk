@@ -54,6 +54,7 @@ interface AddFileDrawerProps {
 const KIND_OPTIONS: { value: AttachmentKind; label: string; icon: typeof RiFlaskLine }[] = [
   { value: "lab", label: "Lab", icon: RiFlaskLine },
   { value: "scan", label: "Scan", icon: RiHeartPulseLine },
+  { value: "ecg", label: "ECG", icon: RiHeartPulseLine },
   { value: "document", label: "Document", icon: RiFileTextLine },
 ]
 

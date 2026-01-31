@@ -46,6 +46,7 @@ interface Patient {
   height: number | null
   complaint: string | null
   job: string | null
+  social_status: string | null
   ai_diagnosis: string | null
   ai_diagnosis_updated_at: string | null
   // Medical conditions
@@ -88,6 +89,7 @@ export const mockPatients: Patient[] = [
     height: 165,
     complaint: "High blood pressure and occasional headaches",
     job: "Teacher",
+    social_status: "Married",
     ai_diagnosis: "Hypertension Stage 1 - well controlled with medication. Patient shows good adherence to treatment plan.",
     ai_diagnosis_updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     is_diabetic: false,
@@ -127,6 +129,7 @@ export const mockPatients: Patient[] = [
     height: 178,
     complaint: "Type 2 Diabetes, joint pain",
     job: "Engineer",
+    social_status: "Married",
     ai_diagnosis: "Type 2 Diabetes Mellitus with good glycemic control (HbA1c: 6.8%). Mild osteoarthritis in knees.",
     ai_diagnosis_updated_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
     is_diabetic: true,
@@ -166,6 +169,7 @@ export const mockPatients: Patient[] = [
     height: 162,
     complaint: "Weight management and fatigue",
     job: "Pharmacist",
+    social_status: "Single",
     ai_diagnosis: "Hypothyroidism with anemia. Patient requires iron supplementation and thyroid hormone optimization.",
     ai_diagnosis_updated_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
     is_diabetic: false,
@@ -205,6 +209,7 @@ export const mockPatients: Patient[] = [
     height: 180,
     complaint: "Asthma and seasonal allergies",
     job: "Accountant",
+    social_status: "Married",
     ai_diagnosis: "Bronchial Asthma - moderate persistent. Well controlled with current inhaler regimen.",
     ai_diagnosis_updated_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     is_diabetic: false,
@@ -244,6 +249,7 @@ export const mockPatients: Patient[] = [
     height: 168,
     complaint: "GERD symptoms and weight management",
     job: "Marketing Specialist",
+    social_status: "Single",
     ai_diagnosis: "Gastroesophageal Reflux Disease (GERD). Recommend dietary modifications and PPI therapy.",
     ai_diagnosis_updated_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     is_diabetic: false,
@@ -2136,6 +2142,62 @@ export const mockAttachments: Attachment[] = [
     uploaded_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     uploaded_by: "Dr. Ahmed Hassan",
     attachment_kind: "scan",
+  },
+  // ECG file for each patient (public/mock/files/ecg.jpeg)
+  {
+    id: "attach-008",
+    patient_id: "patient-001",
+    file_name: "ECG.jpeg",
+    file_type: "image/jpeg",
+    file_size: 256000,
+    file_url: "/mock/files/ecg.jpeg",
+    uploaded_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    uploaded_by: "Dr. Ahmed Hassan",
+    attachment_kind: "ecg",
+  },
+  {
+    id: "attach-009",
+    patient_id: "patient-002",
+    file_name: "ECG.jpeg",
+    file_type: "image/jpeg",
+    file_size: 256000,
+    file_url: "/mock/files/ecg.jpeg",
+    uploaded_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    uploaded_by: "Dr. Ahmed Hassan",
+    attachment_kind: "ecg",
+  },
+  {
+    id: "attach-010",
+    patient_id: "patient-003",
+    file_name: "ECG.jpeg",
+    file_type: "image/jpeg",
+    file_size: 256000,
+    file_url: "/mock/files/ecg.jpeg",
+    uploaded_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    uploaded_by: "Dr. Ahmed Hassan",
+    attachment_kind: "ecg",
+  },
+  {
+    id: "attach-011",
+    patient_id: "patient-004",
+    file_name: "ECG.jpeg",
+    file_type: "image/jpeg",
+    file_size: 256000,
+    file_url: "/mock/files/ecg.jpeg",
+    uploaded_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    uploaded_by: "Dr. Ahmed Hassan",
+    attachment_kind: "ecg",
+  },
+  {
+    id: "attach-012",
+    patient_id: "patient-005",
+    file_name: "ECG.jpeg",
+    file_type: "image/jpeg",
+    file_size: 256000,
+    file_url: "/mock/files/ecg.jpeg",
+    uploaded_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    uploaded_by: "Dr. Ahmed Hassan",
+    attachment_kind: "ecg",
   },
 ]
 

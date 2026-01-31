@@ -13,6 +13,7 @@ export interface Patient {
   height: number | null
   complaint: string | null
   job: string | null
+  social_status?: string | null
   source?: string | null
   source_other?: string | null
   doctor_id: string | null
@@ -55,4 +56,5 @@ export interface CreatePatientInput {
   source_other?: string
   address?: string
   complaint?: string
+  social_status?: string
 }

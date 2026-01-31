@@ -14,6 +14,11 @@ import {
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
 
+interface MetricToRecord {
+  id: string
+  label: string
+}
+
 interface ClinicalNotesMobileProps {
   // Hook state
   newNote: string
@@ -27,6 +32,8 @@ interface ClinicalNotesMobileProps {
   totalCount: number
   completenessPercentage: number
   checklistItems: any[]
+  metricsToRecord?: MetricToRecord[]
+  metricsChecklist?: Record<string, boolean>
   
   // Handlers
   handleSendNote: () => void
@@ -45,6 +52,8 @@ export function ClinicalNotesMobile({
   checklist,
   completenessPercentage,
   checklistItems,
+  metricsToRecord = [],
+  metricsChecklist = {},
   handleSendNote,
   handleStartRecording,
   handleStopRecording,
@@ -155,6 +164,37 @@ export function ClinicalNotesMobile({
                   </div>
                 ))}
               </div>
+              {metricsToRecord.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <div className="space-y-3">
+                    {metricsToRecord.map((m) => (
+                      <div key={m.id} className={cx(
+                        "flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 border",
+                        metricsChecklist[m.id]
+                          ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm"
+                          : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
+                      )}>
+                        <div className={cx(
+                          "size-7 rounded-full border-2 flex items-center justify-center transition-all duration-500 shrink-0",
+                          metricsChecklist[m.id]
+                            ? "bg-primary-600 border-primary-600 text-white scale-110 rotate-0"
+                            : "border-gray-300 dark:border-gray-700 rotate-45"
+                        )}>
+                          {metricsChecklist[m.id] ? <RiCheckboxCircleLine className="size-5" /> : <div className="size-1 rounded-full bg-gray-300 dark:bg-gray-700" />}
+                        </div>
+                        <span className={cx(
+                          "text-sm font-semibold flex-1 transition-colors",
+                          metricsChecklist[m.id]
+                            ? "text-primary-900 dark:text-primary-100"
+                            : "text-gray-500 dark:text-gray-400"
+                        )}>
+                          {m.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="mt-8 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
                 <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed text-center font-medium">
                   Clinical items are automatically detected as you type or record your observations.
@@ -167,6 +207,16 @@ export function ClinicalNotesMobile({
 
       {/* Main Content - full width, no horizontal padding */}
       <div className="flex-1 flex flex-col min-h-[320px] px-0 py-2 relative">
+        {(() => {
+          const uncheckedMetrics = metricsToRecord.filter((m) => !metricsChecklist[m.id])
+          return uncheckedMetrics.length > 0 ? (
+            <div className="shrink-0 px-4 py-2 bg-gray-50/50 dark:bg-gray-900/30 border-b border-gray-100 dark:border-gray-800">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Remember to record: {uncheckedMetrics.map((m) => m.label).join(", ")}
+              </p>
+            </div>
+          ) : null
+        })()}
         {/* Textarea */}
         <div className="relative flex-1 flex flex-col min-h-[280px] w-full">
           <textarea
