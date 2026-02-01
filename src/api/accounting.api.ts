@@ -303,9 +303,6 @@ export async function createRefund(input: CreateRefundInput): Promise<Refund> {
     createdByUserId: input.createdByUserId,
   }
   refundsStore.push(refund)
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'accounting.api.ts:createRefund',message:'refund pushed to store',data:{refundId:refund.id,storeLength:refundsStore.length,createdAt:refund.createdAt},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
-  // #endregion
 
   const { createInvoiceWithAmount } = await import("@/api/invoices.api")
   await createInvoiceWithAmount({
@@ -322,9 +319,6 @@ export async function createRefund(input: CreateRefundInput): Promise<Refund> {
 
 export async function listRefunds(params: ListRefundsParams): Promise<ListRefundsResponse> {
   await delay(200)
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'accounting.api.ts:listRefunds',message:'listRefunds called',data:{storeLength:refundsStore.length,dateFrom:params.dateFrom,dateTo:params.dateTo,clinicId:params.clinicId},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H4'})}).catch(()=>{});
-  // #endregion
 
   let filtered = refundsStore.filter((r) => r.clinicId === params.clinicId)
 
@@ -344,9 +338,6 @@ export async function listRefunds(params: ListRefundsParams): Promise<ListRefund
   const start = (page - 1) * pageSize
   const end = start + pageSize
   const refunds = filtered.slice(start, end)
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'accounting.api.ts:listRefunds',message:'listRefunds returning',data:{filteredLength:filtered.length,refundsLength:refunds.length,total:filtered.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
-  // #endregion
 
   return {
     refunds,

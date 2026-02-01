@@ -82,9 +82,6 @@ export function ViewInvoiceDrawer({
 
   const handleRefundSuccess = async () => {
     if (!invoice) return
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ViewInvoiceDrawer.tsx:handleRefundSuccess',message:'entry',data:{invoiceId:invoice.id,hasOnSuccess:!!onSuccess},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
     setShowRefundForm(false)
     const [summary, list] = await Promise.all([
       getInvoiceRefundSummary(invoice.id),
@@ -92,9 +89,6 @@ export function ViewInvoiceDrawer({
     ])
     setRefundSummary(summary ?? null)
     setRefunds(list ?? [])
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ViewInvoiceDrawer.tsx:handleRefundSuccess',message:'calling onSuccess',data:{listLength:list?.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
     await onSuccess?.()
   }
 

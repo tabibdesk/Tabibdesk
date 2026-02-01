@@ -492,13 +492,7 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
         }}
         invoice={selectedInvoiceForView}
         onSuccess={async () => {
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'IncomeTab.tsx:onSuccess',message:'onSuccess entered',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2'})}).catch(()=>{});
-          // #endregion
           await Promise.all([refetch(), refetchRefunds()])
-          // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'IncomeTab.tsx:onSuccess',message:'after await Promise.all',data:{},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H2'})}).catch(()=>{});
-          // #endregion
           setShowViewInvoiceDrawer(false)
           setSelectedInvoiceForView(null)
         }}
