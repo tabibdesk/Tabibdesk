@@ -4,6 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Use npm (no pnpm); skip husky in CI
+  NPM_FLAGS = "--legacy-peer-deps"
+  HUSKY = "0"
 
 [[headers]]
   for = "/*"
