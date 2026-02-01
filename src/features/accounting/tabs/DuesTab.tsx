@@ -10,7 +10,7 @@ import { useUserClinic } from "@/contexts/user-clinic-context"
 import { AccountingToolbar, type DateRangePreset } from "../components/AccountingToolbar"
 import { InvoiceDrawer } from "../components/InvoiceDrawer"
 import { mockData } from "@/data/mock/mock-data"
-import { RiPhoneLine, RiWhatsappLine, RiMoneyDollarCircleLine } from "@remixicon/react"
+import { RiPhoneLine, RiWhatsappLine, RiMoneyDollarCircleLine, RiCheckLine } from "@remixicon/react"
 import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 import { startOfToday, startOfMonth } from "date-fns"
 import Link from "next/link"
@@ -183,9 +183,20 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                           >
                             {getPatientName(invoice.patientId)}
                           </Link>
-                          <div className="mt-1 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <RiPhoneLine className="size-4" />
+                          <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                            <RiPhoneLine className="size-4 shrink-0" />
                             <span>{patientPhone}</span>
+                            {patientPhone ? (
+                              <a
+                                href={whatsappLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="shrink-0 rounded p-0.5 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                                title="WhatsApp"
+                              >
+                                <RiWhatsappLine className="size-3.5" />
+                              </a>
+                            ) : null}
                           </div>
                         </td>
                         <td className="px-4 py-4 text-sm font-medium">
@@ -208,25 +219,15 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                           {getDoctorName(invoice.doctorId)}
                         </td>
                         <td className="px-4 py-4">
-                          <div className="flex items-center gap-2">
-                            <a
-                              href={whatsappLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="rounded-md p-1.5 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
-                              title="WhatsApp"
-                            >
-                              <RiWhatsappLine className="size-4" />
-                            </a>
-                            <Button
-                              size="sm"
-                              variant="primary"
-                              onClick={() => handleMarkPaid(invoice)}
-                              className="whitespace-nowrap"
-                            >
-                              {t.invoice.markAsPaid}
-                            </Button>
-                          </div>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleMarkPaid(invoice)}
+                            className="whitespace-nowrap"
+                          >
+                            <RiCheckLine className="size-4 me-1.5 rtl:me-0 rtl:ms-1.5" />
+                            {t.invoice.markAsPaid}
+                          </Button>
                         </td>
                       </tr>
                     )
@@ -254,9 +255,20 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                         >
                           {getPatientName(invoice.patientId)}
                         </Link>
-                        <div className="mt-1 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
                           <RiPhoneLine className="size-4 shrink-0" />
                           <span className="break-all">{patientPhone}</span>
+                          {patientPhone ? (
+                            <a
+                              href={whatsappLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 rounded p-0.5 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                              title="WhatsApp"
+                            >
+                              <RiWhatsappLine className="size-3.5" />
+                            </a>
+                          ) : null}
                         </div>
                       </div>
                       <p className="text-sm font-semibold whitespace-nowrap shrink-0">{invoice.amount.toFixed(2)} EGP</p>
@@ -270,22 +282,14 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                         <div>{getDoctorName(invoice.doctorId)}</div>
                       </div>
                     )}
-                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 rounded-md border border-green-300 px-3 py-2 text-center text-sm text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/20"
-                      >
-                        <RiWhatsappLine className="mx-auto size-4" />
-                        <span className="mt-1 block text-xs">WhatsApp</span>
-                      </a>
+                    <div className="mt-4 flex justify-end">
                       <Button
                         size="sm"
-                        variant="primary"
+                        variant="secondary"
                         onClick={() => handleMarkPaid(invoice)}
-                        className="flex-1"
+                        className="w-full sm:w-auto"
                       >
+                        <RiCheckLine className="size-4 me-1.5 rtl:me-0 rtl:ms-1.5" />
                         {t.invoice.markAsPaid}
                       </Button>
                     </div>

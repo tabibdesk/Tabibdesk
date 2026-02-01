@@ -195,3 +195,54 @@ export interface GetTodayCashierRowsParams {
   clinicId: string
   date: string
 }
+
+// Refunds (invoice-scoped); method shared with payments (PaymentMethod from types/payment)
+export type RefundPaymentMethod = import("@/types/payment").PaymentMethod
+
+export interface Refund {
+  id: string
+  clinicId: string
+  invoiceId: string
+  patientId: string
+  patientName?: string
+  amount: number
+  method: RefundPaymentMethod
+  reason?: string
+  proofFileId?: string
+  createdAt: string
+  createdByUserId: string
+}
+
+export interface CreateRefundInput {
+  clinicId: string
+  invoiceId: string
+  amount: number
+  method: RefundPaymentMethod
+  reason?: string
+  proofFileId?: string
+  createdByUserId: string
+}
+
+export interface InvoiceRefundSummary {
+  invoiceId: string
+  invoiceTotal: number
+  invoicePaid: number
+  invoiceRefunded: number
+  refundable: number
+}
+
+export interface ListRefundsParams {
+  clinicId: string
+  dateFrom?: string
+  dateTo?: string
+  page?: number
+  pageSize?: number
+}
+
+export interface ListRefundsResponse {
+  refunds: Refund[]
+  total: number
+  page: number
+  pageSize: number
+  hasMore: boolean
+}

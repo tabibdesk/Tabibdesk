@@ -9,8 +9,9 @@ import { useExpenses } from "../hooks/useExpenses"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { AccountingToolbar, type DateRangePreset } from "../components/AccountingToolbar"
 import { startOfMonth, startOfToday } from "date-fns"
-import { RiAddLine, RiFileLine, RiShoppingBagLine } from "@remixicon/react"
+import { RiAddLine, RiEyeLine, RiFileLine, RiShoppingBagLine } from "@remixicon/react"
 import { AddExpenseDrawer } from "../components/AddExpenseDrawer"
+import { ViewExpenseDrawer } from "../components/ViewExpenseDrawer"
 import { ProofViewerModal } from "../components/ProofViewerModal"
 import type { Expense, ExpenseCategory, ExpenseMethod } from "@/types/expense"
 import type { AppTranslations } from "@/lib/app-translations"
@@ -41,6 +42,8 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedReceiptFileId, setSelectedReceiptFileId] = useState<string | undefined>(undefined)
   const [showReceiptModal, setShowReceiptModal] = useState(false)
+  const [selectedExpenseForView, setSelectedExpenseForView] = useState<Expense | null>(null)
+  const [showViewExpenseDrawer, setShowViewExpenseDrawer] = useState(false)
 
   const getDateRange = () => {
     if (dateRangePreset === "all") {
@@ -206,6 +209,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                     <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.method}</th>
                     <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.vendor}</th>
                     <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.receipt}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.actions}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
@@ -234,6 +238,21 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                           </button>
                         )}
                       </td>
+                      <td className="px-4 py-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedExpenseForView(expense)
+                            setShowViewExpenseDrawer(true)
+                          }}
+                          className="text-xs p-1.5"
+                          title={t.expense.expenseDetails}
+                          aria-label={t.expense.expenseDetails}
+                        >
+                          <RiEyeLine className="size-4" />
+                        </Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -261,18 +280,34 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                       <p className="text-xs text-gray-600 dark:text-gray-400">{t.expense[EXPENSE_METHOD_KEYS[expense.method]]}</p>
                     </div>
                   </div>
-                  {expense.receiptFileId && (
-                    <button
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
-                        setSelectedReceiptFileId(expense.receiptFileId)
-                        setShowReceiptModal(true)
+                        setSelectedExpenseForView(expense)
+                        setShowViewExpenseDrawer(true)
                       }}
-                      className="mt-2 flex items-center gap-2 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 cursor-pointer"
+                      className="text-xs p-1.5"
+                      title={t.expense.expenseDetails}
+                      aria-label={t.expense.expenseDetails}
                     >
-                      <RiFileLine className="size-4 shrink-0" />
-                      <span>{t.expense.viewReceipt}</span>
-                    </button>
-                  )}
+                      <RiEyeLine className="size-4 me-1" />
+                      {t.expense.expenseDetails}
+                    </Button>
+                    {expense.receiptFileId && (
+                      <button
+                        onClick={() => {
+                          setSelectedReceiptFileId(expense.receiptFileId)
+                          setShowReceiptModal(true)
+                        }}
+                        className="flex items-center gap-2 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 cursor-pointer"
+                      >
+                        <RiFileLine className="size-4 shrink-0" />
+                        <span>{t.expense.viewReceipt}</span>
+                      </button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -287,6 +322,15 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
           refetch()
           setShowAddModal(false)
         }}
+      />
+
+      <ViewExpenseDrawer
+        open={showViewExpenseDrawer}
+        onOpenChange={(open) => {
+          setShowViewExpenseDrawer(open)
+          if (!open) setSelectedExpenseForView(null)
+        }}
+        expense={selectedExpenseForView}
       />
 
       <ProofViewerModal

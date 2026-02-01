@@ -36,7 +36,16 @@ import {
 } from "./invoiceDrawer.utils"
 import { CreateInvoiceForm, type CreateInvoiceFormReadyState } from "./CreateInvoiceForm"
 import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
-import { RiFileLine, RiUserLine, RiStethoscopeLine, RiCalendarLine } from "@remixicon/react"
+import { RiFileLine } from "@remixicon/react"
+import { InvoiceSummarySection } from "./InvoiceSummarySection"
+import { canRefundAccounting } from "@/lib/permissions"
+import {
+  getInvoiceRefundSummary,
+  listRefundsByInvoice,
+} from "@/api/accounting.api"
+import type { InvoiceRefundSummary as InvoiceRefundSummaryType } from "@/features/accounting/accounting.types"
+import type { Refund } from "@/features/accounting/accounting.types"
+import { InvoiceRefundsSection } from "./InvoiceRefundsSection"
 
 export type { PatientAppointment }
 
@@ -86,7 +95,13 @@ export function InvoiceDrawer({
   })
   const formSubmitRef = useRef<() => Promise<void>>(async () => {})
 
+  const [refundSummary, setRefundSummary] = useState<InvoiceRefundSummaryType | null>(null)
+  const [refunds, setRefunds] = useState<Refund[]>([])
+  const [refundSectionLoading, setRefundSectionLoading] = useState(false)
+  const [refundSectionError, setRefundSectionError] = useState<string | null>(null)
+
   const payOnlyMode = mode === "pay-only"
+  const canRefund = canRefundAccounting(currentUser)
   const captureOnlyMode = mode === "capture-only"
 
   const handleFormReady = useCallback((state: CreateInvoiceFormReadyState) => {
@@ -106,6 +121,9 @@ export function InvoiceDrawer({
     setProofFile(null)
     setProofFileId(undefined)
     setUploadingProof(false)
+    setRefundSummary(null)
+    setRefunds([])
+    setRefundSectionError(null)
     if (mode === "pay-only" && invoiceProp) {
       setAmountToCollect(String(invoiceProp.amount))
       setMethod("cash")
@@ -115,6 +133,33 @@ export function InvoiceDrawer({
       setCapturePatient(null)
     }
   }, [open, mode, invoiceProp])
+
+  useEffect(() => {
+    if (!open || !payOnlyMode || !invoiceProp || invoiceProp.status !== "paid") return
+    let cancelled = false
+    setRefundSectionLoading(true)
+    setRefundSectionError(null)
+    Promise.all([
+      getInvoiceRefundSummary(invoiceProp.id),
+      listRefundsByInvoice(invoiceProp.id),
+    ])
+      .then(([summary, refundList]) => {
+        if (cancelled) return
+        setRefundSummary(summary ?? null)
+        setRefunds(refundList ?? [])
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setRefundSectionError(err instanceof Error ? err.message : "Failed to load refunds")
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setRefundSectionLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [open, payOnlyMode, invoiceProp?.id, invoiceProp?.status])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -189,8 +234,6 @@ export function InvoiceDrawer({
     }
   }
 
-  const appointmentData = payOnlyMode && invoiceProp ? getAppointmentData(invoiceProp.appointmentId) : null
-
   const canSubmitPayOnly = payOnlyMode && Number.isFinite(parsedAmount) && parsedAmount > 0
 
   const title = t.invoice.createInvoice
@@ -206,58 +249,7 @@ export function InvoiceDrawer({
           <div className="space-y-5">
             {/* Pay-only: invoice summary */}
             {payOnlyMode && invoiceProp && (
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900">
-                <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-50">{t.invoice.appointmentSummary}</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <RiUserLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
-                    <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.patient}</div>
-                      <div className="font-medium text-gray-900 dark:text-gray-50">
-                        {getPatientName(invoiceProp.patientId)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <RiStethoscopeLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
-                    <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.doctor}</div>
-                      <div className="font-medium text-gray-900 dark:text-gray-50">
-                        {getDoctorName(invoiceProp.doctorId)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <RiStethoscopeLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
-                    <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.appointmentType}</div>
-                      <div className="font-medium text-gray-900 dark:text-gray-50">
-                        {getAppointmentTypeLabel(invoiceProp.appointmentType, t.appointments)}
-                      </div>
-                    </div>
-                  </div>
-                  {appointmentData && (
-                    <div className="flex items-center gap-3">
-                      <RiCalendarLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
-                      <div className="flex-1">
-                        <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.dateTime}</div>
-                        <div className="font-medium text-gray-900 dark:text-gray-50">
-                          {appointmentData.date} at {appointmentData.time}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3">
-                    <RiFileLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
-                    <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.invoiceAmount}</div>
-                      <div className="text-lg font-bold text-gray-900 dark:text-gray-50">
-                        {invoiceProp.amount.toFixed(2)} EGP
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <InvoiceSummarySection invoice={invoiceProp} />
             )}
 
             {/* Pay-only: payment form (amount, method, proof) */}
@@ -340,6 +332,20 @@ export function InvoiceDrawer({
                     </div>
                   )}
               </>
+            )}
+
+            {/* Pay-only + paid invoice: Refunds section */}
+            {payOnlyMode && invoiceProp && invoiceProp.status === "paid" && (
+              <InvoiceRefundsSection
+                invoice={invoiceProp}
+                summary={refundSummary}
+                refunds={refunds}
+                loading={refundSectionLoading}
+                error={refundSectionError}
+                canRefund={canRefund}
+                onRefund={() => {}}
+                showRefundButton={false}
+              />
             )}
 
             {/* Capture-only: patient selection then same form as dashboard */}

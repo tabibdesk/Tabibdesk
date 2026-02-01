@@ -22,6 +22,11 @@ import type {
   ListExpensesResponse,
   ListBalancesParams,
   ListBalancesResponse,
+  Refund,
+  CreateRefundInput,
+  InvoiceRefundSummary,
+  ListRefundsParams,
+  ListRefundsResponse,
 } from "@/features/accounting/accounting.types"
 import type { Payment as InvoicePayment } from "@/types/payment"
 import { listPayments as listPaymentsFromStore } from "@/api/payments.api"
@@ -103,6 +108,9 @@ const expensesStore: Expense[] = [
 
 const settingsStore: Record<string, ClinicAccountingSettings> = {}
 const integrationStore: Record<string, AccountingIntegration> = {}
+
+// Refunds store (invoice-scoped; mock-only)
+const refundsStore: Refund[] = []
 
 // Helper to simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -222,6 +230,136 @@ export async function listPayments(
     pageSize: res.pageSize,
     hasMore: res.hasMore,
   }
+}
+
+/**
+ * REFUNDS — invoice-scoped; in-memory store
+ */
+
+export async function getInvoiceRefundSummary(invoiceId: string): Promise<InvoiceRefundSummary | null> {
+  await delay(100)
+  const { getInvoiceById } = await import("@/api/invoices.api")
+  const { getPaymentByInvoiceId } = await import("@/api/payments.api")
+
+  const inv = await getInvoiceById(invoiceId)
+  if (!inv) return null
+
+  const invoiceTotal =
+    inv.lineItems && inv.lineItems.length > 0
+      ? inv.lineItems.reduce((sum, i) => sum + i.amount, 0)
+      : inv.amount
+
+  const payment = await getPaymentByInvoiceId(invoiceId)
+  const invoicePaid = payment ? payment.amount : 0
+
+  const invoiceRefunded = refundsStore
+    .filter((r) => r.invoiceId === invoiceId)
+    .reduce((sum, r) => sum + r.amount, 0)
+
+  const refundable = Math.max(0, invoicePaid - invoiceRefunded)
+
+  return {
+    invoiceId,
+    invoiceTotal,
+    invoicePaid,
+    invoiceRefunded,
+    refundable,
+  }
+}
+
+export async function listRefundsByInvoice(invoiceId: string): Promise<Refund[]> {
+  await delay(100)
+  return refundsStore
+    .filter((r) => r.invoiceId === invoiceId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
+export async function createRefund(input: CreateRefundInput): Promise<Refund> {
+  await delay(300)
+
+  const summary = await getInvoiceRefundSummary(input.invoiceId)
+  if (!summary) throw new Error("Invoice not found")
+  if (input.amount <= 0) throw new Error("Refund amount must be greater than zero.")
+  if (input.amount > summary.refundable) {
+    throw new Error(
+      `Refund amount cannot exceed refundable amount (${summary.refundable.toFixed(2)} EGP).`
+    )
+  }
+
+  const inv = await (await import("@/api/invoices.api")).getInvoiceById(input.invoiceId)
+  if (!inv) throw new Error("Invoice not found")
+
+  const refund: Refund = {
+    id: `ref_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    clinicId: input.clinicId,
+    invoiceId: input.invoiceId,
+    patientId: inv.patientId,
+    patientName: getPatientName(inv.patientId),
+    amount: input.amount,
+    method: input.method,
+    reason: input.reason,
+    proofFileId: input.proofFileId,
+    createdAt: new Date().toISOString(),
+    createdByUserId: input.createdByUserId,
+  }
+  refundsStore.push(refund)
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'accounting.api.ts:createRefund',message:'refund pushed to store',data:{refundId:refund.id,storeLength:refundsStore.length,createdAt:refund.createdAt},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H1'})}).catch(()=>{});
+  // #endregion
+
+  const { createInvoiceWithAmount } = await import("@/api/invoices.api")
+  await createInvoiceWithAmount({
+    clinicId: inv.clinicId,
+    doctorId: inv.doctorId,
+    patientId: inv.patientId,
+    appointmentId: inv.appointmentId,
+    appointmentType: inv.appointmentType,
+    amount: input.amount,
+  })
+
+  return refund
+}
+
+export async function listRefunds(params: ListRefundsParams): Promise<ListRefundsResponse> {
+  await delay(200)
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'accounting.api.ts:listRefunds',message:'listRefunds called',data:{storeLength:refundsStore.length,dateFrom:params.dateFrom,dateTo:params.dateTo,clinicId:params.clinicId},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H4'})}).catch(()=>{});
+  // #endregion
+
+  let filtered = refundsStore.filter((r) => r.clinicId === params.clinicId)
+
+  if (params.dateFrom) {
+    const fromDate = params.dateFrom.split("T")[0]
+    filtered = filtered.filter((r) => r.createdAt.split("T")[0] >= fromDate)
+  }
+  if (params.dateTo) {
+    const toDate = params.dateTo.split("T")[0]
+    filtered = filtered.filter((r) => r.createdAt.split("T")[0] <= toDate)
+  }
+
+  filtered.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+
+  const page = params.page ?? 1
+  const pageSize = params.pageSize ?? 20
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+  const refunds = filtered.slice(start, end)
+  // #region agent log
+  fetch('http://127.0.0.1:7242/ingest/14d1a666-454e-4d19-a0b7-b746072205fc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'accounting.api.ts:listRefunds',message:'listRefunds returning',data:{filteredLength:filtered.length,refundsLength:refunds.length,total:filtered.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'H3'})}).catch(()=>{});
+  // #endregion
+
+  return {
+    refunds,
+    total: filtered.length,
+    page,
+    pageSize,
+    hasMore: end < filtered.length,
+  }
+}
+
+/** Reset in-memory refunds store (for tests only). */
+export function __testOnlyResetRefundsStore(): void {
+  refundsStore.length = 0
 }
 
 /**

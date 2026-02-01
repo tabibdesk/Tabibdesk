@@ -45,19 +45,24 @@ export function usePayments(params: ListPaymentsParams) {
     params.patientId,
   ])
 
-  return { data, loading, error, refetch: () => {
-    const fetchPayments = async () => {
+  return {
+    data,
+    loading,
+    error,
+    refetch: () => {
       setLoading(true)
       setError(null)
-      try {
-        const result = await listPayments(params)
-        setData(result)
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error("Failed to fetch payments"))
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchPayments()
-  } }
+      const promise = listPayments(params)
+        .then((result) => {
+          setData(result)
+          return result
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err : new Error("Failed to fetch payments"))
+          throw err
+        })
+        .finally(() => setLoading(false))
+      return promise
+    },
+  }
 }
