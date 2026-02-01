@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { getAppointmentTypeLabel } from "../appointmentTypes"
 import { Button } from "@/components/Button"
 import { SearchInput } from "@/components/SearchInput"
 import { useWaitlist } from "../hooks/useWaitlist"
@@ -20,10 +22,12 @@ function WaitlistTable({
   entries,
   loading,
   onBook,
+  t,
 }: {
   entries: WaitlistEntry[]
   loading: boolean
   onBook: (entry: WaitlistEntry) => void
+  t: ReturnType<typeof useAppTranslations>
 }) {
   if (loading) {
     return (
@@ -61,7 +65,7 @@ function WaitlistTable({
               </Link>
               {entry.appointmentType && (
                 <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                  {entry.appointmentType}
+                  {getAppointmentTypeLabel(entry.appointmentType, t.appointments)}
                 </span>
               )}
             </div>
@@ -93,7 +97,7 @@ function WaitlistTable({
           </div>
           <div className="shrink-0">
             <Button variant="primary" size="sm" onClick={() => onBook(entry)} className="btn-card-action">
-              Book
+              {t.appointments.book}
             </Button>
           </div>
         </div>
@@ -103,6 +107,7 @@ function WaitlistTable({
 }
 
 export function WaitlistTab({ clinicId, doctorId, onBook, onAddToWaitlist }: WaitlistTabProps) {
+  const t = useAppTranslations()
   const [searchQuery, setSearchQuery] = useState("")
   
   const { entries, loading } = useWaitlist({
@@ -121,7 +126,7 @@ export function WaitlistTab({ clinicId, doctorId, onBook, onAddToWaitlist }: Wai
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full">
         <SearchInput
-          placeholder="Search by name or phone..."
+          placeholder={t.appointments.searchWaitlist}
           value={searchQuery}
           onSearchChange={setSearchQuery}
           className="flex-1 min-w-0"
@@ -130,10 +135,10 @@ export function WaitlistTab({ clinicId, doctorId, onBook, onAddToWaitlist }: Wai
           <Button
             onClick={onAddToWaitlist}
             variant="secondary"
-            className="shrink-0"
+            className="shrink-0 inline-flex items-center gap-2 rtl:flex-row-reverse"
           >
-            <RiAddLine className="mr-2 size-4" />
-            Add to Waitlist
+            <RiAddLine className="size-4 shrink-0" />
+            {t.appointments.addToWaitlist}
           </Button>
         )}
       </div>
@@ -141,7 +146,8 @@ export function WaitlistTab({ clinicId, doctorId, onBook, onAddToWaitlist }: Wai
       <WaitlistTable 
         entries={entries} 
         loading={loading} 
-        onBook={handleBook} 
+        onBook={handleBook}
+        t={t}
       />
     </div>
   )

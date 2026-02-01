@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
@@ -35,6 +36,7 @@ export function ArchivedTasksTab({
   customDateRange,
   onCustomDateRangeChange,
 }: ArchivedTasksTabProps) {
+  const t = useAppTranslations()
   const [tasks, setTasks] = useState<TaskListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -116,20 +118,21 @@ export function ArchivedTasksTab({
         dateRangePreset={dateRangePreset}
         customDateRange={customDateRange}
         onCustomDateRangeChange={onCustomDateRangeChange}
+        searchPlaceholder={t.archive.searchTasks}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 rtl:flex-row-reverse">
           {(["completed", "ignored", "cancelled"] as ArchivedTaskStatus[]).map((status) => (
             <button
               key={status}
               onClick={() => toggleStatusFilter(status)}
               className={cx(
-                "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all border shadow-sm capitalize",
+                "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all border shadow-sm",
                 statusFilters.includes(status)
                   ? "bg-primary-50 border-primary-200 text-primary-700 dark:bg-primary-900/20 dark:border-primary-800 dark:text-primary-400"
                   : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400"
               )}
             >
-              {status}
+              {status === "completed" ? t.archive.statusCompleted : status === "ignored" ? t.archive.statusIgnored : t.archive.statusCancelled}
             </button>
           ))}
         </div>
@@ -137,8 +140,8 @@ export function ArchivedTasksTab({
 
       {/* Results Count */}
       {!loading && tasks.length > 0 && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 px-1">
-          Found {total} archived task{total !== 1 ? "s" : ""}
+        <p className="text-xs text-gray-500 dark:text-gray-400 px-1 text-start">
+          {(total === 1 ? t.archive.foundTasks : t.archive.foundTasksPlural).replace("{n}", String(total))}
         </p>
       )}
 
@@ -178,7 +181,7 @@ export function ArchivedTasksTab({
                 disabled={loading}
                 isLoading={loading}
               >
-                Load More
+                {t.archive.loadMore}
               </Button>
             </div>
           )}

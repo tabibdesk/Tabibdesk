@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card, CardContent, CardHeader } from "@/components/Card"
 import { Badge } from "@/components/Badge"
 import { Checkbox } from "@/components/Checkbox"
@@ -89,7 +90,9 @@ export function ProfileTab({
   onNoteAdded,
   onUpdatePatient,
 }: ProfileTabProps) {
+  const t = useAppTranslations()
 
+  // Medical condition labels kept in English (clinical terms)
   const allMedicalConditions = [
     { id: "is_diabetic", label: "Diabetes", value: patient.is_diabetic },
     { id: "is_hypertensive", label: "Hypertension", value: patient.is_hypertensive },
@@ -127,10 +130,10 @@ export function ProfileTab({
             <div className="flex items-center gap-2">
               <RiRobot2Line className="size-4 text-blue-600 dark:text-blue-400" />
               <h3 className="text-xs font-bold text-blue-900/70 dark:text-blue-100/70 uppercase tracking-widest">
-                AI Medical Summary
+                {t.profile.aiMedicalSummary}
               </h3>
               <Badge color="indigo" size="xs">
-                AI Generated
+                {t.profile.aiGenerated}
               </Badge>
             </div>
           </CardHeader>
@@ -140,7 +143,7 @@ export function ProfileTab({
             </div>
             {patient.ai_diagnosis_updated_at && (
               <div className="mt-3 flex items-center gap-1.5 text-[11px] text-gray-400 font-medium">
-                <span>Last updated: {new Date(patient.ai_diagnosis_updated_at).toLocaleString()}</span>
+                <span>{t.profile.lastUpdated}: {new Date(patient.ai_diagnosis_updated_at).toLocaleString()}</span>
               </div>
             )}
           </CardContent>
@@ -191,11 +194,11 @@ export function ProfileTab({
           <div className="flex items-center gap-2">
             <RiCapsuleLine className="size-3.5 text-primary-500/70 dark:text-primary-400/70" />
             <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-              Prescriptions
+              {t.profile.prescriptions}
             </h3>
           </div>
           {onAddPrescription && (
-            <Button variant="ghost" size="sm" onClick={onAddPrescription} className="size-7 shrink-0 p-0" title="Add prescription">
+            <Button variant="ghost" size="sm" onClick={onAddPrescription} className="size-7 shrink-0 p-0" title={t.profile.addPrescription}>
               <RiAddLine className="size-3.5" />
             </Button>
           )}
@@ -204,8 +207,8 @@ export function ProfileTab({
           {prescriptions.length === 0 ? (
             <PatientEmptyState
               icon={RiCapsuleLine}
-              title="No prescriptions yet"
-              description="Add a prescription to see it here."
+              title={t.profile.noPrescriptions}
+              description={t.profile.addPrescriptionDesc}
             />
           ) : (
             <div className="space-y-2">
@@ -232,7 +235,7 @@ export function ProfileTab({
                       </div>
                       {prescription.visitType && (
                         <Badge color="gray" size="xs">
-                          {prescription.visitType === "in_clinic" ? "In Clinic" : "Online"}
+                          {prescription.visitType === "in_clinic" ? t.profile.inClinic : t.profile.online}
                         </Badge>
                       )}
                     </div>
@@ -254,7 +257,7 @@ export function ProfileTab({
                             </span>
                           )}
                           {item.notes && (
-                            <span className="text-gray-400 italic w-full text-xs">Note: {item.notes}</span>
+                            <span className="text-gray-400 italic w-full text-xs">{t.profile.note}: {item.notes}</span>
                           )}
                         </div>
                       ))}
@@ -277,11 +280,11 @@ export function ProfileTab({
           <div className="flex items-center gap-2">
             <RiLineChartLine className="size-4 text-primary-500/70 dark:text-primary-400/70" />
             <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-              Progress
+              {t.profile.progress}
             </h3>
           </div>
           {onAddWeightLog && (
-            <Button variant="ghost" size="sm" onClick={onAddWeightLog} className="size-8 shrink-0 p-0" title="Add weight">
+            <Button variant="ghost" size="sm" onClick={onAddWeightLog} className="size-8 shrink-0 p-0" title={t.profile.addWeight}>
               <RiAddLine className="size-4" />
             </Button>
           )}
@@ -291,8 +294,8 @@ export function ProfileTab({
             <CardContent className="p-4">
               <PatientEmptyState
                 icon={RiLineChartLine}
-                title="No progress data yet"
-                description="Record weight, labs, or medications to see progress here."
+                title={t.profile.noProgressData}
+                description={t.profile.recordProgressDesc}
               />
             </CardContent>
           </Card>
@@ -303,7 +306,7 @@ export function ProfileTab({
                 <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12">
                   <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                     {metric.label}
-                    {metric.unit && <span className="ml-1 font-normal text-gray-500">({metric.unit})</span>}
+                    {metric.unit && <span className="ms-1 font-normal text-gray-500">({metric.unit})</span>}
                   </h3>
                 </CardHeader>
                 <CardContent className="p-4">

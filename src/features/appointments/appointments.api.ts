@@ -13,6 +13,7 @@ import { getFollowUpRules } from "@/api/settings.api"
 import { createFollowUpTask, hasOpenFollowUpTask } from "@/features/tasks/tasks.api"
 import type { AppointmentStatus } from "@/features/patients/patientLifecycle"
 import type { ListAppointmentsParams, ListAppointmentsResponse, AppointmentListItem } from "./appointments.types"
+import { getAppointmentTypeIdForStorage } from "./appointmentTypes"
 import type { Appointment as AppointmentType, WaitlistEntry, Slot } from "./types"
 
 // In-memory store for appointments (demo mode only)
@@ -554,7 +555,8 @@ export async function createAppointment(params: {
   appointmentType: string
   notes?: string
 }): Promise<AppointmentType> {
-  const { patientId, patientName, patientPhone, clinicId, doctorId, startAt, endAt, appointmentType, notes } = params
+  const { patientId, patientName, patientPhone, clinicId, doctorId, startAt, endAt, appointmentType: appointmentTypeParam, notes } = params
+  const appointmentType = getAppointmentTypeIdForStorage(appointmentTypeParam)
   
   // Calculate duration from slot
   const start = new Date(startAt)
@@ -669,7 +671,7 @@ export async function createAppointmentFromWaitlist(params: {
     appointment_time: startAt.toTimeString().slice(0, 5),
     duration_minutes: durationMinutes,
     status: "scheduled",
-    type: waitlistEntry.appointmentType || "Consultation",
+    type: getAppointmentTypeIdForStorage(waitlistEntry.appointmentType),
     scheduled_at: slot.startAt,
     notes: waitlistEntry.notes || null,
     created_at: now,
@@ -684,7 +686,7 @@ export async function createAppointmentFromWaitlist(params: {
     patient_name: waitlistEntry.patientName,
     scheduled_at: slot.startAt,
     status: "scheduled" as const,
-    type: waitlistEntry.appointmentType || "Consultation",
+    type: getAppointmentTypeIdForStorage(waitlistEntry.appointmentType),
     notes: waitlistEntry.notes || null,
     created_at: now,
     doctor_id: doctorId || null,
@@ -727,7 +729,7 @@ export async function createAppointmentFromWaitlist(params: {
     endAt: slot.endAt,
     durationMinutes,
     status: "scheduled",
-    type: waitlistEntry.appointmentType || "Consultation",
+    type: getAppointmentTypeIdForStorage(waitlistEntry.appointmentType),
     notes: waitlistEntry.notes,
     createdAt: now,
   }

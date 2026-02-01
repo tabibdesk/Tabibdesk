@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { getAppointmentTypeLabel } from "../appointmentTypes"
 import Link from "next/link"
 import { Badge } from "@/components/Badge"
 import { Button } from "@/components/Button"
@@ -18,6 +20,7 @@ interface SlotRowProps {
 }
 
 export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
+  const t = useAppTranslations()
   const { showToast } = useToast()
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
@@ -85,7 +88,7 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
           {slot.appointmentType && slot.appointmentType !== "flexible" && (
             <>
               <span className="text-gray-300 dark:text-gray-600">·</span>
-              <span>{slot.appointmentType}</span>
+              <span>{getAppointmentTypeLabel(slot.appointmentType, t.appointments)}</span>
             </>
           )}
         </div>

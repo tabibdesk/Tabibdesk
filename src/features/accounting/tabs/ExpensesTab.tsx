@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
@@ -11,13 +12,29 @@ import { startOfMonth, startOfToday } from "date-fns"
 import { RiAddLine, RiFileLine, RiShoppingBagLine } from "@remixicon/react"
 import { AddExpenseDrawer } from "../components/AddExpenseDrawer"
 import { ProofViewerModal } from "../components/ProofViewerModal"
-import type { Expense } from "@/types/expense"
+import type { Expense, ExpenseCategory, ExpenseMethod } from "@/types/expense"
+import type { AppTranslations } from "@/lib/app-translations"
+
+const EXPENSE_CATEGORY_KEYS: Record<ExpenseCategory, keyof AppTranslations["expense"]> = {
+  supplies: "categorySupplies",
+  rent: "categoryRent",
+  salaries: "categorySalaries",
+  utilities: "categoryUtilities",
+  marketing: "categoryMarketing",
+  other: "categoryOther",
+}
+const EXPENSE_METHOD_KEYS: Record<ExpenseMethod, keyof AppTranslations["expense"]> = {
+  cash: "methodCash",
+  instapay: "methodInstapay",
+  transfer: "methodTransfer",
+}
 
 interface ExpensesTabProps {
   dateRangePreset: DateRangePreset
 }
 
 export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -145,12 +162,13 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
           <AccountingToolbar
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
+            searchPlaceholder={t.accounting.searchExpenses}
           />
         </div>
-        <Button variant="secondary" onClick={() => setShowAddModal(true)} className="w-full sm:w-auto shrink-0 md:h-9 md:py-1.5 md:text-sm">
-          <RiAddLine className="mr-2 size-4" />
-          <span className="hidden sm:inline">Add Expense</span>
-          <span className="sm:hidden">Add</span>
+        <Button variant="secondary" onClick={() => setShowAddModal(true)} className="w-full sm:w-auto shrink-0 md:h-9 md:py-1.5 md:text-sm inline-flex items-center gap-2 rtl:flex-row-reverse">
+          <RiAddLine className="size-4" />
+          <span className="hidden sm:inline">{t.expense.addExpense}</span>
+          <span className="sm:hidden">{t.expense.add}</span>
         </Button>
       </div>
 
@@ -170,7 +188,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
           <CardContent className="py-12 text-center">
             <RiShoppingBagLine className="mx-auto size-12 text-gray-400" />
             <p className="mt-4 text-gray-600 dark:text-gray-400">
-              {searchQuery ? "No expenses found matching your search." : "No expenses found"}
+              {searchQuery ? t.expense.noExpensesMatch : t.expense.noExpensesFound}
             </p>
           </CardContent>
         </Card>
@@ -182,12 +200,12 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
               <table className="w-full min-w-[800px]">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Date</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Category</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Amount</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Method</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Vendor</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Receipt</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.date}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.category}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.amount}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.method}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.vendor}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.receipt}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
@@ -195,11 +213,11 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                     <tr key={expense.id} className="hover:bg-gray-50 dark:hover:bg-gray-900">
                       <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">{formatDate(expense.createdAt)}</td>
                       <td className="px-4 py-4">
-                        <span className="text-sm capitalize">{expense.category}</span>
+                        <span className="text-sm">{t.expense[EXPENSE_CATEGORY_KEYS[expense.category]]}</span>
                       </td>
                       <td className="px-4 py-4 text-sm font-medium">{expense.amount.toFixed(2)} EGP</td>
                       <td className="px-4 py-4">
-                        <span className="text-sm capitalize">{expense.method}</span>
+                        <span className="text-sm">{t.expense[EXPENSE_METHOD_KEYS[expense.method]]}</span>
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">{expense.vendorName || "—"}</td>
                       <td className="px-4 py-4">
@@ -210,7 +228,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                               setShowReceiptModal(true)
                             }}
                             className="cursor-pointer hover:opacity-70 transition-opacity"
-                            title="View receipt"
+                            title={t.expense.viewReceipt}
                           >
                             <RiFileLine className="size-5 text-primary-600 dark:text-primary-400" />
                           </button>
@@ -230,7 +248,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium capitalize break-words">{expense.category}</p>
+                      <p className="font-medium break-words">{t.expense[EXPENSE_CATEGORY_KEYS[expense.category]]}</p>
                       <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                         {formatDate(expense.createdAt)}
                       </div>
@@ -238,9 +256,9 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                         <div className="mt-1 text-sm text-gray-600 dark:text-gray-400 break-words">{expense.vendorName}</div>
                       )}
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-end shrink-0">
                       <p className="font-semibold whitespace-nowrap">{expense.amount.toFixed(2)} EGP</p>
-                      <p className="text-xs capitalize text-gray-600 dark:text-gray-400">{expense.method}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{t.expense[EXPENSE_METHOD_KEYS[expense.method]]}</p>
                     </div>
                   </div>
                   {expense.receiptFileId && (
@@ -252,7 +270,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
                       className="mt-2 flex items-center gap-2 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 cursor-pointer"
                     >
                       <RiFileLine className="size-4 shrink-0" />
-                      <span>View receipt</span>
+                      <span>{t.expense.viewReceipt}</span>
                     </button>
                   )}
                 </CardContent>
@@ -275,7 +293,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
         open={showReceiptModal}
         onOpenChange={setShowReceiptModal}
         fileId={selectedReceiptFileId}
-        title="Receipt"
+        title={t.expense.receipt}
       />
     </div>
   )

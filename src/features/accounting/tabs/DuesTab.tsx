@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
@@ -10,6 +11,7 @@ import { AccountingToolbar, type DateRangePreset } from "../components/Accountin
 import { InvoiceDrawer } from "../components/InvoiceDrawer"
 import { mockData } from "@/data/mock/mock-data"
 import { RiPhoneLine, RiWhatsappLine, RiMoneyDollarCircleLine } from "@remixicon/react"
+import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 import { startOfToday, startOfMonth } from "date-fns"
 import Link from "next/link"
 import type { Invoice } from "@/types/invoice"
@@ -19,6 +21,7 @@ interface DuesTabProps {
 }
 
 export function DuesTab({ dateRangePreset }: DuesTabProps) {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -127,6 +130,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
       <AccountingToolbar
         searchQuery={searchQuery}
         onSearchQueryChange={setSearchQuery}
+        searchPlaceholder={t.accounting.searchDues}
       />
 
       {loading ? (
@@ -156,12 +160,12 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
               <table className="w-full min-w-[900px]">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Patient</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Amount Due</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Appointment</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Type</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Doctor</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Actions</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.patient}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.amountDue}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.appointment}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.type}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.doctor}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.actions}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
@@ -198,7 +202,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                           )}
                         </td>
                         <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                          {appointmentData?.type || invoice.appointmentType}
+                          {getAppointmentTypeLabel(appointmentData?.type || invoice.appointmentType, t.appointments)}
                         </td>
                         <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
                           {getDoctorName(invoice.doctorId)}
@@ -220,7 +224,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                               onClick={() => handleMarkPaid(invoice)}
                               className="whitespace-nowrap"
                             >
-                              Mark Paid
+                              {t.invoice.markAsPaid}
                             </Button>
                           </div>
                         </td>
@@ -262,7 +266,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                         <div>
                           {appointmentData.date} at {appointmentData.time}
                         </div>
-                        <div>{appointmentData.type}</div>
+                        <div>{getAppointmentTypeLabel(appointmentData?.type, t.appointments)}</div>
                         <div>{getDoctorName(invoice.doctorId)}</div>
                       </div>
                     )}
@@ -282,7 +286,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                         onClick={() => handleMarkPaid(invoice)}
                         className="flex-1"
                       >
-                        Mark Paid
+                        {t.invoice.markAsPaid}
                       </Button>
                     </div>
                   </CardContent>

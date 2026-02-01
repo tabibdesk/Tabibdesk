@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, AreaChart } from "@tremor/react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { mockData, DEMO_CLINIC_ID } from "@/data/mock/mock-data"
@@ -9,6 +10,7 @@ import { useEffect, useState } from "react"
 import { listPayments } from "@/api/payments.api"
 
 export function MetricCards() {
+  const t = useAppTranslations()
   const now = new Date()
   const thirtyDaysAgo = new Date(now)
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -221,7 +223,7 @@ export function MetricCards() {
   const metrics = [
     {
       id: "slot-fill-rate",
-      label: "Slot Fill Rate",
+      label: t.insights.slotFillRate,
       value: `${slotFillRate.toFixed(1)}%`,
       change: slotFillRateChange.value,
       changeType: slotFillRateChange.type,
@@ -230,7 +232,7 @@ export function MetricCards() {
     },
     {
       id: "no-show-rate",
-      label: "No-Show Rate",
+      label: t.insights.noShowRate,
       value: `${noShowRate.toFixed(1)}%`,
       change: noShowRateChange.value,
       changeType: noShowRateChange.type === "positive" ? "negative" : noShowRateChange.type === "negative" ? "positive" : "neutral",
@@ -239,7 +241,7 @@ export function MetricCards() {
     },
     {
       id: "cancellation-rate",
-      label: "Cancellation Rate",
+      label: t.insights.cancellationRate,
       value: `${cancellationRate.toFixed(1)}%`,
       change: cancellationRateChange.value,
       changeType: cancellationRateChange.type === "positive" ? "negative" : cancellationRateChange.type === "negative" ? "positive" : "neutral",
@@ -248,7 +250,7 @@ export function MetricCards() {
     },
     {
       id: "revenue-collected",
-      label: "Revenue Collected",
+      label: t.insights.revenueCollected,
       value: `EGP ${revenueCollected.toLocaleString()}`,
       change: revenueChange.value,
       changeType: revenueChange.type,
@@ -257,7 +259,7 @@ export function MetricCards() {
     },
     {
       id: "new-patients",
-      label: "New Patients",
+      label: t.insights.newPatients,
       value: newPatients.toString(),
       change: newPatientsChange.value,
       changeType: newPatientsChange.type,
@@ -266,7 +268,7 @@ export function MetricCards() {
     },
     {
       id: "return-rate",
-      label: "Return Rate",
+      label: t.insights.returnRate,
       value: `${returnRate.toFixed(1)}%`,
       change: returnRateChange.value,
       changeType: returnRateChange.type,

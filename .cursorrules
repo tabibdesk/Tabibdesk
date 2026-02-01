@@ -139,3 +139,48 @@ Widgets (like Now Queue and Today's Appointments) have a specific "dense" design
 
 See `src/features/patients/PatientsTable.tsx` and `src/features/patients/PatientsCards.tsx` for canonical examples of proper font hierarchy usage.
 See `src/app/(app)/dashboard/page.tsx` for the canonical widget implementation.
+
+## RTL & i18n (Internationalization)
+
+**Every new component must support RTL (right-to-left) and use translations.** The app targets Arabic (Egyptian dialect) as primary language.
+
+### RTL Design Rules
+
+1. **Document Direction**:
+   - `LocaleSync` syncs `dir` and `lang` to `document.documentElement`. When `lang === "ar"`, `dir="rtl"` is applied automatically.
+   - Most layout auto-flips with `dir="rtl"`; use logical properties for explicit control.
+
+2. **Logical CSS Properties** (prefer over directional):
+   - Use `ms-*`, `me-*` (margin-inline-start/end), `ps-*`, `pe-*` (padding-inline-start/end) instead of `ml/mr`, `pl/pr`.
+   - Use `start`, `end` in flex/grid alignment instead of `left`, `right`.
+   - Use `rounded-s-*`, `rounded-e-*` for directional radius when needed.
+
+3. **Direction-Aware Components**:
+   - For components with asymmetric layout (drawers, sidebars, tooltips), use `useLocale()` → `isRtl` and flip as needed.
+   - Example: `side={isRtl ? "left" : "right"}` for drawers (see `BookAppointmentDrawer.tsx`).
+   - Icons that imply direction (arrows, chevrons) should flip in RTL—use `rtl:rotate-180` or mirror variants when appropriate.
+
+4. **Never hardcode `left`/`right`** for layout that should flip in RTL; use logical properties or `isRtl` checks.
+
+### Translations (Egyptian Dialect)
+
+1. **All user-facing strings must be translated**:
+   - Use `useAppTranslations()` to access translations—never hardcode UI text.
+   - Add new keys to `src/lib/app-translations.ts` in **both** `ar` and `en` objects.
+
+2. **Egyptian Arabic dialect**:
+   - Use Egyptian colloquial Arabic (عامية مصرية) for `ar` keys, not formal Modern Standard Arabic.
+   - Examples: "دلوقتي" (now), "النّهاردة" (today), "مفيش" (there isn't), "عايز" (want), "إيه" (what), "إزاي" (how).
+   - Match the existing tone in `app-translations.ts` (conversational, clinic-appropriate).
+
+3. **Key organization**:
+   - Group keys by feature (e.g. `dashboard`, `patients`, `appointments`, `common`).
+   - Use nested objects for related strings.
+   - Keep keys semantic: `modalNoShowTitle` not `title1`.
+
+### Reference Files
+
+- `src/contexts/locale-context.tsx` — `useLocale()`, `isRtl`, `dir`, `lang`
+- `src/lib/useAppTranslations.ts` — `useAppTranslations()` hook
+- `src/lib/app-translations.ts` — translation keys (ar/en)
+- `src/features/appointments/components/BookAppointmentDrawer.tsx` — RTL-aware drawer side

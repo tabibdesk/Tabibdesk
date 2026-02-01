@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { AppointmentsHeader, DoctorSelector } from "@/features/appointments/components/AppointmentsHeader"
 import { DailyScheduleView, type DailyScheduleViewRef } from "@/features/appointments/components/DailyScheduleView"
@@ -13,6 +14,7 @@ import { DEMO_CLINIC_ID, DEMO_DOCTOR_ID } from "@/data/mock/mock-data"
 import type { Slot, WaitlistEntry } from "@/features/appointments/types"
 
 export default function AppointmentsPage() {
+  const t = useAppTranslations()
   const { currentUser, currentClinic } = useUserClinic()
   useDemo()
   
@@ -105,7 +107,7 @@ export default function AppointmentsPage() {
   return (
     <div className="page-content">
       <PageHeader
-        title="Appointments"
+        title={t.nav.appointments}
         actions={
           <DoctorSelector
             clinicId={clinicId}

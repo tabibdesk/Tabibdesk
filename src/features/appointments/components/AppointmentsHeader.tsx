@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Select } from "@/components/Select"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { listDoctorsByClinic } from "../availability.api"
@@ -96,29 +97,30 @@ export function AppointmentsHeader({
   activeTab,
   onTabChange,
 }: AppointmentsHeaderProps) {
+  const t = useAppTranslations()
   return (
     <div className="space-y-3">
       <div className="border-b border-gray-200 dark:border-gray-800">
-        <nav className="-mb-px flex space-x-4 sm:space-x-8">
+        <nav className="-mb-px flex gap-4 overflow-x-auto pb-px sm:gap-8" aria-label="Appointments tabs">
           <button
             onClick={() => onTabChange("appointments")}
-            className={`border-b-2 px-1 py-3 sm:py-4 text-sm font-medium ${
+            className={`shrink-0 border-b-2 px-1 py-3 sm:py-4 text-sm font-medium transition-colors ${
               activeTab === "appointments"
-                ? "border-primary-500 text-primary-600"
-                : "border-transparent text-gray-500 hover:border-gray-300"
+                ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
+                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             }`}
           >
-            Appointments
+            {t.appointments.title}
           </button>
           <button
             onClick={() => onTabChange("waitlist")}
-            className={`border-b-2 px-1 py-3 sm:py-4 text-sm font-medium ${
+            className={`shrink-0 border-b-2 px-1 py-3 sm:py-4 text-sm font-medium transition-colors ${
               activeTab === "waitlist"
-                ? "border-primary-500 text-primary-600"
-                : "border-transparent text-gray-500 hover:border-gray-300"
+                ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
+                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             }`}
           >
-            Waitlist
+            {t.appointments.waitlist}
           </button>
         </nav>
       </div>

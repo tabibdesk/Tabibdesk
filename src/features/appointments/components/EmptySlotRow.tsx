@@ -2,6 +2,7 @@
 
 import { RiCalendarLine } from "@remixicon/react"
 import { Button } from "@/components/Button"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { formatSlotTime } from "../utils/slotFormatters"
 import type { Slot } from "../types"
 
@@ -11,6 +12,7 @@ interface EmptySlotRowProps {
 }
 
 export function EmptySlotRow({ slot, onFillSlot }: EmptySlotRowProps) {
+  const t = useAppTranslations()
   const startTime = formatSlotTime(slot.startAt)
   const endTime = formatSlotTime(slot.endAt)
   const timeRange = `${startTime} - ${endTime}`
@@ -24,8 +26,8 @@ export function EmptySlotRow({ slot, onFillSlot }: EmptySlotRowProps) {
         <span className="text-xs text-gray-600 dark:text-gray-400">{timeRange}</span>
       </div>
       <div className="shrink-0">
-        <Button variant="primary" size="sm" onClick={() => onFillSlot(slot)} className="btn-card-action">
-          Fill Slot
+        <Button variant="primary" size="sm" onClick={() => onFillSlot(slot)} className="btn-card-action inline-flex items-center gap-2 rtl:flex-row-reverse">
+          {t.appointments.fillSlot}
         </Button>
       </div>
     </div>

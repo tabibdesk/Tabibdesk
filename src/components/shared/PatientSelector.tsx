@@ -7,6 +7,7 @@ import { Button } from "@/components/Button"
 import { Alert } from "@/components/Alert"
 import { RiUserLine } from "@remixicon/react"
 import { useDemo } from "@/contexts/demo-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { PatientFormFields, type PatientFormData } from "@/features/patients/PatientFormFields"
 import { createPatient } from "@/features/patients/patients.api"
 import type { CreatePatientInput } from "@/features/patients/patients.types"
@@ -35,6 +36,7 @@ export function PatientSelector({
   showEmail = false,
   required = true,
 }: PatientSelectorProps) {
+  const t = useAppTranslations()
   const { isDemoMode } = useDemo()
   const [patientMode, setPatientMode] = useState<"existing" | "new">("existing")
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(initialPatient)
@@ -243,7 +245,7 @@ export function PatientSelector({
         <div className="space-y-3">
           <SearchInput
             id="patient-search"
-            placeholder="Search for the patient by name or phone"
+            placeholder={t.patients.searchSelectorPlaceholder}
             value={searchTerm}
             onSearchChange={setSearchTerm}
             loading={isSearching}

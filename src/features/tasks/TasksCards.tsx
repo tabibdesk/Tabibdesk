@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/Button"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   RiUserLine,
   RiCheckLine,
@@ -11,10 +13,10 @@ import {
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import {
-  formatTaskDate,
+  formatTaskDateTranslated,
   isOverdue,
-  getStatusLabel,
   getStatusBadgeVariant,
+  TASK_STATUS_KEYS,
 } from "./tasks.utils"
 import type { TaskListItem } from "./tasks.types"
 import { cx } from "@/lib/utils"
@@ -36,6 +38,8 @@ export function TasksCards({
   onNextAttempt,
   role,
 }: TasksCardsProps) {
+  const t = useAppTranslations()
+  const { lang } = useLocale()
   return (
     <div className="space-y-3">
       {tasks.map((task) => {
@@ -68,11 +72,11 @@ export function TasksCards({
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
                 {(task.createdByName || task.assignedToName) && (
                   <span>
-                    {task.createdByName && <>by {task.createdByName}</>}
+                    {task.createdByName && <>{t.tasks.createdBy} {task.createdByName}</>}
                     {task.createdByName && task.assignedToName && " "}
                     {task.assignedToName && (
                       <>
-                        to{" "}
+                        {t.tasks.assignedTo}{" "}
                         {canAssign ? (
                           <button
                             type="button"
@@ -95,21 +99,21 @@ export function TasksCards({
               </div>
               <div className="flex flex-wrap items-center gap-1.5 gap-y-1">
                 <Badge color={getBadgeColor(getStatusBadgeVariant(task.status))} size="xs">
-                  {getStatusLabel(task.status)}
+                  {t.tasks[TASK_STATUS_KEYS[task.status] as keyof typeof t.tasks] ?? task.status}
                 </Badge>
                 {task.follow_up_kind && (
                   <Badge color="amber" size="xs">
-                    Follow-up: {task.follow_up_kind === "cancelled" ? "Cancelled" : task.follow_up_kind === "no_show" ? "No-show" : "Inactive"}
+                    {t.tasks.followUp}: {task.follow_up_kind === "cancelled" ? t.tasks.followUpCancelled : task.follow_up_kind === "no_show" ? t.tasks.followUpNoShow : t.tasks.followUpInactive}
                   </Badge>
                 )}
                 {task.attempt !== undefined && task.follow_up_kind && (
                   <Badge color="gray" size="xs">
-                    Attempt {task.attempt}
+                    {t.tasks.attempt} {task.attempt}
                   </Badge>
                 )}
                 {task.dueDate && (
                   <Badge color={getBadgeColor(isDone ? "neutral" : overdue ? "error" : "default")} size="xs">
-                    {formatTaskDate(task.dueDate)}
+                    {formatTaskDateTranslated(task.dueDate, t, lang)}
                   </Badge>
                 )}
               </div>
@@ -145,18 +149,23 @@ export function TasksCards({
                   )}
                 </button>
 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 space-y-1">
+                  {task.patientName && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {t.table.patient}:{" "}
+                      <Link
+                        href={`/patients/${task.patientId}`}
+                        className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                      >
+                        {task.patientName}
+                      </Link>
+                    </p>
+                  )}
                   <p className={cx(
-                    "text-sm text-gray-900 dark:text-white",
+                    "text-xs text-gray-900 dark:text-white",
                     isDone && "text-gray-400 line-through decoration-gray-400/50"
                   )}>
-                    {task.patientName ? (
-                      <>
-                        Patient: <Link href={`/patients/${task.patientId}`} className="font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{task.patientName}</Link> → {task.description || task.title}
-                      </>
-                    ) : (
-                      task.description || task.title
-                    )}
+                    {task.description || task.title}
                   </p>
                 </div>
               </div>
@@ -189,7 +198,7 @@ export function TasksCards({
                     size="sm"
                     className="h-8 px-2 text-xs"
                     onClick={() => onNextAttempt(task)}
-                    title="Next Attempt"
+                    title={t.tasks.nextAttempt}
                   >
                     <RiArrowRightLine className="size-3 mr-1" />
                     Next

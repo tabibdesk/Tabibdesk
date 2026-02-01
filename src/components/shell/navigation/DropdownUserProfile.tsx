@@ -14,6 +14,8 @@ import {
 } from "@remixicon/react"
 import { useTheme } from "next-themes"
 import { useUserClinic } from "@/contexts/user-clinic-context"
+import { useLocale } from "@/contexts/locale-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { cx, focusRing } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -41,6 +43,8 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
   const router = useRouter()
   const { currentUser, allUsers, setCurrentUser } = useUserClinic()
   const { theme, setTheme } = useTheme()
+  const { isRtl } = useLocale()
+  const t = useAppTranslations()
   const [isOpen, setIsOpen] = React.useState(false)
   const [isSwitchUserOpen, setIsSwitchUserOpen] = React.useState(false)
   const [isThemeOpen, setIsThemeOpen] = React.useState(false)
@@ -57,9 +61,9 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
   if (!mounted) return null
 
   const roleLabel =
-    currentUser.role === "doctor" ? "Doctor" :
-    currentUser.role === "manager" ? "Manager" :
-    "Assistant"
+    currentUser.role === "doctor" ? t.common.doctor :
+    currentUser.role === "manager" ? t.common.manager :
+    t.common.assistant
 
   // Desktop modes (Expanded & Collapsed) use Dropdown
   if (mode === "dropdown" || mode === "collapsed") {
@@ -98,7 +102,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
     return (
       <DropdownMenu>
         {mode === "collapsed" ? (
-          <Tooltip content={currentUser.full_name} side="right">
+          <Tooltip content={currentUser.full_name} side={isRtl ? "left" : "right"}>
             <DropdownMenuTrigger asChild>
               {triggerButton}
             </DropdownMenuTrigger>
@@ -108,9 +112,9 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
             {triggerButton}
           </DropdownMenuTrigger>
         )}
-        <DropdownMenuContent 
-          align={align} 
-          side={mode === "collapsed" ? "right" : "top"} 
+        <DropdownMenuContent
+          align={align}
+          side={mode === "collapsed" ? (isRtl ? "left" : "right") : "top"}
           className="w-64"
         >
           <DropdownMenuLabel>
@@ -129,7 +133,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
             <DropdownMenuSubMenu>
               <DropdownMenuSubMenuTrigger>
                 <RiUserSettingsLine className="size-4 shrink-0 me-2" aria-hidden="true" />
-                Switch User
+                {t.common.switchUser}
               </DropdownMenuSubMenuTrigger>
               <DropdownMenuSubMenuContent>
                 {allUsers.map((user) => (
@@ -145,7 +149,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">{user.full_name}</span>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {user.role === "doctor" ? "Doctor" : user.role === "manager" ? "Manager" : "Assistant"}
+                          {user.role === "doctor" ? t.common.doctor : user.role === "manager" ? t.common.manager : t.common.assistant}
                         </span>
                       </div>
                     </div>
@@ -156,21 +160,21 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
             <DropdownMenuSubMenu>
               <DropdownMenuSubMenuTrigger>
                 <RiSunLine className="size-4 shrink-0 me-2" aria-hidden="true" />
-                Theme
+                {t.common.theme}
               </DropdownMenuSubMenuTrigger>
               <DropdownMenuSubMenuContent>
                 <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
                   <DropdownMenuRadioItem value="light" iconType="check">
                     <RiSunLine className="size-4 shrink-0 me-2" aria-hidden="true" />
-                    Light
+                    {t.common.light}
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="dark" iconType="check">
                     <RiMoonLine className="size-4 shrink-0 me-2" aria-hidden="true" />
-                    Dark
+                    {t.common.dark}
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="system" iconType="check">
                     <RiComputerLine className="size-4 shrink-0 me-2" aria-hidden="true" />
-                    System
+                    {t.common.system}
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubMenuContent>
@@ -182,7 +186,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
             className="text-red-600 dark:text-red-400 focus:bg-red-50 focus:dark:bg-red-900/10"
           >
             <RiLogoutBoxRLine className="size-4 shrink-0 me-2" />
-            Sign out
+            {t.common.signOut}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -228,7 +232,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
           >
             <div className="flex items-center gap-2">
               <RiUserSettingsLine className="size-4" />
-              <span>تبديل المستخدم</span>
+              <span>{t.common.switchUser}</span>
             </div>
             <RiArrowDownSLine className={cx("size-4 transition-transform", isSwitchUserOpen && "rotate-180")} />
           </button>
@@ -262,7 +266,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
           >
             <div className="flex items-center gap-2">
               <RiSunLine className="size-4" />
-              <span>المظهر</span>
+              <span>{t.common.theme}</span>
             </div>
             <RiArrowDownSLine className={cx("size-4 transition-transform", isThemeOpen && "rotate-180")} />
           </button>
@@ -273,19 +277,19 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
                 { id: "light", label: "Light", icon: RiSunLine },
                 { id: "dark", label: "Dark", icon: RiMoonLine },
                 { id: "system", label: "System", icon: RiComputerLine },
-              ].map((t) => (
+              ].map((opt) => (
                 <button
-                  key={t.id}
-                  onClick={() => setTheme(t.id)}
+                  key={opt.id}
+                  onClick={() => setTheme(opt.id)}
                   className={cx(
                     "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
-                    theme === t.id
+                    theme === opt.id
                       ? "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
                       : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
                   )}
                 >
-                  <t.icon className="size-3.5" />
-                  <span>{t.label}</span>
+                  <opt.icon className="size-3.5" />
+                  <span>{opt.id === "light" ? t.common.light : opt.id === "dark" ? t.common.dark : t.common.system}</span>
                 </button>
               ))}
             </div>
@@ -296,7 +300,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
             className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/10"
           >
             <RiLogoutBoxRLine className="size-4" />
-            <span>Sign out</span>
+            <span>{t.common.signOut}</span>
           </button>
         </div>
       )}

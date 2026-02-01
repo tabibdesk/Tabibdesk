@@ -1,5 +1,7 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -22,6 +24,8 @@ export function AddToWaitlistDrawer({
   onClose,
   onComplete,
 }: AddToWaitlistDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const { currentClinic } = useUserClinic()
 
   const handleComplete = () => {
@@ -33,9 +37,9 @@ export function AddToWaitlistDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onClose}>
-      <DrawerContent side="right" className="w-full sm:max-w-2xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-2xl">
         <DrawerHeader>
-          <DrawerTitle>Add to Waiting List</DrawerTitle>
+          <DrawerTitle>{t.appointments.addToWaitlist}</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
           <div className="space-y-6">
@@ -45,12 +49,12 @@ export function AddToWaitlistDrawer({
                 <RiUserAddLine className="size-5 text-primary-600 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900 dark:text-gray-50 flex items-center gap-1.5">
-                    <span>Waiting List</span>
+                    <span>{t.appointments.waitingList}</span>
                     <span className="text-gray-300">•</span>
-                    <span>{currentClinic?.name || "Clinic"}</span>
+                    <span>{currentClinic?.name || t.common.clinic}</span>
                   </p>
                   <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium truncate">
-                    Adding patient for earliest availability
+                    {t.appointments.addingPatientEarliest}
                   </p>
                 </div>
               </div>

@@ -6,6 +6,8 @@ import { cx, focusRing } from "@/lib/utils"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useFeatures } from "@/features/settings/useFeatures"
+import { useLocale } from "@/contexts/locale-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import {
   getNavigationForRole,
   isActiveRoute,
@@ -29,6 +31,8 @@ export function Sidebar({ role }: SidebarProps) {
   const navigation = getNavigationForRole(role)
   const { effective } = useFeatures()
   const { isCollapsed, toggleSidebar } = useSidebar()
+  const { isRtl } = useLocale()
+  const t = useAppTranslations()
 
   // Filter navigation based on feature flags
   const filteredNavigation = navigation.filter((item) => {
@@ -79,7 +83,7 @@ export function Sidebar({ role }: SidebarProps) {
               "dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-50",
               focusRing
             )}
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={isCollapsed ? t.common.expandSidebar : t.common.collapseSidebar}
           >
             {isCollapsed ? (
               <RiMenuUnfoldLine className="size-5 shrink-0" />
@@ -117,7 +121,7 @@ export function Sidebar({ role }: SidebarProps) {
                   <item.icon className="size-5 shrink-0" aria-hidden="true" />
                   {!isCollapsed && (
                     <>
-                      <span className="flex-1">{item.name}</span>
+                      <span className="flex-1">{t.nav[item.navKey]}</span>
                       {item.badge && item.badge > 0 && (
                         <span className="ms-auto">
                           <Badge color="indigo" size="xs">
@@ -131,9 +135,9 @@ export function Sidebar({ role }: SidebarProps) {
               )
 
               return (
-                <li key={item.name}>
+                <li key={item.navKey}>
                   {isCollapsed ? (
-                    <Tooltip content={item.name} side="right">
+                    <Tooltip content={t.nav[item.navKey]} side={isRtl ? "left" : "right"}>
                       {linkContent}
                     </Tooltip>
                   ) : (

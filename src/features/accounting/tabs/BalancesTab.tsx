@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card } from "@/components/Card"
 import { Input } from "@/components/Input"
 import { useUserClinic } from "@/contexts/user-clinic-context"
@@ -27,6 +28,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function BalancesTab() {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -60,7 +62,7 @@ export function BalancesTab() {
     <div className="space-y-6">
       {/* Search */}
       <Input
-        placeholder="Search by patient name or phone..."
+        placeholder={t.accounting.searchBalances}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />

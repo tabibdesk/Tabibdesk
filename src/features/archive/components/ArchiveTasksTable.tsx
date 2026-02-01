@@ -1,13 +1,16 @@
 "use client"
 
 import Link from "next/link"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import { Button } from "@/components/Button"
 import {
   RiUserLine,
   RiCheckLine,
 } from "@remixicon/react"
 import {
-  formatTaskDate,
+  formatTaskDateTranslated,
+  TASK_TYPE_KEYS,
 } from "@/features/tasks/tasks.utils"
 import type { TaskListItem } from "@/features/tasks/tasks.types"
 import { cx } from "@/lib/utils"
@@ -17,6 +20,8 @@ interface ArchiveTasksTableProps {
 }
 
 export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
+  const t = useAppTranslations()
+  const { lang } = useLocale()
   return (
     <div className="space-y-3">
       {tasks.map((task) => {
@@ -35,16 +40,16 @@ export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
               "group relative flex items-center justify-between p-3 transition-colors bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700 shadow-sm opacity-75"
             )}
           >
-            {/* Status Accent Line */}
+            {/* Status Accent Line - RTL aware */}
             <div className={cx(
-              "absolute left-0 top-0 bottom-0 w-1 rounded-l-xl transition-colors",
+              "absolute start-0 top-0 bottom-0 w-1 rounded-s-xl transition-colors",
               task.status === "done" ? "bg-green-500" : 
               task.status === "cancelled" ? "bg-red-500" :
               taskWithDates.ignored_at ? "bg-gray-500" :
               "bg-gray-200 dark:bg-gray-700"
             )} />
 
-            <div className="flex items-center gap-3 flex-1 min-w-0 ml-1">
+            <div className="flex items-center gap-3 flex-1 min-w-0 ms-1">
               {/* Status Icon */}
               <div className={cx(
                 "flex size-9 shrink-0 items-center justify-center rounded-full",
@@ -75,45 +80,45 @@ export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
                   {task.patientName && (
                     <Link
                       href={`/patients/${task.patientId}`}
-                      className="flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium"
+                      className="flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium rtl:flex-row-reverse"
                     >
-                      <RiUserLine className="size-3" />
+                      <RiUserLine className="size-3 shrink-0" />
                       {task.patientName}
                     </Link>
                   )}
                   {task.assignedToName && (
-                    <span className="flex items-center gap-1">
-                      Assigned to: {task.assignedToName}
+                    <span className="flex items-center gap-1 rtl:flex-row-reverse">
+                      {t.archive.assignedTo} {task.assignedToName}
                     </span>
                   )}
                   {task.type && (
-                    <span className="flex items-center gap-1">
-                      Type: {task.type}
+                    <span className="flex items-center gap-1 rtl:flex-row-reverse">
+                      {t.archive.type} {task.type in TASK_TYPE_KEYS ? (t.tasks as Record<string, string>)[TASK_TYPE_KEYS[task.type as keyof typeof TASK_TYPE_KEYS]] : task.type}
                     </span>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Right Side - Completed Date + Actions */}
-            <div className="flex items-center gap-2 ml-4 shrink-0">
-              <div className="flex flex-col items-end gap-1">
+            {/* Right Side - Completed Date + Actions - RTL aware */}
+            <div className="flex items-center gap-2 ms-4 shrink-0 rtl:flex-row-reverse">
+              <div className="flex flex-col items-end gap-1 rtl:items-start">
                 {completedDate && (
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {task.status === "done" ? "Completed" : "Ignored"}: {completedDate.toLocaleDateString()}
+                    {task.status === "done" ? t.archive.completed : t.archive.ignored}: {completedDate.toLocaleDateString()}
                   </span>
                 )}
                 {task.dueDate && (
                   <span className="text-xs text-gray-400 dark:text-gray-500">
-                    Due: {formatTaskDate(task.dueDate)}
+                    {t.archive.due} {formatTaskDateTranslated(task.dueDate, t, lang)}
                   </span>
                 )}
               </div>
               {task.patientId && (
                 <Link href={`/patients/${task.patientId}`}>
-                  <Button variant="ghost" size="sm">
-                    <RiUserLine className="mr-1 size-4" />
-                    Open Patient
+                  <Button variant="ghost" size="sm" className="inline-flex items-center gap-2 rtl:flex-row-reverse">
+                    <RiUserLine className="size-4" />
+                    {t.archive.openPatient}
                   </Button>
                 </Link>
               )}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
@@ -12,6 +13,7 @@ import * as settingsApi from "@/api/settings.api"
 import type { ClinicFollowUpRules } from "@/features/settings/settings.types"
 
 export function FollowUpRulesTab() {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const [rules, setRules] = useState<ClinicFollowUpRules | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -56,15 +58,15 @@ export function FollowUpRulesTab() {
       {/* Auto Follow-up Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Auto Follow-up</CardTitle>
-          <CardDescription>Automatically create tasks when appointments are cancelled or marked no-show</CardDescription>
+          <CardTitle>{t.settings.autoFollowUp}</CardTitle>
+          <CardDescription>{t.settings.autoFollowUpDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="follow-up-cancelled">Create tasks after cancellation</Label>
+              <Label htmlFor="follow-up-cancelled">{t.settings.createTasksAfterCancellation}</Label>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Automatically create a follow-up task when an appointment is cancelled
+                {t.settings.createTasksAfterCancellationHint}
               </p>
             </div>
             <Switch
@@ -76,9 +78,9 @@ export function FollowUpRulesTab() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="follow-up-no-show">Create tasks after no-show</Label>
+              <Label htmlFor="follow-up-no-show">{t.settings.createTasksAfterNoShow}</Label>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Automatically create a follow-up task when a patient doesn&apos;t show up
+                {t.settings.createTasksAfterNoShowHint}
               </p>
             </div>
             <Switch
@@ -93,12 +95,12 @@ export function FollowUpRulesTab() {
       {/* Timing Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Timing</CardTitle>
-          <CardDescription>Configure when follow-up tasks should be due</CardDescription>
+          <CardTitle>{t.settings.timing}</CardTitle>
+          <CardDescription>{t.settings.timingDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="cancel-delay-hours">Cancellation follow-up after (hours)</Label>
+            <Label htmlFor="cancel-delay-hours">{t.settings.cancellationFollowUpAfter}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="cancel-delay-hours"
@@ -111,15 +113,15 @@ export function FollowUpRulesTab() {
                 }
                 className="w-24"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">hours</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t.settings.hours}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Delay before creating follow-up task for cancelled appointments
+              {t.settings.cancelDelayHint}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="no-show-delay-hours">No-show follow-up after (hours)</Label>
+            <Label htmlFor="no-show-delay-hours">{t.settings.noShowFollowUpAfter}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="no-show-delay-hours"
@@ -132,10 +134,10 @@ export function FollowUpRulesTab() {
                 }
                 className="w-24"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">hours</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t.settings.hours}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Delay before creating follow-up task for no-show appointments (typically same-day)
+              {t.settings.noShowDelayHint}
             </p>
           </div>
         </CardContent>
@@ -144,12 +146,12 @@ export function FollowUpRulesTab() {
       {/* Attempts Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Attempts</CardTitle>
-          <CardDescription>Configure retry attempts and patient status</CardDescription>
+          <CardTitle>{t.settings.attempts}</CardTitle>
+          <CardDescription>{t.settings.attemptsDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="max-attempts">Max attempts</Label>
+            <Label htmlFor="max-attempts">{t.settings.maxAttempts}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="max-attempts"
@@ -160,15 +162,15 @@ export function FollowUpRulesTab() {
                 onChange={(e) => setRules({ ...rules, maxAttempts: Number(e.target.value) })}
                 className="w-24"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">attempts</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t.settings.attemptsUnit}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Maximum number of follow-up attempts before marking patient as Cold
+              {t.settings.maxAttemptsHint}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="days-between-attempts">Days between attempts</Label>
+            <Label htmlFor="days-between-attempts">{t.settings.daysBetweenAttempts}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="days-between-attempts"
@@ -179,18 +181,18 @@ export function FollowUpRulesTab() {
                 onChange={(e) => setRules({ ...rules, daysBetweenAttempts: Number(e.target.value) })}
                 className="w-24"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">days</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t.settings.days}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Wait time between follow-up attempts
+              {t.settings.daysBetweenHint}
             </p>
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="mark-cold">Mark patient Cold after max attempts</Label>
+              <Label htmlFor="mark-cold">{t.settings.markColdAfterMax}</Label>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Automatically mark patient as Cold when max attempts reached
+                {t.settings.markColdHint}
               </p>
             </div>
             <Switch
@@ -235,13 +237,13 @@ export function FollowUpRulesTab() {
       {/* Quiet Hours Section (Optional) */}
       <Card>
         <CardHeader>
-          <CardTitle>Quiet Hours</CardTitle>
-          <CardDescription>Optional: Define hours when follow-ups should not be scheduled</CardDescription>
+          <CardTitle>{t.settings.quietHours}</CardTitle>
+          <CardDescription>{t.settings.quietHoursDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="quiet-start">Start time</Label>
+              <Label htmlFor="quiet-start">{t.settings.startTime}</Label>
               <Input
                 id="quiet-start"
                 type="time"
@@ -255,7 +257,7 @@ export function FollowUpRulesTab() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="quiet-end">End time</Label>
+              <Label htmlFor="quiet-end">{t.settings.endTime}</Label>
               <Input
                 id="quiet-end"
                 type="time"
@@ -275,10 +277,10 @@ export function FollowUpRulesTab() {
       {/* Save Button */}
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Button variant="secondary" onClick={loadRules} className="w-full sm:w-auto">
-          Reset
+          {t.settings.reset}
         </Button>
         <Button variant="primary" onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving ? t.settings.saving : t.settings.saveChanges}
         </Button>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { RiArrowRightLine, RiCalendarLine, RiCheckboxCircleLine, RiCloseLine, RiMenuLine, RiMoneyDollarCircleLine } from "@remixicon/react"
 import { WidgetSkeleton } from "@/components/skeletons"
@@ -48,11 +49,13 @@ export function TodaysAppointmentsWidget({
   onUnmarkArrived,
   onUnmarkPaid,
 }: TodaysAppointmentsWidgetProps) {
+  const t = useAppTranslations()
+
   if (loading) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Today&apos;s Appointments</h2>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.todaysAppointments}</h2>
         </div>
         <WidgetSkeleton rows={5} />
       </div>
@@ -62,11 +65,11 @@ export function TodaysAppointmentsWidget({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Today&apos;s Appointments</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.todaysAppointments}</h2>
         <Link href="/appointments">
           <Button variant="ghost" className="text-[11px] font-bold tracking-wider -mr-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50">
-            view all
-            <RiArrowRightLine className="ml-1 size-3.5" />
+            {t.dashboard.viewAll}
+            <RiArrowRightLine className="ml-1 size-3.5 rtl:rotate-180 rtl:ml-0 rtl:mr-1" />
           </Button>
         </Link>
       </div>
@@ -117,7 +120,7 @@ export function TodaysAppointmentsWidget({
                         </Link>
                         {(isNow || isNext) ? (
                           <Badge color={getBadgeColor(badgeVariant)} size="xs">
-                            {badgeText}
+                            {badgeText === "now" ? t.dashboard.now : t.dashboard.next}
                           </Badge>
                         ) : (
                           <span className="shrink-0 text-[10px] font-bold tracking-widest text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-sm lowercase">
@@ -133,11 +136,11 @@ export function TodaysAppointmentsWidget({
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-1.5 ml-2 sm:ml-4 shrink-0">
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-1.5 ms-2 sm:ms-4 shrink-0">
                     <div className="flex items-center gap-1 flex-wrap">
                       {apt.queueStatus === "no_show" && (
                         <Badge color="red" size="xs">
-                          no show
+                          {t.dashboard.noShow}
                         </Badge>
                       )}
                       {apt.status === "arrived" && (
@@ -148,9 +151,9 @@ export function TodaysAppointmentsWidget({
                             e.stopPropagation()
                             onUnmarkArrived(apt)
                           }}
-                          title="Click to unmark arrived"
+                          title={t.dashboard.unmarkArrived}
                         >
-                          arrived
+                          {t.dashboard.arrived}
                         </Badge>
                       )}
                       {paidAppointments.has(apt.id) && (
@@ -161,9 +164,9 @@ export function TodaysAppointmentsWidget({
                             e.stopPropagation()
                             onUnmarkPaid(apt)
                           }}
-                          title="Click to unmark paid"
+                          title={t.dashboard.unmarkPaid}
                         >
-                          paid
+                          {t.dashboard.paid}
                         </Badge>
                       )}
                     </div>
@@ -177,10 +180,10 @@ export function TodaysAppointmentsWidget({
                           }}
                           disabled={markingArrived === apt.id}
                           className="btn-secondary-widget text-green-600 hover:text-green-700 hover:bg-green-50 border-green-100 shrink-0 whitespace-nowrap"
-                          title="Mark as Arrived"
+                          title={t.dashboard.markAsArrived}
                         >
-                          <RiCheckboxCircleLine className="size-3.5 sm:mr-1" />
-                          <span className="hidden sm:inline">arrived</span>
+                          <RiCheckboxCircleLine className="size-3.5 sm:mr-1 rtl:ml-1 rtl:mr-0" />
+                          <span className="hidden sm:inline">{t.dashboard.arrived}</span>
                         </Button>
                       )}
                       {!paidAppointments.has(apt.id) && apt.status === "arrived" && (
@@ -192,10 +195,10 @@ export function TodaysAppointmentsWidget({
                           }}
                           disabled={markingPaid === apt.id || markingArrived === apt.id}
                           className="btn-secondary-widget text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-100 shrink-0 whitespace-nowrap"
-                          title="Create invoice"
+                          title={t.dashboard.createInvoice}
                         >
-                          <RiMoneyDollarCircleLine className="size-3.5 sm:mr-1" />
-                          <span className="hidden sm:inline">create invoice</span>
+                          <RiMoneyDollarCircleLine className="size-3.5 sm:mr-1 rtl:ml-1 rtl:mr-0" />
+                          <span className="hidden sm:inline">{t.dashboard.createInvoice}</span>
                         </Button>
                       )}
                       <Button
@@ -205,10 +208,10 @@ export function TodaysAppointmentsWidget({
                           onNoShow(apt)
                         }}
                         className="btn-secondary-widget text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 shrink-0 whitespace-nowrap"
-                        title="Mark as No Show"
+                        title={t.dashboard.markAsNoShow}
                       >
-                        <RiCloseLine className="size-3.5 sm:mr-1" />
-                        <span className="hidden sm:inline">no show</span>
+                        <RiCloseLine className="size-3.5 sm:mr-1 rtl:ml-1 rtl:mr-0" />
+                        <span className="hidden sm:inline">{t.dashboard.noShow}</span>
                       </Button>
                     </div>
                   </div>
@@ -219,7 +222,7 @@ export function TodaysAppointmentsWidget({
         ) : (
           <div className="py-12 text-center text-gray-600 dark:text-gray-400">
             <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-2 text-sm">No appointments scheduled for today</p>
+            <p className="mt-2 text-sm">{t.dashboard.noAppointmentsScheduledToday}</p>
           </div>
         )}
       </div>

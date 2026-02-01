@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -19,6 +21,7 @@ import type { Invoice, ChargeLineItem } from "@/types/invoice"
 import { format } from "date-fns"
 import { RiFileLine, RiPencilLine } from "@remixicon/react"
 import { ListSkeleton } from "@/components/skeletons"
+import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 
 interface ViewInvoiceDrawerProps {
   open: boolean
@@ -33,6 +36,8 @@ export function ViewInvoiceDrawer({
   invoiceId,
   onSuccess,
 }: ViewInvoiceDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const { currentClinic, currentUser } = useUserClinic()
   const { showToast } = useToast()
   const [invoice, setInvoice] = useState<Invoice | null>(null)
@@ -115,7 +120,7 @@ export function ViewInvoiceDrawer({
         message: `Edited invoice ${invoice.id} (${invoice.appointmentType})`,
         meta: { patientId: invoice.patientId },
       })
-      showToast("Invoice updated. Change recorded in activity log.", "success")
+      showToast(t.invoice.invoiceUpdatedLogged, "success")
       const updated = await getInvoiceById(invoice.id)
       if (updated) {
         setInvoice(updated)
@@ -124,7 +129,7 @@ export function ViewInvoiceDrawer({
       setIsEditing(false)
       onSuccess?.()
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "Failed to update invoice", "error")
+      showToast(error instanceof Error ? error.message : t.invoice.invoiceUpdateFailed, "error")
     } finally {
       setSaving(false)
     }
@@ -135,9 +140,9 @@ export function ViewInvoiceDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-md">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-md">
         <DrawerHeader>
-          <DrawerTitle>Invoice details</DrawerTitle>
+          <DrawerTitle>{t.invoice.invoiceDetails}</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
           {loading ? (
@@ -146,26 +151,26 @@ export function ViewInvoiceDrawer({
             </div>
           ) : !invoice ? (
             <p className="py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-              Invoice not found.
+              {t.invoice.invoiceNotFound}
             </p>
           ) : (
             <div className="space-y-4">
               <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-gray-900/30">
-                <div className="text-xs text-gray-500 dark:text-gray-400">Date</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{t.invoice.date}</div>
                 <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {format(new Date(invoice.createdAt), "MMM d, yyyy · h:mm a")}
                 </div>
               </div>
               <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 dark:border-gray-800 dark:bg-gray-900/30">
-                <div className="text-xs text-gray-500 dark:text-gray-400">Appointment type</div>
-                <div className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">
-                  {invoice.appointmentType}
+                <div className="text-xs text-gray-500 dark:text-gray-400">{t.invoice.appointmentType}</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {getAppointmentTypeLabel(invoice.appointmentType, t.appointments)}
                 </div>
               </div>
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                    Breakdown
+                    {t.invoice.breakdown}
                   </span>
                   {!isEditing && invoice.status === "unpaid" && (
                     <Button
@@ -176,7 +181,7 @@ export function ViewInvoiceDrawer({
                       className="gap-1.5"
                     >
                       <RiPencilLine className="size-4" />
-                      Edit
+                      {t.invoice.edit}
                     </Button>
                   )}
                 </div>
@@ -220,7 +225,7 @@ export function ViewInvoiceDrawer({
               </div>
               <div className="flex items-center justify-between border-t border-gray-200 pt-3 dark:border-gray-700">
                 <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Total
+                  {t.invoice.total}
                 </span>
                 <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                   {(isEditing ? total : invoice.amount).toFixed(2)} EGP
@@ -229,15 +234,14 @@ export function ViewInvoiceDrawer({
               {showEditConfirm && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
                   <p className="text-sm text-amber-800 dark:text-amber-200">
-                    Are you sure you want to edit this invoice? Your change will be recorded in the
-                    activity log.
+                    {t.invoice.editConfirm}
                   </p>
                   <div className="mt-3 flex gap-2">
                     <Button variant="outline" size="sm" onClick={handleCancelEdit}>
-                      Cancel
+                      {t.common.cancel}
                     </Button>
                     <Button size="sm" onClick={handleConfirmEdit}>
-                      Yes, edit
+                      {t.invoice.yesEdit}
                     </Button>
                   </div>
                 </div>
@@ -248,10 +252,10 @@ export function ViewInvoiceDrawer({
         {invoice && isEditing && (
           <DrawerFooter>
             <Button variant="outline" onClick={() => setIsEditing(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button onClick={handleSaveEdit} disabled={saving}>
-              {saving ? "Saving…" : "Save and log activity"}
+              {saving ? t.invoice.saving : t.invoice.saveAndLogActivity}
             </Button>
           </DrawerFooter>
         )}

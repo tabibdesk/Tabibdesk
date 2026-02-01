@@ -1,5 +1,7 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import { Button } from "@/components/Button"
 import {
   Drawer,
@@ -20,6 +22,8 @@ interface AddPatientDrawerProps {
 }
 
 export function AddPatientDrawer({ open, onOpenChange, onSubmit }: AddPatientDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const [formData, setFormData] = useState<PatientFormData>({
     first_name: "",
     last_name: "",
@@ -41,16 +45,16 @@ export function AddPatientDrawer({ open, onOpenChange, onSubmit }: AddPatientDra
     // Validation
     const newErrors: Partial<Record<keyof CreatePatientInput, string>> = {}
     if (!formData.first_name.trim()) {
-      newErrors.first_name = "First name is required"
+      newErrors.first_name = t.patients.errFirstNameRequired
     }
     if (!formData.last_name.trim()) {
-      newErrors.last_name = "Last name is required"
+      newErrors.last_name = t.patients.errLastNameRequired
     }
     if (!formData.phone.trim()) {
-      newErrors.phone = "Phone is required"
+      newErrors.phone = t.patients.errPhoneRequired
     }
     if (formData.source === "other" && !formData.source_other?.trim()) {
-      newErrors.source_other = "Please specify the source"
+      newErrors.source_other = t.patients.errSpecifySource
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -96,9 +100,9 @@ export function AddPatientDrawer({ open, onOpenChange, onSubmit }: AddPatientDra
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-2xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-2xl">
         <DrawerHeader>
-          <DrawerTitle>Add New Patient</DrawerTitle>
+          <DrawerTitle>{t.patients.addNewPatient}</DrawerTitle>
         </DrawerHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
           <DrawerBody>
@@ -117,10 +121,10 @@ export function AddPatientDrawer({ open, onOpenChange, onSubmit }: AddPatientDra
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button type="submit" variant="primary" isLoading={isSubmitting}>
-              Add Patient
+              {t.patients.addPatient}
             </Button>
           </DrawerFooter>
         </form>

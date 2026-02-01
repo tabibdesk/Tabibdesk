@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -28,6 +30,8 @@ export function AddPastMedicationDrawer({
   onSubmit,
   patientId,
 }: AddPastMedicationDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -76,9 +80,9 @@ export function AddPastMedicationDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-xl">
         <DrawerHeader>
-          <DrawerTitle>Add Past Medication</DrawerTitle>
+          <DrawerTitle>{t.profile.addPastMedication}</DrawerTitle>
         </DrawerHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
           <DrawerBody>
@@ -91,7 +95,7 @@ export function AddPastMedicationDrawer({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Started Taking</Label>
+                  <Label>{t.profile.startedTaking}</Label>
                   <Input
                     type="date"
                     value={formData.takenFrom}
@@ -99,12 +103,12 @@ export function AddPastMedicationDrawer({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Stopped Taking (Optional)</Label>
+                  <Label>{t.profile.stoppedTakingOptional}</Label>
                   <Input
                     type="date"
                     value={formData.takenTo || ''}
                     onChange={(e) => setFormData((prev) => ({ ...prev, takenTo: e.target.value || undefined }))}
-                    placeholder="Still taking (Ongoing)"
+                    placeholder={t.profile.stillTaking}
                   />
                 </div>
               </div>
@@ -117,7 +121,7 @@ export function AddPastMedicationDrawer({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -125,7 +129,7 @@ export function AddPastMedicationDrawer({
               isLoading={isSubmitting}
               disabled={!formData.name.trim()}
             >
-              Add Medication
+              {t.profile.addMedication}
             </Button>
           </DrawerFooter>
         </form>

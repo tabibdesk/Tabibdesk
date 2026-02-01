@@ -1,17 +1,27 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { RiGoogleFill, RiMicrosoftFill, RiCheckLine, RiFlaskLine } from "@remixicon/react"
 import { useDemo } from "@/contexts/demo-context"
+import { useLocale } from "@/contexts/locale-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 
-export default function RegisterPage() {
+function RegisterPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { enableDemoMode } = useDemo()
+  const { setLanguage } = useLocale()
+  const t = useAppTranslations()
+
+  useEffect(() => {
+    const urlLang = searchParams.get("lang")
+    if (urlLang === "ar" || urlLang === "en") setLanguage(urlLang)
+  }, [searchParams, setLanguage])
   const [formData, setFormData] = useState({
     clinicName: "",
     fullName: "",
@@ -21,35 +31,26 @@ export default function RegisterPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [passwordStrength, setPasswordStrength] = useState({
-    score: 0,
-    label: "",
-    color: "",
-  })
+  const [passwordStrength, setPasswordStrength] = useState<{
+    score: number
+    labelKey: "weak" | "medium" | "strong" | ""
+    color: string
+  }>({ score: 0, labelKey: "", color: "" })
 
-  const calculatePasswordStrength = (password: string) => {
+  const calculatePasswordStrength = (password: string): { score: number; labelKey: "weak" | "medium" | "strong" | ""; color: string } => {
     let score = 0
-    if (!password) return { score: 0, label: "", color: "" }
+    if (!password) return { score: 0, labelKey: "", color: "" }
 
-    // Length
     if (password.length >= 8) score++
     if (password.length >= 12) score++
-
-    // Contains lowercase
     if (/[a-z]/.test(password)) score++
-
-    // Contains uppercase
     if (/[A-Z]/.test(password)) score++
-
-    // Contains number
     if (/\d/.test(password)) score++
-
-    // Contains special character
     if (/[^A-Za-z0-9]/.test(password)) score++
 
-    if (score <= 2) return { score, label: "Weak", color: "text-red-600" }
-    if (score <= 4) return { score, label: "Medium", color: "text-yellow-600" }
-    return { score, label: "Strong", color: "text-green-600" }
+    if (score <= 2) return { score, labelKey: "weak", color: "text-red-600" }
+    if (score <= 4) return { score, labelKey: "medium", color: "text-yellow-600" }
+    return { score, labelKey: "strong", color: "text-green-600" }
   }
 
   useEffect(() => {
@@ -61,30 +62,22 @@ export default function RegisterPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!formData.clinicName.trim()) {
-      newErrors.clinicName = "Clinic name is required"
-    }
-
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required"
-    }
-
+    if (!formData.clinicName.trim()) newErrors.clinicName = t.auth.clinicNameRequired
+    if (!formData.fullName.trim()) newErrors.fullName = t.auth.fullNameRequired
     if (!formData.email) {
-      newErrors.email = "Email is required"
+      newErrors.email = t.auth.emailRequired
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid"
+      newErrors.email = t.auth.emailInvalid
     }
-
     if (!formData.password) {
-      newErrors.password = "Password is required"
+      newErrors.password = t.auth.passwordRequired
     } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters"
+      newErrors.password = t.auth.passwordMinLength8
     }
-
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password"
+      newErrors.confirmPassword = t.auth.confirmPasswordRequired
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords don't match"
+      newErrors.confirmPassword = t.auth.passwordsDontMatch
     }
 
     setErrors(newErrors)
@@ -127,7 +120,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen rtl:flex-row-reverse">
       {/* Left side - Form */}
       <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
@@ -151,7 +144,7 @@ export default function RegisterPage() {
                 onClick={() => handleSocialSignup("google")}
                 className="w-full"
               >
-                <RiGoogleFill className="mr-2 size-5" />
+                <RiGoogleFill className="me-2 size-5" />
                 Google
               </Button>
               <Button
@@ -160,7 +153,7 @@ export default function RegisterPage() {
                 onClick={() => handleSocialSignup("microsoft")}
                 className="w-full"
               >
-                <RiMicrosoftFill className="mr-2 size-5" />
+                <RiMicrosoftFill className="me-2 size-5" />
                 Microsoft
               </Button>
             </div>
@@ -171,7 +164,7 @@ export default function RegisterPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-gray-500 dark:bg-gray-950 dark:text-gray-400">
-                  Or continue with email
+                  {t.auth.orContinueWithEmail}
                 </span>
               </div>
             </div>
@@ -179,7 +172,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
                 <Label htmlFor="clinicName" className="mb-2 block">
-                  Clinic Name
+                  {t.auth.clinicName}
                 </Label>
                 <Input
                   id="clinicName"
@@ -199,7 +192,7 @@ export default function RegisterPage() {
 
               <div>
                 <Label htmlFor="fullName" className="mb-2 block">
-                  Your Full Name
+                  {t.auth.fullName}
                 </Label>
                 <Input
                   id="fullName"
@@ -219,7 +212,7 @@ export default function RegisterPage() {
 
               <div>
                 <Label htmlFor="email" className="mb-2 block">
-                  Email address
+                  {t.auth.email}
                 </Label>
                 <Input
                   id="email"
@@ -240,7 +233,7 @@ export default function RegisterPage() {
 
               <div>
                 <Label htmlFor="password" className="mb-2 block">
-                  Password
+                  {t.auth.password}
                 </Label>
                 <Input
                   id="password"
@@ -256,10 +249,10 @@ export default function RegisterPage() {
                   <div className="mt-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600 dark:text-gray-400">
-                        Password strength:
+                        {t.auth.passwordStrength}:
                       </span>
                       <span className={`font-medium ${passwordStrength.color}`}>
-                        {passwordStrength.label}
+                        {passwordStrength.labelKey ? (passwordStrength.labelKey === "weak" ? t.auth.weak : passwordStrength.labelKey === "medium" ? t.auth.medium : t.auth.strong) : ""}
                       </span>
                     </div>
                     <div className="mt-1 flex gap-1">
@@ -289,7 +282,7 @@ export default function RegisterPage() {
 
               <div>
                 <Label htmlFor="confirmPassword" className="mb-2 block">
-                  Confirm Password
+                  {t.auth.confirmPassword}
                 </Label>
                 <Input
                   id="confirmPassword"
@@ -304,8 +297,8 @@ export default function RegisterPage() {
                 {formData.confirmPassword &&
                   formData.password === formData.confirmPassword && (
                     <p className="mt-1 flex items-center text-sm text-green-600 dark:text-green-400">
-                      <RiCheckLine className="mr-1 size-4" />
-                      Passwords match
+                      <RiCheckLine className="mr-1 size-4 rtl:ml-1 rtl:mr-0" />
+                      {t.auth.passwordsMatch}
                     </p>
                   )}
                 {errors.confirmPassword && (
@@ -349,9 +342,9 @@ export default function RegisterPage() {
                 variant="primary"
                 className="w-full"
                 isLoading={isLoading}
-                loadingText="Creating account..."
+                loadingText={t.auth.creatingAccount}
               >
-                Create account
+                {t.auth.createAccount}
               </Button>
 
               <div className="relative">
@@ -360,7 +353,7 @@ export default function RegisterPage() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="bg-white px-2 text-gray-500 dark:bg-gray-950 dark:text-gray-400">
-                    Or
+                    {t.auth.or}
                   </span>
                 </div>
               </div>
@@ -371,18 +364,18 @@ export default function RegisterPage() {
                 className="w-full"
                 onClick={handleDemoMode}
               >
-                <RiFlaskLine className="mr-2 size-4" />
-                Try Demo Mode
+                <RiFlaskLine className="mr-2 size-4 rtl:ml-2 rtl:mr-0" />
+                {t.auth.tryDemoMode}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-              Already have an account?{" "}
+              {t.auth.alreadyHaveAccount}{" "}
               <Link
                 href="/login"
                 className="font-medium text-primary-600 transition hover:text-primary-500 dark:text-primary-400"
               >
-                Sign in
+                {t.auth.signIn}
               </Link>
             </p>
           </div>
@@ -392,7 +385,7 @@ export default function RegisterPage() {
       {/* Right side - Branding */}
       <div className="relative hidden lg:block lg:w-1/2">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-900" />
-        <div className="absolute right-8 top-8 flex items-center gap-3">
+        <div className="absolute right-8 top-8 flex items-center gap-3 rtl:right-auto rtl:left-8">
           <div className="flex size-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
             <span className="text-xl font-bold text-white">TD</span>
           </div>
@@ -400,6 +393,22 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function RegisterPageFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+    </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<RegisterPageFallback />}>
+      <RegisterPageContent />
+    </Suspense>
   )
 }
 

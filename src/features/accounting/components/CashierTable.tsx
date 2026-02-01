@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { Button } from "@/components/Button"
@@ -27,28 +28,29 @@ export function CashierTable({
   onRequestProof,
   onAddProof,
 }: CashierTableProps) {
+  const t = useAppTranslations()
   return (
     <div className="hidden lg:block overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
         <thead className="bg-gray-50 dark:bg-gray-900/50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Time
+            <th className="px-6 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {t.table.time}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Patient
+            <th className="px-6 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {t.table.patient}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Apt Status
+            <th className="px-6 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {t.table.aptStatus}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Fee
+            <th className="px-6 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {t.table.fee}
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Payment
+            <th className="px-6 py-3 text-start text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {t.table.payment}
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Actions
+            <th className="px-6 py-3 text-end text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              {t.table.actions}
             </th>
           </tr>
         </thead>

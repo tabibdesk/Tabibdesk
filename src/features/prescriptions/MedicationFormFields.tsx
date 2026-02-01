@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { Select } from "@/components/Select"
@@ -35,12 +36,13 @@ export function MedicationFormFields({
   onChange,
   showInstructions = true,
 }: MedicationFormFieldsProps) {
+  const t = useAppTranslations()
   return (
     <div className="space-y-4">
       {/* Name */}
       <div className="space-y-2">
         <Label htmlFor="medication-name">
-          Medication Name <span className="text-red-500">*</span>
+          {t.profile.medicationName} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="medication-name"
@@ -60,7 +62,7 @@ export function MedicationFormFields({
       {/* Strength and Form */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="medication-strength">Strength</Label>
+          <Label htmlFor="medication-strength">{t.profile.strength}</Label>
           <Input
             id="medication-strength"
             value={data.strength || ""}
@@ -69,13 +71,13 @@ export function MedicationFormFields({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="medication-form">Form</Label>
+          <Label htmlFor="medication-form">{t.profile.form}</Label>
           <Select
             id="medication-form"
             value={data.form || ""}
             onChange={(e) => onChange({ form: e.target.value })}
           >
-            <option value="">Select form</option>
+            <option value="">{t.profile.selectForm}</option>
             {MEDICATION_FORMS.map((form) => (
               <option key={form} value={form}>
                 {form}
@@ -89,7 +91,7 @@ export function MedicationFormFields({
       {showInstructions && (
         <div className="space-y-2">
           <Label htmlFor="medication-sig">
-            Instructions (Sig) <span className="text-red-500">*</span>
+            {t.profile.instructionsSig} <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="medication-sig"
@@ -104,7 +106,7 @@ export function MedicationFormFields({
 
       {/* Duration */}
       <div className="space-y-2">
-        <Label htmlFor="medication-duration">Duration</Label>
+        <Label htmlFor="medication-duration">{t.profile.duration}</Label>
         <Input
           id="medication-duration"
           value={data.duration || ""}
@@ -115,7 +117,7 @@ export function MedicationFormFields({
 
       {/* Notes */}
       <div className="space-y-2">
-        <Label htmlFor="medication-notes">Notes (Optional)</Label>
+        <Label htmlFor="medication-notes">{t.profile.notesOptional}</Label>
         <Input
           id="medication-notes"
           value={data.notes || ""}

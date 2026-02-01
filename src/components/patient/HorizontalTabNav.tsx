@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { cx } from "@/lib/utils"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import {
   RiAddLine,
   RiCloseLine,
@@ -40,14 +41,15 @@ export function HorizontalTabNav({
   onAddFile,
   onAddCharge,
 }: HorizontalTabNavProps) {
+  const t = useAppTranslations()
   const [showActionsMenu, setShowActionsMenu] = useState(false)
 
   const actions = [
-    { label: "Add note", icon: RiFileTextLine, onClick: onAddNote },
-    { label: "Add task", icon: RiTaskLine, onClick: onAddTask },
-    { label: "Upload file", icon: RiAttachmentLine, onClick: onAddFile },
-    { label: "Add invoice", icon: RiMoneyDollarCircleLine, onClick: onAddCharge },
-    { label: "Add prescription", icon: RiCapsuleLine, onClick: onAddMedication },
+    { label: t.patients.addNote, icon: RiFileTextLine, onClick: onAddNote },
+    { label: t.patients.addTask, icon: RiTaskLine, onClick: onAddTask },
+    { label: t.patients.uploadFile, icon: RiAttachmentLine, onClick: onAddFile },
+    { label: t.patients.addInvoice, icon: RiMoneyDollarCircleLine, onClick: onAddCharge },
+    { label: t.patients.addPrescription, icon: RiCapsuleLine, onClick: onAddMedication },
   ]
 
   const AddButton = () => (
@@ -77,8 +79,8 @@ export function HorizontalTabNav({
             onClick={() => setShowActionsMenu(false)}
           />
 
-          {/* Dropdown Menu */}
-          <div className="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950">
+          {/* Dropdown Menu - RTL: button on left, dropdown opens right; LTR: button on right, dropdown opens left */}
+          <div className="absolute end-0 z-20 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950 rtl:end-0 rtl:start-auto">
             <div className="p-1.5">
               {actions.map((action, i) => {
                 const ActionIcon = action.icon
@@ -144,7 +146,7 @@ export function HorizontalTabNav({
         </nav>
 
         {/* Add Record Dropdown (Desktop Only) */}
-        <div className="hidden shrink-0 ml-4 sm:block">
+        <div className="hidden shrink-0 ms-4 sm:block">
           <AddButton />
         </div>
 
@@ -156,21 +158,22 @@ export function HorizontalTabNav({
 }
 
 // Export the AddButton component for use in the PageHeader
-export function MobileAddButton({ 
-  onAddNote, 
-  onAddMedication, 
-  onAddTask, 
-  onAddFile, 
-  onAddCharge 
+export function MobileAddButton({
+  onAddNote,
+  onAddMedication,
+  onAddTask,
+  onAddFile,
+  onAddCharge
 }: Partial<HorizontalTabNavProps>) {
+  const t = useAppTranslations()
   const [showActionsMenu, setShowActionsMenu] = useState(false)
 
   const actions = [
-    { label: "Add note", icon: RiFileTextLine, onClick: onAddNote },
-    { label: "Add task", icon: RiTaskLine, onClick: onAddTask },
-    { label: "Upload file", icon: RiAttachmentLine, onClick: onAddFile },
-    { label: "Add invoice", icon: RiMoneyDollarCircleLine, onClick: onAddCharge },
-    { label: "Add prescription", icon: RiCapsuleLine, onClick: onAddMedication },
+    { label: t.patients.addNote, icon: RiFileTextLine, onClick: onAddNote },
+    { label: t.patients.addTask, icon: RiTaskLine, onClick: onAddTask },
+    { label: t.patients.uploadFile, icon: RiAttachmentLine, onClick: onAddFile },
+    { label: t.patients.addInvoice, icon: RiMoneyDollarCircleLine, onClick: onAddCharge },
+    { label: t.patients.addPrescription, icon: RiCapsuleLine, onClick: onAddMedication },
   ]
 
   return (
@@ -195,7 +198,7 @@ export function MobileAddButton({
       {showActionsMenu && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowActionsMenu(false)} />
-          <div className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950">
+          <div className="absolute end-0 z-50 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-950 rtl:end-0 rtl:start-auto">
             <div className="p-1.5">
               {actions.map((action, i) => {
                 const ActionIcon = action.icon

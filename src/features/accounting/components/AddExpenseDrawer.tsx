@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -33,6 +35,8 @@ export function AddExpenseDrawer({
   onOpenChange,
   onSuccess,
 }: AddExpenseDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const { currentClinic, currentUser } = useUserClinic()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -77,7 +81,7 @@ export function AddExpenseDrawer({
       setReceiptFileId(result.fileId)
     } catch (error) {
       console.error("Failed to upload receipt:", error)
-      showToast("Failed to upload receipt", "error")
+      showToast(t.expense.failedToUploadReceipt, "error")
       setReceiptFile(null)
     } finally {
       setUploadingReceipt(false)
@@ -88,7 +92,7 @@ export function AddExpenseDrawer({
     e.preventDefault()
 
     if (!amount || parseFloat(amount) <= 0) {
-      showToast("Please enter a valid amount", "error")
+      showToast(t.expense.pleaseEnterValidAmount, "error")
       return
     }
 
@@ -110,7 +114,7 @@ export function AddExpenseDrawer({
       onOpenChange(false)
     } catch (error) {
       console.error("Failed to create expense:", error)
-      showToast("Failed to add expense", "error")
+      showToast(t.expense.failedToAddExpense, "error")
     } finally {
       setLoading(false)
     }
@@ -118,34 +122,34 @@ export function AddExpenseDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-2xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-2xl">
         <DrawerHeader>
-          <DrawerTitle>Add Expense</DrawerTitle>
+          <DrawerTitle>{t.expense.addExpense}</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="category">
-                  Category <span className="text-red-500">*</span>
+                  {t.expense.category} <span className="text-red-500">*</span>
                 </Label>
                 <Select
                   id="category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
                 >
-                  <option value="supplies">Supplies</option>
-                  <option value="rent">Rent</option>
-                  <option value="salaries">Salaries</option>
-                  <option value="utilities">Utilities</option>
-                  <option value="marketing">Marketing</option>
-                  <option value="other">Other</option>
+                  <option value="supplies">{t.expense.categorySupplies}</option>
+                  <option value="rent">{t.expense.categoryRent}</option>
+                  <option value="salaries">{t.expense.categorySalaries}</option>
+                  <option value="utilities">{t.expense.categoryUtilities}</option>
+                  <option value="marketing">{t.expense.categoryMarketing}</option>
+                  <option value="other">{t.expense.categoryOther}</option>
                 </Select>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="amount">
-                  Amount (EGP) <span className="text-red-500">*</span>
+                  {t.expense.amount} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="amount"
@@ -160,63 +164,63 @@ export function AddExpenseDrawer({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="vendor">Vendor/Supplier</Label>
+                <Label htmlFor="vendor">{t.expense.vendorSupplier}</Label>
                 <VendorAutocomplete
                   clinicId={currentClinic.id}
                   value={vendor}
                   onChange={setVendor}
                   onSelect={(v) => setVendorPhone(v.phone ?? "")}
                   createVendorPhone={vendorPhone}
-                  placeholder="Type to search or add new vendor"
+                  placeholder={t.expense.vendorPlaceholder}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="vendorPhone">Vendor phone (optional)</Label>
+                <Label htmlFor="vendorPhone">{t.expense.vendorPhone}</Label>
                 <Input
                   id="vendorPhone"
                   type="tel"
                   value={vendorPhone}
                   onChange={(e) => setVendorPhone(e.target.value)}
-                  placeholder="Vendor phone number"
+                  placeholder={t.expense.vendorPhonePlaceholder}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t.expense.description}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Brief description of expense (optional)"
+                  placeholder={t.expense.descriptionPlaceholder}
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="paymentMethod">
-                  Payment Method <span className="text-red-500">*</span>
+                  {t.expense.paymentMethod} <span className="text-red-500">*</span>
                 </Label>
                 <Select
                   id="paymentMethod"
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value as ExpenseMethod)}
                 >
-                  <option value="cash">Cash</option>
-                  <option value="instapay">InstaPay</option>
-                  <option value="transfer">Transfer</option>
+                  <option value="cash">{t.expense.methodCash}</option>
+                  <option value="instapay">{t.expense.methodInstapay}</option>
+                  <option value="transfer">{t.expense.methodTransfer}</option>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="receipt">Receipt/Proof (Optional)</Label>
+                <Label htmlFor="receipt">{t.expense.receiptProof}</Label>
                 <div className="space-y-2">
                   <label
                     htmlFor="receipt"
                     className="flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
                   >
                     <RiUploadLine className="size-4" />
-                    {receiptFile ? receiptFile.name : "Upload receipt or proof"}
+                    {receiptFile ? receiptFile.name : t.expense.uploadReceipt}
                   </label>
                   <input
                     id="receipt"
@@ -227,17 +231,17 @@ export function AddExpenseDrawer({
                     disabled={uploadingReceipt}
                   />
                   {uploadingReceipt && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Uploading...</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.expense.uploading}</p>
                   )}
                   {receiptFileId && (
                     <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
                       <RiFileLine className="size-4" />
-                      Receipt uploaded successfully
+                      {t.expense.receiptUploaded}
                     </div>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Upload a receipt or proof of payment (optional but recommended)
+                  {t.expense.receiptHint}
                 </p>
               </div>
             </div>
@@ -250,7 +254,7 @@ export function AddExpenseDrawer({
                 disabled={loading}
                 className="flex-1 sm:flex-initial"
               >
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button
                 type="submit"
@@ -259,7 +263,7 @@ export function AddExpenseDrawer({
                 isLoading={loading}
                 className="flex-1 sm:flex-initial"
               >
-                Add Expense
+                {t.expense.addExpense}
               </Button>
             </DrawerFooter>
           </form>

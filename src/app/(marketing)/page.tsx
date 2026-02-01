@@ -1,7 +1,8 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { persistLocaleForApp } from "@/contexts/locale-context"
 import Link from "next/link"
 import { Language, translations } from "@/lib/landing-translations"
 import { Button } from "@/components/Button"
@@ -19,6 +20,10 @@ function LandingPageContent() {
   const dir = lang === "ar" ? "rtl" : "ltr"
   const t = translations[lang]
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    persistLocaleForApp(lang)
+  }, [lang])
 
   return (
     <div dir={dir} lang={lang}>
@@ -48,14 +53,14 @@ function LandingPageContent() {
                 <LanguageToggle />
                 <div className="flex items-center gap-3">
                   <Link
-                    href="/login"
+                    href={lang === "ar" ? "/login?lang=ar" : "/login"}
                     className="text-sm font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   >
                     {t.navLogin}
                   </Link>
                   <span className="text-gray-300 dark:text-gray-700">|</span>
                   <Link
-                    href="/register"
+                    href={lang === "ar" ? "/register?lang=ar" : "/register"}
                     className="text-sm font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                   >
                     {t.navSignup}
@@ -80,12 +85,12 @@ function LandingPageContent() {
         {isMobileMenuOpen && (
           <div className="border-t border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-950 md:hidden">
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link href={lang === "ar" ? "/login?lang=ar" : "/login"} onClick={() => setIsMobileMenuOpen(false)}>
                 <Button className="w-full" variant="primary">
                   {t.navLogin}
                 </Button>
               </Link>
-              <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link href={lang === "ar" ? "/register?lang=ar" : "/register"} onClick={() => setIsMobileMenuOpen(false)}>
                 <Button className="w-full" variant="secondary">
                   {t.navSignup}
                 </Button>

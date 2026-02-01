@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -33,6 +35,8 @@ export function AddWeightDrawer({
   onSubmit,
   patientId,
 }: AddWeightDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [weight, setWeight] = useState("")
   const [recordedDate, setRecordedDate] = useState(() => new Date().toISOString().split("T")[0])
@@ -64,27 +68,27 @@ export function AddWeightDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-md">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-md">
         <DrawerHeader>
-          <DrawerTitle>Add Weight</DrawerTitle>
+          <DrawerTitle>{t.profile.addWeightTitle}</DrawerTitle>
         </DrawerHeader>
         <form onSubmit={handleSubmit}>
           <DrawerBody className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg)</Label>
+              <Label htmlFor="weight">{t.profile.weightKg}</Label>
               <Input
                 id="weight"
                 type="number"
                 step="0.1"
                 min="1"
-                placeholder="e.g. 72.5"
+                placeholder={t.profile.weightPlaceholder}
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="recorded-date">Date</Label>
+              <Label htmlFor="recorded-date">{t.profile.date}</Label>
               <Input
                 id="recorded-date"
                 type="date"
@@ -94,10 +98,10 @@ export function AddWeightDrawer({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weight-notes">Notes (optional)</Label>
+              <Label htmlFor="weight-notes">{t.profile.notesOptional}</Label>
               <Textarea
                 id="weight-notes"
-                placeholder="e.g. Before breakfast"
+                placeholder={t.profile.notesPlaceholder}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
@@ -106,10 +110,10 @@ export function AddWeightDrawer({
           </DrawerBody>
           <DrawerFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button type="submit" variant="primary" disabled={isSubmitting || !weight.trim()}>
-              {isSubmitting ? "Adding…" : "Add Weight"}
+              {isSubmitting ? t.profile.addingWeight : t.profile.addWeightBtn}
             </Button>
           </DrawerFooter>
         </form>

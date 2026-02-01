@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useState } from "react"
 import { Badge } from "@/components/Badge"
 import { Button } from "@/components/Button"
@@ -58,6 +59,7 @@ export function FilesTab({
   onExtractLab,
   onExtractScan,
 }: FilesTabProps) {
+  const t = useAppTranslations()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Partial<LabResult>>({})
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; fileName: string } | null>(null)
@@ -313,16 +315,16 @@ export function FilesTab({
                     <table className="w-full min-w-0 table-fixed text-xs">
                       <thead className="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
-                          <th className="w-[40%] pl-4 pr-3 py-2 text-left text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">Test</th>
-                          <th className="w-[30%] px-3 py-2 text-left text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">Value</th>
-                          <th className="w-[20%] px-3 py-2 text-left text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">Status</th>
-                          <th className="w-9 shrink-0 pl-2 pr-4 py-2 text-right text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500" aria-label="Actions" />
+                          <th className="w-[40%] ps-4 pe-3 py-2 text-start text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">{t.table.test}</th>
+                          <th className="w-[30%] px-3 py-2 text-start text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">{t.table.value}</th>
+                          <th className="w-[20%] px-3 py-2 text-start text-xs font-bold lowercase tracking-widest text-gray-400 dark:text-gray-500">{t.table.status}</th>
+                          <th className="w-9 shrink-0 ps-2 pe-4 py-2 text-end text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500" aria-label={t.table.actions} />
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                         {results.map((result) => (
                           <tr key={result.id}>
-                            <td className="min-w-0 pl-4 pr-3 py-2.5">
+                            <td className="min-w-0 ps-4 pe-3 py-2.5">
                               {editingId === result.id ? (
                                 <Input value={editValues.test_name ?? ""} onChange={(e) => setEditValues({ ...editValues, test_name: e.target.value })} className="h-7 text-xs" />
                               ) : (
@@ -344,7 +346,7 @@ export function FilesTab({
                             <td className="px-3 py-2.5">
                               <span className={cx("text-xs font-bold uppercase tracking-wider", getStatusColor(result.status))}>{result.status}</span>
                             </td>
-                            <td className="pl-2 pr-4 py-2.5 text-right align-middle">
+                            <td className="ps-2 pe-4 py-2.5 text-end align-middle">
                               {editingId === result.id ? (
                                 <div className="flex items-center justify-end gap-0.5">
                                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleSave}><RiSaveLine className="size-3.5" /></Button>

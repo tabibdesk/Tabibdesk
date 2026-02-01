@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { ConfirmationModal } from "@/components/ConfirmationModal"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useDemo } from "@/contexts/demo-context"
@@ -16,6 +17,7 @@ import { NowQueueWidget } from "./NowQueueWidget"
 import { TodaysAppointmentsWidget } from "./TodaysAppointmentsWidget"
 
 export default function DashboardPage() {
+  const t = useAppTranslations()
   const { currentUser, currentClinic } = useUserClinic()
   const { isDemoMode } = useDemo()
   const { showToast } = useToast()
@@ -104,7 +106,7 @@ export default function DashboardPage() {
     setMarkingArrived(selectedAppointment.id)
     try {
       await updateAppointmentStatus(selectedAppointment.id, "arrived")
-      showToast("Patient marked as arrived", "success")
+      showToast(t.dashboard.toastMarkedArrived, "success")
       setAppointments((prev) =>
         prev.map((apt) =>
           apt.id === selectedAppointment.id ? { ...apt, status: "arrived" as const } : apt
@@ -112,7 +114,7 @@ export default function DashboardPage() {
       )
       setShowArrivedModal(false)
     } catch {
-      showToast("Failed to mark patient as arrived", "error")
+      showToast(t.dashboard.toastArrivedFailed, "error")
     } finally {
       setMarkingArrived(null)
     }
@@ -123,7 +125,7 @@ export default function DashboardPage() {
     setMarkingArrived(selectedAppointment.id)
     try {
       await updateAppointmentStatus(selectedAppointment.id, "scheduled")
-      showToast("Arrived status removed", "success")
+      showToast(t.dashboard.toastArrivalRemoved, "success")
       setAppointments((prev) =>
         prev.map((apt) =>
           apt.id === selectedAppointment.id ? { ...apt, status: "scheduled" as const } : apt
@@ -131,7 +133,7 @@ export default function DashboardPage() {
       )
       setShowUnmarkArrivedModal(false)
     } catch {
-      showToast("Failed to unmark patient as arrived", "error")
+      showToast(t.dashboard.toastUnmarkArrivedFailed, "error")
     } finally {
       setMarkingArrived(null)
     }
@@ -160,7 +162,7 @@ export default function DashboardPage() {
 
   return (
     <div className="page-content">
-      <PageHeader title="Dashboard" />
+      <PageHeader title={t.nav.dashboard} />
 
       {role === "doctor" ? (
         <div className="space-y-4">
@@ -218,10 +220,11 @@ export default function DashboardPage() {
           }
         }}
         onConfirm={handleNoShowConfirm}
-        title="Mark as No Show"
-        description="Are you sure you want to cancel this appointment and mark it as no show? This action will update the appointment status."
-        confirmText="Yes, Mark as No Show"
-        cancelText="Cancel"
+        title={t.dashboard.modalNoShowTitle}
+        description={t.dashboard.modalNoShowConfirm}
+        confirmText={t.dashboard.yesMarkNoShow}
+        cancelText={t.common.cancel}
+        loadingText={t.common.processing}
         variant="danger"
         isLoading={isMarkingNoShow}
       />
@@ -230,10 +233,11 @@ export default function DashboardPage() {
         isOpen={showArrivedModal}
         onClose={() => setShowArrivedModal(false)}
         onConfirm={handleMarkArrived}
-        title="Mark as Arrived"
-        description={`Mark ${selectedAppointment?.patientName} as arrived?`}
-        confirmText="Confirm Arrival"
-        cancelText="Cancel"
+        title={t.dashboard.modalArrivedTitle}
+        description={t.dashboard.modalArrivedConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
+        confirmText={t.dashboard.confirmArrival}
+        cancelText={t.common.cancel}
+        loadingText={t.common.processing}
         variant="success"
         isLoading={!!markingArrived}
       />
@@ -242,10 +246,11 @@ export default function DashboardPage() {
         isOpen={showUnmarkArrivedModal}
         onClose={() => setShowUnmarkArrivedModal(false)}
         onConfirm={handleUnmarkArrived}
-        title="Undo Arrival"
-        description={`Are you sure you want to un-mark ${selectedAppointment?.patientName} as arrived? Status will return to scheduled.`}
-        confirmText="Yes, Undo"
-        cancelText="Cancel"
+        title={t.dashboard.modalUndoArrivalTitle}
+        description={t.dashboard.modalUndoArrivalConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
+        confirmText={t.dashboard.yesUndo}
+        cancelText={t.common.cancel}
+        loadingText={t.common.processing}
         variant="danger"
         isLoading={!!markingArrived}
       />
@@ -268,10 +273,11 @@ export default function DashboardPage() {
         isOpen={showUnmarkPaidModal}
         onClose={() => setShowUnmarkPaidModal(false)}
         onConfirm={handleUnmarkPaid}
-        title="Undo Payment"
-        description={`Are you sure you want to delete the payment record for ${selectedAppointment?.patientName}?`}
-        confirmText="Yes, Delete Record"
-        cancelText="Cancel"
+        title={t.dashboard.modalUndoPaymentTitle}
+        description={t.dashboard.modalUndoPaymentConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
+        confirmText={t.dashboard.yesDeleteRecord}
+        cancelText={t.common.cancel}
+        loadingText={t.common.processing}
         variant="danger"
         isLoading={!!markingPaid}
       />

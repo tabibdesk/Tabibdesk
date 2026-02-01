@@ -12,6 +12,7 @@ import { ActivityEvent, ActivityEntityType } from "@/types/activity";
 import { format } from "date-fns";
 import { cx } from "@/lib/utils";
 import { useDebounce } from "@/lib/useDebounce";
+import { useAppTranslations } from "@/lib/useAppTranslations";
 import Link from "next/link";
 
 interface ActivityPageProps {
@@ -19,6 +20,7 @@ interface ActivityPageProps {
 }
 
 export function ActivityPage({ clinicId }: ActivityPageProps) {
+  const t = useAppTranslations();
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -75,7 +77,7 @@ export function ActivityPage({ clinicId }: ActivityPageProps) {
       <FeatureToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search by patient, action, or user..."
+        searchPlaceholder={t.archive.searchActivity}
       />
 
       {/* Activity List */}

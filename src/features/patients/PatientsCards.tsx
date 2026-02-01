@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { RiPhoneLine, RiStethoscopeLine, RiUserLine } from "@remixicon/react"
 import Link from "next/link"
 import type { PatientListItem } from "./patients.types"
@@ -10,6 +11,7 @@ interface PatientsCardsProps {
 }
 
 export function PatientsCards({ patients }: PatientsCardsProps) {
+  const t = useAppTranslations()
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—"
     const date = new Date(dateString)
@@ -53,14 +55,14 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
               )}
             </div>
 
-            {/* Phone & last visited - right-aligned */}
-            <div className="hidden shrink-0 text-right sm:block">
-              <div className="flex items-center justify-end gap-1.5 text-sm text-gray-900 dark:text-gray-100">
+            {/* Phone & last visited - end-aligned, phone icon on other side in RTL */}
+            <div className="hidden shrink-0 text-end sm:block">
+              <div className="flex items-center justify-end gap-1.5 text-sm text-gray-900 dark:text-gray-100 rtl:flex-row-reverse">
                 <RiPhoneLine className="size-4 shrink-0 text-gray-500 dark:text-gray-400" aria-hidden />
                 <span>{patient.phone}</span>
               </div>
               <div className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">
-                Visited {formatDate(patient.lastAppointmentDate)}
+                {t.patients.visited} {formatDate(patient.lastAppointmentDate)}
               </div>
             </div>
           </Link>

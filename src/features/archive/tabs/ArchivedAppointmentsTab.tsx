@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { cx } from "@/lib/utils"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
@@ -36,6 +37,7 @@ export function ArchivedAppointmentsTab({
   customDateRange,
   onCustomDateRangeChange,
 }: ArchivedAppointmentsTabProps) {
+  const t = useAppTranslations()
   const [appointments, setAppointments] = useState<AppointmentListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -117,20 +119,21 @@ export function ArchivedAppointmentsTab({
         dateRangePreset={dateRangePreset}
         customDateRange={customDateRange}
         onCustomDateRangeChange={onCustomDateRangeChange}
+        searchPlaceholder={t.archive.searchAppointments}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 rtl:flex-row-reverse">
           {(["completed", "cancelled", "no_show"] as ArchivedAppointmentStatus[]).map((status) => (
             <button
               key={status}
               onClick={() => toggleStatusFilter(status)}
               className={cx(
-                "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all border shadow-sm capitalize",
+                "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all border shadow-sm",
                 statusFilters.includes(status)
                   ? "bg-primary-50 border-primary-200 text-primary-700 dark:bg-primary-900/20 dark:border-primary-800 dark:text-primary-400"
                   : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400"
               )}
             >
-              {status.replace("_", " ")}
+              {status === "completed" ? t.archive.statusCompleted : status === "cancelled" ? t.archive.statusCancelled : t.archive.statusNoShow}
             </button>
           ))}
         </div>
@@ -149,7 +152,7 @@ export function ArchivedAppointmentsTab({
           <CardContent className="py-12 text-center">
             <RiCalendarLine className="mx-auto size-12 text-gray-400" />
             <p className="mt-4 text-gray-600 dark:text-gray-400">
-              No archived appointments in this range.
+              {t.archive.noArchivedAppointments}
             </p>
           </CardContent>
         </Card>
@@ -179,7 +182,7 @@ export function ArchivedAppointmentsTab({
                 disabled={loading}
                 isLoading={loading}
               >
-                Load More
+                {t.archive.loadMore}
               </Button>
             </div>
           )}

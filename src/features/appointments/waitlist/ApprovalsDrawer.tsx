@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -30,6 +32,7 @@ import {
   RiExternalLinkLine,
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
+import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 import { ListSkeleton } from "@/components/skeletons"
 
 export interface ApprovalsDrawerProps {
@@ -38,6 +41,8 @@ export interface ApprovalsDrawerProps {
 }
 
 export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const { showToast } = useToast()
   const { currentUser, currentClinic } = useUserClinic()
   const clinicId = currentClinic?.id || DEMO_CLINIC_ID
@@ -58,7 +63,7 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
       setRequests(pending)
     } catch (error) {
       console.error("Failed to fetch pending approvals:", error)
-      showToast("Failed to load pending approvals", "error")
+      showToast(t.approvals.failedLoadApprovals, "error")
     } finally {
       setLoading(false)
     }
@@ -67,19 +72,19 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
   const handleApprove = async (request: AppointmentApprovalRequest) => {
     try {
       await approve({ requestId: request.id })
-      showToast(`Approved appointment for ${request.patientName}`, "success")
+      showToast(t.approvals.approvedFor.replace("{name}", request.patientName), "success")
       // Remove from list
       setRequests((prev) => prev.filter((r) => r.id !== request.id))
     } catch (error) {
       console.error("Failed to approve request:", error)
-      showToast("Failed to approve request", "error")
+      showToast(t.approvals.failedApprove, "error")
     }
   }
 
   const handleReject = async (request: AppointmentApprovalRequest) => {
     try {
       await reject(request.id, "Rejected by assistant")
-      showToast(`Rejected appointment for ${request.patientName}`, "info")
+      showToast(t.approvals.rejectedFor.replace("{name}", request.patientName), "info")
       // Remove from list
       setRequests((prev) => prev.filter((r) => r.id !== request.id))
     } catch (error) {
@@ -101,10 +106,10 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
         createdByUserId: currentUser.id,
       })
 
-      showToast("Task created for alternative time suggestion", "success")
+      showToast(t.approvals.taskCreatedAlternative, "success")
     } catch (error) {
       console.error("Failed to create task:", error)
-      showToast("Failed to create task", "error")
+      showToast(t.approvals.failedCreateTask, "error")
     }
   }
 
@@ -150,9 +155,9 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
         )}
       >
         <DrawerHeader>
-          <DrawerTitle>Pending Approvals</DrawerTitle>
+          <DrawerTitle>{t.approvals.pendingApprovals}</DrawerTitle>
           <DrawerDescription>
-            Review and approve appointment requests from integrations and online bookings.
+            {t.approvals.approvalsDescription}
           </DrawerDescription>
         </DrawerHeader>
 
@@ -193,7 +198,7 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
                           </div>
                         </div>
                         <Badge color={request.source === "integration" ? "indigo" : "gray"} size="xs">
-                          {request.source === "integration" ? "Integration" : "Online"}
+                          {request.source === "integration" ? t.approvals.integration : t.approvals.online}
                         </Badge>
                       </div>
 
@@ -210,7 +215,7 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
                           </span>
                         </div>
                         <div className="text-sm text-gray-700 dark:text-gray-300">
-                          <span className="font-medium">Type:</span> {request.appointmentType}
+                          <span className="font-medium">{t.approvals.typeLabel}:</span> {getAppointmentTypeLabel(request.appointmentType, t.appointments)}
                         </div>
                         {request.notes && (
                           <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
@@ -259,7 +264,7 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
 
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button variant="secondary">Close</Button>
+            <Button variant="secondary">{t.approvals.close}</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

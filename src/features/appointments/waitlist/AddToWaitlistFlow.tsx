@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Button } from "@/components/Button"
 import { Label } from "@/components/Label"
 import { Textarea } from "@/components/Textarea"
@@ -18,6 +19,7 @@ interface AddToWaitlistFlowProps {
 }
 
 export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowProps) {
+  const t = useAppTranslations()
   const { showToast } = useToast()
   const { currentUser, currentClinic } = useUserClinic()
   const clinicId = currentClinic?.id || DEMO_CLINIC_ID
@@ -74,7 +76,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
       }
     } catch (error) {
       console.error("Failed to add to waiting list:", error)
-      showToast("Failed to add patient to waiting list", "error")
+      showToast(t.appointments.failedToAddWaitlist, "error")
     } finally {
       setIsSubmitting(false)
     }
@@ -102,8 +104,8 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
                 onClick={onCancel} 
                 className="text-[11px] font-bold"
               >
-                <RiArrowLeftLine className="mr-1 size-3.5" />
-                Cancel
+                <RiArrowLeftLine className="me-1 size-3.5 rtl:rotate-180" />
+                {t.common.cancel}
               </Button>
             )
           ) : (
@@ -112,8 +114,8 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
               onClick={handleBack} 
               className="text-[11px] font-bold"
             >
-              <RiArrowLeftLine className="mr-1 size-3.5" />
-              Back
+              <RiArrowLeftLine className="me-1 size-3.5 rtl:rotate-180" />
+              {t.common.back}
             </Button>
           )}
         </div>
@@ -124,9 +126,9 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
         <div className="py-2">
           <div className="flex items-center justify-center max-w-xs mx-auto">
             {[
-              { key: "patient", label: "Patient" },
-              { key: "preferences", label: "Prefs" },
-              { key: "confirmation", label: "Confirm" },
+              { key: "patient", label: t.table.patient },
+              { key: "preferences", label: t.appointments.prefs },
+              { key: "confirmation", label: t.appointments.confirm },
             ].map((step, index, array) => {
               const stepKeys = array.map(s => s.key)
               const stepIndex = stepKeys.indexOf(currentStep)
@@ -173,7 +175,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
           <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
             {/* Appointment Type */}
             <div className="space-y-2">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Type</Label>
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ms-1">{t.appointments.type}</Label>
               <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-full border border-gray-200 dark:border-gray-700">
                 {(["new", "followup", "online"] as const).map((type) => (
                   <button
@@ -186,7 +188,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
                         : "text-gray-500 hover:text-gray-700"
                     }`}
                   >
-                    <span className="capitalize">{type === "followup" ? "Follow-up" : type}</span>
+                    <span className="capitalize">{type === "followup" ? t.appointments.followup : type === "new" ? t.appointments.new : t.appointments.online}</span>
                   </button>
                 ))}
               </div>
@@ -194,7 +196,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
 
             {/* Time Window */}
             <div className="space-y-2">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Time Preference</Label>
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ms-1">{t.appointments.timePreference}</Label>
               <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-full border border-gray-200 dark:border-gray-700">
                 {(["any", "morning", "afternoon", "evening"] as const).map((window) => (
                   <button
@@ -207,7 +209,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
                         : "text-gray-500 hover:text-gray-700"
                     }`}
                   >
-                    <span className="capitalize">{window}</span>
+                    <span className="capitalize">{window === "any" ? t.appointments.any : window === "morning" ? t.appointments.morning : window === "afternoon" ? t.appointments.afternoon : t.appointments.evening}</span>
                   </button>
                 ))}
               </div>
@@ -215,7 +217,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
 
             {/* Days Selection */}
             <div className="space-y-2">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">Preferred Days</Label>
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ms-1">{t.appointments.preferredDays}</Label>
               <div className="flex flex-wrap gap-2">
                 {daysOfWeek.map((day) => (
                   <button
@@ -238,7 +240,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
               className="w-full h-11 bg-gray-900 text-white rounded-xl font-bold text-xs"
               onClick={() => setCurrentStep("confirmation")}
             >
-              Review Details
+              {t.appointments.reviewDetails}
             </Button>
           </div>
         )}
@@ -248,7 +250,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
             <div className="rounded-xl bg-primary-50/50 border border-primary-100 p-3">
               <p className="text-xs font-semibold text-primary-700 flex items-center gap-1.5">
                 <RiCheckLine className="size-4" />
-                Review waitlist preferences
+                {t.appointments.reviewWaitlistPrefs}
               </p>
             </div>
 
@@ -268,8 +270,8 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
                   <RiTimeLine className="size-4.5 text-gray-500" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Timing</p>
-                  <p className="text-sm font-bold text-gray-900 capitalize">{formData.preferredTimeWindow} • {formData.appointmentType || "Any Type"}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{t.appointments.timing}</p>
+                  <p className="text-sm font-bold text-gray-900 capitalize">{formData.preferredTimeWindow === "any" ? t.appointments.any : formData.preferredTimeWindow === "morning" ? t.appointments.morning : formData.preferredTimeWindow === "afternoon" ? t.appointments.afternoon : t.appointments.evening} • {formData.appointmentType === "new" ? t.appointments.new : formData.appointmentType === "followup" ? t.appointments.followup : formData.appointmentType === "online" ? t.appointments.online : t.appointments.anyType}</p>
                 </div>
               </div>
 
@@ -292,7 +294,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
                 className="flex-1 text-[11px] h-11 px-2.5 font-bold border-gray-200" 
                 onClick={handleBack}
               >
-                Back
+                {t.common.back}
               </Button>
               <Button 
                 variant="primary" 
@@ -300,7 +302,7 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
                 onClick={handleSubmit} 
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Adding..." : "Add to Waiting List"}
+                {isSubmitting ? t.appointments.adding : t.appointments.addToWaitingList}
               </Button>
             </div>
           </div>
@@ -311,9 +313,9 @@ export function AddToWaitlistFlow({ onComplete, onCancel }: AddToWaitlistFlowPro
             <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-green-50 border-4 border-white shadow-sm">
               <RiCheckLine className="size-12 text-green-600" />
             </div>
-            <h3 className="mt-6 text-xl font-bold text-gray-900">Waitlist Updated!</h3>
+            <h3 className="mt-6 text-xl font-bold text-gray-900">{t.appointments.waitlistUpdated}</h3>
             <p className="mt-2 text-sm text-gray-500 max-w-xs mx-auto">
-              {selectedPatient?.first_name} has been successfully added to the waiting list.
+              {t.appointments.addedToWaitlistSuccess.replace("{name}", selectedPatient?.first_name || "")}
             </p>
           </div>
         )}

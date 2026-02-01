@@ -7,6 +7,7 @@ export interface AppBookableService {
   duration_minutes: number
   app_clinic_id: string | null
   app_doctor_id: string | null
+  app_appointment_type_id?: string
   app_appointment_type_name: string
   app_clinic_name: string | null
   app_doctor_name: string | null

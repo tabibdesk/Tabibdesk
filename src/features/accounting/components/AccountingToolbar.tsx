@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react"
 import { SearchInput } from "@/components/SearchInput"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useDebounce } from "@/lib/useDebounce"
 import { RiFilterLine } from "@remixicon/react"
 
@@ -10,6 +11,7 @@ export type DateRangePreset = "today" | "7days" | "30days" | "90days" | "thismon
 export interface AccountingToolbarProps {
   searchQuery: string
   onSearchQueryChange: (query: string) => void
+  searchPlaceholder?: string
   showFilters?: boolean
   onFiltersToggle?: () => void
 }
@@ -17,9 +19,12 @@ export interface AccountingToolbarProps {
 export function AccountingToolbar({
   searchQuery,
   onSearchQueryChange,
+  searchPlaceholder,
   showFilters = false,
   onFiltersToggle,
 }: AccountingToolbarProps) {
+  const t = useAppTranslations()
+  const placeholder = searchPlaceholder ?? t.common.searchPlaceholder
   const debouncedSearch = useDebounce(searchQuery, 250)
 
   // Update parent when debounced search changes
@@ -32,7 +37,7 @@ export function AccountingToolbar({
       {/* Search Bar */}
       <div className="flex-1 min-w-0">
         <SearchInput
-          placeholder="Search..."
+          placeholder={placeholder}
           value={searchQuery}
           onSearchChange={onSearchQueryChange}
         />

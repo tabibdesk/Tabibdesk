@@ -12,6 +12,7 @@ import {
 import * as React from "react"
 
 import { cx } from "@/lib/utils"
+import { useLocale } from "@/contexts/locale-context"
 
 const DropdownMenu = DropdownMenuPrimitives.Root
 DropdownMenu.displayName = "DropdownMenu"
@@ -52,7 +53,7 @@ const DropdownMenuSubMenuTrigger = React.forwardRef<
   >
     {children}
     <RiArrowRightSLine
-      className="ml-auto size-4 shrink-0 text-gray-500"
+      className="ms-auto size-4 shrink-0 text-gray-500 rtl:rotate-180"
       aria-hidden="true"
     />
   </DropdownMenuPrimitives.SubTrigger>
@@ -105,43 +106,52 @@ const DropdownMenuContent = React.forwardRef<
       sideOffset = 8,
       collisionPadding = 8,
       align = "center",
+      side,
       loop = true,
       ...props
     },
     forwardedRef,
-  ) => (
-    <DropdownMenuPrimitives.Portal>
-      <DropdownMenuPrimitives.Content
-        ref={forwardedRef}
-        className={cx(
-          // base
-          "relative z-50 overflow-hidden rounded-md border p-1 shadow-xl shadow-black/[2.5%]",
-          // widths
-          "min-w-[calc(var(--radix-dropdown-menu-trigger-width))]",
-          // heights
-          "max-h-[var(--radix-popper-available-height)]",
-          // background color
-          "bg-white dark:bg-gray-950",
-          // text color
-          "text-gray-900 dark:text-gray-50",
-          // border color
-          "border-gray-200 dark:border-gray-800",
-          // transition
-          "will-change-[transform,opacity]",
-          // mobile: ensure dropdowns stay within viewport
-          "max-w-[calc(100vw-2rem)] lg:max-w-none",
-          "data-[state=closed]:animate-hide",
-          "data-[side=bottom]:animate-slideDownAndFade data-[side=left]:animate-slideLeftAndFade data-[side=right]:animate-slideRightAndFade data-[side=top]:animate-slideUpAndFade",
-          className,
-        )}
-        sideOffset={sideOffset}
-        align={align}
-        collisionPadding={collisionPadding}
-        loop={loop}
-        {...props}
-      />
-    </DropdownMenuPrimitives.Portal>
-  ),
+  ) => {
+    const { isRtl } = useLocale()
+    const effectiveAlign =
+      align === "end" && isRtl ? "start" : align === "start" && isRtl ? "end" : align
+    const effectiveSide =
+      side === "left" && isRtl ? "right" : side === "right" && isRtl ? "left" : side
+    return (
+      <DropdownMenuPrimitives.Portal>
+        <DropdownMenuPrimitives.Content
+          ref={forwardedRef}
+          className={cx(
+            // base
+            "relative z-50 overflow-hidden rounded-md border p-1 shadow-xl shadow-black/[2.5%]",
+            // widths
+            "min-w-[calc(var(--radix-dropdown-menu-trigger-width))]",
+            // heights
+            "max-h-[var(--radix-popper-available-height)]",
+            // background color
+            "bg-white dark:bg-gray-950",
+            // text color
+            "text-gray-900 dark:text-gray-50",
+            // border color
+            "border-gray-200 dark:border-gray-800",
+            // transition
+            "will-change-[transform,opacity]",
+            // mobile: ensure dropdowns stay within viewport
+            "max-w-[calc(100vw-2rem)] lg:max-w-none",
+            "data-[state=closed]:animate-hide",
+            "data-[side=bottom]:animate-slideDownAndFade data-[side=left]:animate-slideLeftAndFade data-[side=right]:animate-slideRightAndFade data-[side=top]:animate-slideUpAndFade",
+            className,
+          )}
+          sideOffset={sideOffset}
+          align={effectiveAlign}
+          side={effectiveSide}
+          collisionPadding={collisionPadding}
+          loop={loop}
+          {...props}
+        />
+      </DropdownMenuPrimitives.Portal>
+    )
+  },
 )
 DropdownMenuContent.displayName = "DropdownMenuContent"
 

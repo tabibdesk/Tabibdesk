@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useRouter } from "next/navigation"
 import { mockData, mockAppointments } from "@/data/mock/mock-data"
 import { listInvoices } from "@/api/invoices.api"
@@ -19,6 +20,7 @@ export function usePatientPageData(
   isDemoMode: boolean,
   currentClinicId: string | undefined
 ) {
+  const t = useAppTranslations()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [patient, setPatient] = useState<any | null>(null)
@@ -148,18 +150,18 @@ export function usePatientPageData(
   }
 
   const formatLastVisited = (dateString: string | null) => {
-    if (!dateString) return "Never"
+    if (!dateString) return t.common.never
     const date = new Date(dateString)
     const now = new Date()
     const diffDays = Math.floor(
       Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
     )
-    if (diffDays === 0) return "Today"
-    if (diffDays === 1) return "Yesterday"
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
-    return `${Math.floor(diffDays / 365)} years ago`
+    if (diffDays === 0) return t.common.today
+    if (diffDays === 1) return t.common.yesterday
+    if (diffDays < 7) return t.common.daysAgo.replace("{n}", String(diffDays))
+    if (diffDays < 30) return t.common.weeksAgo.replace("{n}", String(Math.floor(diffDays / 7)))
+    if (diffDays < 365) return t.common.monthsAgo.replace("{n}", String(Math.floor(diffDays / 30)))
+    return t.common.yearsAgo.replace("{n}", String(Math.floor(diffDays / 365)))
   }
 
   const handleUpdatePatient = async (updates: Partial<any>) => {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type { Patient } from "@/components/shared/PatientSelector"
+import { getAppointmentTypeIdForStorage } from "@/features/appointments/appointmentTypes"
 import { mockUsers, mockClinics } from "@/data/mock/users-clinics"
 import { createAppointment, updateAppointmentTime } from "@/features/appointments/appointments.api"
 import { getAvailableDates, getAvailableSlots } from "@/features/appointments/slots.api"
@@ -214,8 +215,9 @@ export function useBookAppointmentState(params: UseBookAppointmentStateParams) {
           doctorId: effectiveDoctorId,
           startAt: selectedSlot.starts_at,
           endAt: selectedSlot.ends_at,
-          appointmentType:
-            selectedService.app_appointment_type_name || selectedService.title,
+          appointmentType: getAppointmentTypeIdForStorage(
+            selectedService.app_appointment_type_id ?? selectedService.app_appointment_type_name ?? selectedService.title
+          ),
           notes: undefined,
         })
       } else {

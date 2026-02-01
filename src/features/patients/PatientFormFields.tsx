@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { Select } from "@/components/Select"
@@ -33,6 +34,7 @@ export function PatientFormFields({
   showEmail = true,
   showGender = false,
 }: PatientFormFieldsProps) {
+  const t = useAppTranslations()
   const updateField = <K extends keyof PatientFormData>(
     field: K,
     value: PatientFormData[K],
@@ -54,14 +56,14 @@ export function PatientFormFields({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="first_name">
-            First Name <span className="text-red-500">*</span>
+            {t.profile.firstName} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="first_name"
             value={formData.first_name}
             onChange={(e) => updateField("first_name", e.target.value)}
             hasError={!!errors.first_name}
-            placeholder="Enter first name"
+            placeholder={t.profile.placeholderFirstName}
             required
           />
           {errors.first_name && (
@@ -70,14 +72,14 @@ export function PatientFormFields({
         </div>
         <div className="space-y-2">
           <Label htmlFor="last_name">
-            Last Name <span className="text-red-500">*</span>
+            {t.profile.lastName} <span className="text-red-500">*</span>
           </Label>
           <Input
             id="last_name"
             value={formData.last_name}
             onChange={(e) => updateField("last_name", e.target.value)}
             hasError={!!errors.last_name}
-            placeholder="Enter last name"
+            placeholder={t.profile.placeholderLastName}
             required
           />
           {errors.last_name && (
@@ -88,7 +90,7 @@ export function PatientFormFields({
 
       <div className="space-y-2">
         <Label htmlFor="phone">
-          Phone <span className="text-red-500">*</span>
+          {t.profile.phone} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="phone"
@@ -96,7 +98,7 @@ export function PatientFormFields({
           value={formData.phone}
           onChange={(e) => updateField("phone", e.target.value)}
           hasError={!!errors.phone}
-          placeholder="+20 100 1234567"
+          placeholder={t.profile.placeholderPhone}
           required
         />
         {errors.phone && (
@@ -106,14 +108,14 @@ export function PatientFormFields({
 
       {showEmail && (
         <div className="space-y-2">
-          <Label htmlFor="email">Email (Optional)</Label>
+          <Label htmlFor="email">{t.profile.emailOptional}</Label>
           <Input
             id="email"
             type="email"
             value={formData.email || ""}
             onChange={(e) => updateField("email", e.target.value)}
             hasError={!!errors.email}
-            placeholder="patient@example.com"
+            placeholder={t.profile.placeholderEmail}
           />
           {errors.email && (
             <p className="text-sm text-red-600 dark:text-red-400">{errors.email}</p>
@@ -123,45 +125,45 @@ export function PatientFormFields({
 
       {showGender && (
         <div className="space-y-2">
-          <Label htmlFor="gender">Gender</Label>
+          <Label htmlFor="gender">{t.profile.gender}</Label>
           <Select
             id="gender"
             value={formData.gender || ""}
             onChange={(e) => updateField("gender", e.target.value)}
           >
-            <option value="">Select gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
+            <option value="">{t.profile.selectGender}</option>
+            <option value="Male">{t.profile.male}</option>
+            <option value="Female">{t.profile.female}</option>
+            <option value="Other">{t.profile.other}</option>
           </Select>
         </div>
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="source">Source</Label>
+        <Label htmlFor="source">{t.profile.source}</Label>
         <Select
           id="source"
           value={formData.source || ""}
           onChange={handleSourceChange}
         >
-          <option value="">Select source</option>
-          <option value="facebook">Facebook</option>
-          <option value="instagram">Instagram</option>
-          <option value="friend_recommendation">Friend Recommendation</option>
-          <option value="walk_in">Walk In</option>
-          <option value="other">Other</option>
+          <option value="">{t.profile.selectSource}</option>
+          <option value="facebook">{t.profile.facebook}</option>
+          <option value="instagram">{t.profile.instagram}</option>
+          <option value="friend_recommendation">{t.profile.friendRecommendation}</option>
+          <option value="walk_in">{t.profile.walkIn}</option>
+          <option value="other">{t.profile.other}</option>
         </Select>
       </div>
 
       {formData.source === "other" && (
         <div className="space-y-2">
-          <Label htmlFor="source_other">Specify Other Source</Label>
+          <Label htmlFor="source_other">{t.profile.specifySource}</Label>
           <Input
             id="source_other"
             value={formData.source_other || ""}
             onChange={(e) => updateField("source_other", e.target.value)}
             hasError={!!errors.source_other}
-            placeholder="Enter source"
+            placeholder={t.profile.placeholderSource}
           />
           {errors.source_other && (
             <p className="text-sm text-red-600 dark:text-red-400">{errors.source_other}</p>
@@ -170,13 +172,13 @@ export function PatientFormFields({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="address">Address (Optional)</Label>
+        <Label htmlFor="address">{t.profile.addressOptional}</Label>
         <Input
           id="address"
           value={formData.address || ""}
           onChange={(e) => updateField("address", e.target.value)}
           hasError={!!errors.address}
-          placeholder="Enter address"
+          placeholder={t.profile.placeholderAddress}
         />
         {errors.address && (
           <p className="text-sm text-red-600 dark:text-red-400">{errors.address}</p>
@@ -186,13 +188,13 @@ export function PatientFormFields({
       <div className="space-y-2">
         <Label htmlFor="complaint" className="flex items-center gap-2">
           <RiFileTextLine className="size-4 text-gray-400" />
-          <span>Complaint (Optional)</span>
+          <span>{t.profile.complaintOptional}</span>
         </Label>
         <Textarea
           id="complaint"
           value={formData.complaint || ""}
           onChange={(e) => updateField("complaint", e.target.value)}
-          placeholder="Enter complaint"
+          placeholder={t.profile.placeholderComplaint}
           rows={3}
         />
       </div>

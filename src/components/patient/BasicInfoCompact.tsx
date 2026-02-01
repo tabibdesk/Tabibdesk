@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import { Card, CardContent, CardHeader } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
@@ -55,6 +57,8 @@ interface FormData {
 }
 
 export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showFullComplaint, setShowFullComplaint] = useState(false)
@@ -97,36 +101,36 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof FormData, string>> = {}
 
-    if (!formData.first_name.trim()) newErrors.first_name = "First name is required"
-    if (!formData.last_name.trim()) newErrors.last_name = "Last name is required"
-    if (!formData.phone.trim()) newErrors.phone = "Phone is required"
+    if (!formData.first_name.trim()) newErrors.first_name = t.profile.errFirstNameRequired
+    if (!formData.last_name.trim()) newErrors.last_name = t.profile.errLastNameRequired
+    if (!formData.phone.trim()) newErrors.phone = t.profile.errPhoneRequired
 
     if (formData.email && formData.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if (!emailRegex.test(formData.email)) newErrors.email = "Invalid email format"
+      if (!emailRegex.test(formData.email)) newErrors.email = t.profile.errEmailInvalid
     }
 
     if (formData.phone && formData.phone.trim()) {
       const phoneRegex = /^[\d\s\+\-\(\)]+$/
-      if (!phoneRegex.test(formData.phone)) newErrors.phone = "Invalid phone format"
+      if (!phoneRegex.test(formData.phone)) newErrors.phone = t.profile.errPhoneInvalid
     }
 
     if (formData.age && formData.age.trim()) {
       const ageNum = parseInt(formData.age, 10)
       if (isNaN(ageNum) || ageNum < 0 || ageNum > 150) {
-        newErrors.age = "Age must be between 0 and 150"
+        newErrors.age = t.profile.errAgeRange
       }
     }
 
     if (formData.height && formData.height.trim()) {
       const heightNum = parseFloat(formData.height)
       if (isNaN(heightNum) || heightNum <= 0) {
-        newErrors.height = "Height must be a positive number"
+        newErrors.height = t.profile.errHeightPositive
       }
     }
 
     if (formData.source === "other" && !formData.source_other?.trim()) {
-      newErrors.source_other = "Please specify the source"
+      newErrors.source_other = t.profile.errSpecifySource
     }
 
     setErrors(newErrors)
@@ -211,11 +215,11 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
   const formatSource = (source: string | null | undefined, sourceOther: string | null | undefined) => {
     if (!source) return null
     const sourceMap: Record<string, string> = {
-      facebook: "Facebook",
-      instagram: "Instagram",
-      friend_recommendation: "Friend Recommendation",
-      walk_in: "Walk In",
-      other: sourceOther || "Other",
+      facebook: t.profile.facebook,
+      instagram: t.profile.instagram,
+      friend_recommendation: t.profile.friendRecommendation,
+      walk_in: t.profile.walkIn,
+      other: sourceOther || t.profile.other,
     }
     return sourceMap[source] || source
   }
@@ -241,7 +245,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
         <Icon className="size-4 text-gray-400" />
         <span>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red-500 ms-1">*</span>}
         </span>
       </Label>
       {children}
@@ -256,12 +260,12 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
             <div className="flex items-center gap-2">
               <RiInformationLine className="size-4 text-primary-500/70 dark:text-primary-400/70" />
               <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                Patient Information
+                {t.profile.patientInfo}
               </h3>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-6 px-1.5 text-[10px] font-bold uppercase tracking-wider">
-              <RiEditLine className="size-3" />
-              Edit
+              <RiEditLine className="size-3 me-1" />
+              {t.profile.edit}
             </Button>
           </div>
         </CardHeader>
@@ -271,7 +275,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
               <div className="flex items-center gap-2">
                 <RiPhoneLine className="size-3.5 shrink-0 text-gray-400" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-500 dark:text-gray-500">Phone</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500">{t.profile.phone}</p>
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
                       {patient.phone}
@@ -290,30 +294,30 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
               </div>
             ) : null}
             {patient.email ? (
-              <InfoItem icon={RiMailLine} label="Email" value={patient.email} />
+              <InfoItem icon={RiMailLine} label={t.profile.email} value={patient.email} />
             ) : null}
             {patient.address ? (
-              <InfoItem icon={RiMapPinLine} label="Address" value={patient.address} />
+              <InfoItem icon={RiMapPinLine} label={t.profile.address} value={patient.address} />
             ) : null}
             {patient.job ? (
-              <InfoItem icon={RiBriefcaseLine} label="Occupation" value={patient.job} />
+              <InfoItem icon={RiBriefcaseLine} label={t.profile.occupation} value={patient.job} />
             ) : null}
             {patient.social_status ? (
-              <InfoItem icon={RiUserLine} label="Social status" value={patient.social_status} />
+              <InfoItem icon={RiUserLine} label={t.profile.socialStatus} value={patient.social_status} />
             ) : null}
             {patient.height ? (
-              <InfoItem icon={RiRulerLine} label="Height" value={`${patient.height} cm`} />
+              <InfoItem icon={RiRulerLine} label={t.profile.height} value={`${patient.height} cm`} />
             ) : null}
             {patient.source ? (
               <InfoItem
                 icon={RiUserLine}
-                label="Source"
+                label={t.profile.source}
                 value={formatSource(patient.source, patient.source_other)}
               />
             ) : null}
             <InfoItem
               icon={RiCalendarLine}
-              label="Registered"
+              label={t.profile.registered}
               value={new Date(patient.created_at).toLocaleDateString()}
             />
           </div>
@@ -323,7 +327,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
               <div className="flex items-start gap-2">
                 <RiInformationLine className="size-3.5 shrink-0 text-gray-400 mt-0.5" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">Complaint</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">{t.profile.complaint}</p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
                     {showFullComplaint || patient.complaint.length <= 120
                       ? patient.complaint
@@ -334,7 +338,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                       onClick={() => setShowFullComplaint(!showFullComplaint)}
                       className="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1"
                     >
-                      {showFullComplaint ? "Show less" : "Read more"}
+                      {showFullComplaint ? t.profile.showLess : t.profile.readMore}
                     </button>
                   )}
                 </div>
@@ -346,87 +350,87 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
 
       {/* Edit Drawer */}
       <Drawer open={isEditing} onOpenChange={setIsEditing}>
-        <DrawerContent side="right" className="w-full sm:max-w-lg">
+        <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-lg">
           <DrawerHeader>
-            <DrawerTitle>Edit Patient Information</DrawerTitle>
+            <DrawerTitle>{t.profile.editPatientInfo}</DrawerTitle>
           </DrawerHeader>
           <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-120px)]">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <FieldWrapper icon={RiUserLine} label="First Name" required>
+              <FieldWrapper icon={RiUserLine} label={t.profile.firstName} required>
                 <Input
                   id="first_name"
                   value={formData.first_name}
                   onChange={(e) => updateField("first_name", e.target.value)}
                   hasError={!!errors.first_name}
-                  placeholder="Enter first name"
+                  placeholder={t.profile.placeholderFirstName}
                 />
                 {errors.first_name && (
                   <p className="text-sm text-red-600 dark:text-red-400">{errors.first_name}</p>
                 )}
               </FieldWrapper>
 
-              <FieldWrapper icon={RiUserLine} label="Last Name" required>
+              <FieldWrapper icon={RiUserLine} label={t.profile.lastName} required>
                 <Input
                   id="last_name"
                   value={formData.last_name}
                   onChange={(e) => updateField("last_name", e.target.value)}
                   hasError={!!errors.last_name}
-                  placeholder="Enter last name"
+                  placeholder={t.profile.placeholderLastName}
                 />
                 {errors.last_name && (
                   <p className="text-sm text-red-600 dark:text-red-400">{errors.last_name}</p>
                 )}
               </FieldWrapper>
 
-              <FieldWrapper icon={RiPhoneLine} label="Phone" required>
+              <FieldWrapper icon={RiPhoneLine} label={t.profile.phone} required>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => updateField("phone", e.target.value)}
                   hasError={!!errors.phone}
-                  placeholder="+20 100 1234567"
+                  placeholder={t.profile.placeholderPhone}
                 />
                 {errors.phone && (
                   <p className="text-sm text-red-600 dark:text-red-400">{errors.phone}</p>
                 )}
               </FieldWrapper>
 
-              <FieldWrapper icon={RiMailLine} label="Email">
+              <FieldWrapper icon={RiMailLine} label={t.profile.email}>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateField("email", e.target.value)}
                   hasError={!!errors.email}
-                  placeholder="patient@example.com"
+                  placeholder={t.profile.placeholderEmail}
                 />
                 {errors.email && (
                   <p className="text-sm text-red-600 dark:text-red-400">{errors.email}</p>
                 )}
               </FieldWrapper>
 
-              <FieldWrapper icon={RiUserLine} label="Gender">
+              <FieldWrapper icon={RiUserLine} label={t.profile.gender}>
                 <Select
                   id="gender"
                   value={formData.gender}
                   onChange={(e) => updateField("gender", e.target.value)}
                 >
-                  <option value="">Select gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
+                  <option value="">{t.profile.selectGender}</option>
+                  <option value="Male">{t.profile.male}</option>
+                  <option value="Female">{t.profile.female}</option>
+                  <option value="Other">{t.profile.other}</option>
                 </Select>
               </FieldWrapper>
 
-              <FieldWrapper icon={RiUserLine} label="Age">
+              <FieldWrapper icon={RiUserLine} label={t.profile.age}>
                 <Input
                   id="age"
                   type="number"
                   value={formData.age}
                   onChange={(e) => updateField("age", e.target.value)}
                   hasError={!!errors.age}
-                  placeholder="Enter age"
+                  placeholder={t.profile.placeholderAge}
                   min="0"
                   max="150"
                 />
@@ -435,25 +439,25 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                 )}
               </FieldWrapper>
 
-              <FieldWrapper icon={RiMapPinLine} label="Address">
+              <FieldWrapper icon={RiMapPinLine} label={t.profile.address}>
                 <Input
                   id="address"
                   value={formData.address}
                   onChange={(e) => updateField("address", e.target.value)}
-                  placeholder="Enter address"
+                  placeholder={t.profile.placeholderAddress}
                 />
               </FieldWrapper>
 
-              <FieldWrapper icon={RiBriefcaseLine} label="Occupation">
+              <FieldWrapper icon={RiBriefcaseLine} label={t.profile.occupation}>
                 <Input
                   id="job"
                   value={formData.job}
                   onChange={(e) => updateField("job", e.target.value)}
-                  placeholder="Enter occupation"
+                  placeholder={t.profile.placeholderOccupation}
                 />
               </FieldWrapper>
 
-              <FieldWrapper icon={RiRulerLine} label="Height">
+              <FieldWrapper icon={RiRulerLine} label={t.profile.height}>
                 <div className="relative">
                   <Input
                     id="height"
@@ -461,11 +465,11 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                     value={formData.height}
                     onChange={(e) => updateField("height", e.target.value)}
                     hasError={!!errors.height}
-                    placeholder="Enter height"
+                    placeholder={t.profile.placeholderHeight}
                     min="0"
                     step="0.1"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                  <span className="absolute end-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
                     cm
                   </span>
                 </div>
@@ -474,40 +478,40 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                 )}
               </FieldWrapper>
 
-              <FieldWrapper icon={RiUserLine} label="Social status">
+              <FieldWrapper icon={RiUserLine} label={t.profile.socialStatus}>
                 <Select
                   id="social_status"
                   value={formData.social_status}
                   onChange={(e) => updateField("social_status", e.target.value)}
                 >
-                  <option value="">Select social status</option>
-                  <option value="Single">Single</option>
-                  <option value="Married">Married</option>
-                  <option value="Divorced">Divorced</option>
-                  <option value="Widowed">Widowed</option>
-                  <option value="Other">Other</option>
+                  <option value="">{t.profile.selectSocialStatus}</option>
+                  <option value="Single">{t.profile.single}</option>
+                  <option value="Married">{t.profile.married}</option>
+                  <option value="Divorced">{t.profile.divorced}</option>
+                  <option value="Widowed">{t.profile.widowed}</option>
+                  <option value="Other">{t.profile.other}</option>
                 </Select>
               </FieldWrapper>
 
-              <FieldWrapper icon={RiUserLine} label="Source">
+              <FieldWrapper icon={RiUserLine} label={t.profile.source}>
                 <Select id="source" value={formData.source} onChange={handleSourceChange}>
-                  <option value="">Select source</option>
-                  <option value="facebook">Facebook</option>
-                  <option value="instagram">Instagram</option>
-                  <option value="friend_recommendation">Friend Recommendation</option>
-                  <option value="walk_in">Walk In</option>
-                  <option value="other">Other</option>
+                  <option value="">{t.profile.selectSource}</option>
+                  <option value="facebook">{t.profile.facebook}</option>
+                  <option value="instagram">{t.profile.instagram}</option>
+                  <option value="friend_recommendation">{t.profile.friendRecommendation}</option>
+                  <option value="walk_in">{t.profile.walkIn}</option>
+                  <option value="other">{t.profile.other}</option>
                 </Select>
               </FieldWrapper>
 
               {formData.source === "other" && (
-                <FieldWrapper icon={RiUserLine} label="Specify Other Source">
+                <FieldWrapper icon={RiUserLine} label={t.profile.specifySource}>
                   <Input
                     id="source_other"
                     value={formData.source_other}
                     onChange={(e) => updateField("source_other", e.target.value)}
                     hasError={!!errors.source_other}
-                    placeholder="Enter source"
+                    placeholder={t.profile.placeholderSource}
                   />
                   {errors.source_other && (
                     <p className="text-sm text-red-600 dark:text-red-400">
@@ -518,12 +522,12 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
               )}
             </div>
 
-            <FieldWrapper icon={RiInformationLine} label="Complaint">
+            <FieldWrapper icon={RiInformationLine} label={t.profile.complaint}>
               <Textarea
                 id="complaint"
                 value={formData.complaint}
                 onChange={(e) => updateField("complaint", e.target.value)}
-                placeholder="Enter complaint"
+                placeholder={t.profile.placeholderComplaint}
                 rows={3}
               />
             </FieldWrapper>
@@ -536,8 +540,8 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                 disabled={isSaving}
                 className="flex-1"
               >
-                <RiCloseLine className="mr-2 size-4" />
-                Cancel
+                <RiCloseLine className="me-2 size-4" />
+                {t.common.cancel}
               </Button>
               <Button
                 type="button"
@@ -546,8 +550,8 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                 isLoading={isSaving}
                 className="flex-[2]"
               >
-                <RiSaveLine className="mr-2 size-4" />
-                Save Changes
+                <RiSaveLine className="me-2 size-4" />
+                {t.profile.saveChanges}
               </Button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
@@ -33,6 +34,7 @@ export function ArchivedActivityTab({
   customDateRange,
   onCustomDateRangeChange,
 }: ArchivedActivityTabProps) {
+  const t = useAppTranslations()
   const [events, setEvents] = useState<ActivityEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -118,13 +120,13 @@ export function ArchivedActivityTab({
         dateRangePreset={dateRangePreset}
         customDateRange={customDateRange}
         onCustomDateRangeChange={onCustomDateRangeChange}
-        searchPlaceholder="Search by patient, action, or user..."
+        searchPlaceholder={t.archive.searchActivity}
       />
 
       {/* Results Count */}
       {!loading && events.length > 0 && (
-        <p className="text-xs text-gray-500 dark:text-gray-400 px-1">
-          Found {total} activity event{total !== 1 ? "s" : ""}
+        <p className="text-xs text-gray-500 dark:text-gray-400 px-1 text-start">
+          {(total === 1 ? t.archive.foundActivity : t.archive.foundActivityPlural).replace("{n}", String(total))}
         </p>
       )}
 
@@ -133,14 +135,14 @@ export function ArchivedActivityTab({
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <RiHistoryLine className="size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">No activity recorded in this range.</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">{t.archive.noActivityInRange}</p>
           </CardContent>
         </Card>
       ) : (
         <>
           <div className="relative">
             {/* Timeline line */}
-            <div className="absolute left-4 top-0 h-full w-px bg-gray-200 dark:bg-gray-800 md:left-6" />
+            <div className="absolute start-4 top-0 h-full w-px bg-gray-200 dark:bg-gray-800 md:start-6" />
 
             <div className="space-y-6">
               {events.map((event) => (
@@ -156,7 +158,7 @@ export function ArchivedActivityTab({
                 onClick={handleLoadMore}
                 isLoading={loading}
               >
-                Load More
+                {t.archive.loadMore}
               </Button>
             </div>
           )}
@@ -167,6 +169,7 @@ export function ArchivedActivityTab({
 }
 
 function ActivityItem({ event }: { event: ActivityEvent }) {
+  const t = useAppTranslations()
   const getEntityLink = (type: ActivityEntityType, id: string) => {
     switch (type) {
       case "patient":
@@ -185,9 +188,9 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
   const link = getEntityLink(event.entityType, event.entityId)
 
   return (
-    <div className="relative pl-10 md:pl-14">
-      {/* Icon dot */}
-      <div className="absolute left-2 top-1 flex size-5 items-center justify-center rounded-full bg-white ring-4 ring-white dark:bg-gray-950 dark:ring-gray-950 md:left-4 md:size-6">
+    <div className="relative ps-10 md:ps-14">
+      {/* Icon dot - RTL aware */}
+      <div className="absolute start-2 top-1 flex size-5 items-center justify-center rounded-full bg-white ring-4 ring-white dark:bg-gray-950 dark:ring-gray-950 md:start-4 md:size-6">
         <div
           className={cx(
             "size-2.5 rounded-full md:size-3",
@@ -218,9 +221,9 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
             </div>
 
             {event.entityLabel && (
-              <div className="flex items-center gap-1.5 text-xs font-medium">
+              <div className="flex items-center gap-1.5 text-xs font-medium rtl:flex-row-reverse">
                 <span className="text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Target:
+                  {t.archive.target}:
                 </span>
                 {link ? (
                   <Link
@@ -236,8 +239,8 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 sm:shrink-0">
-            <RiTimeLine className="size-3.5" />
+          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 sm:shrink-0 rtl:flex-row-reverse">
+            <RiTimeLine className="size-3.5 shrink-0" />
             {format(new Date(event.createdAt), "MMM d, h:mm a")}
           </div>
         </div>

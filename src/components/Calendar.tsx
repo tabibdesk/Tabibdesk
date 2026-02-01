@@ -28,6 +28,7 @@ interface NavigationButtonProps
   onClick: () => void
   icon: React.ElementType
   disabled?: boolean
+  iconClassName?: string
 }
 
 const NavigationButton = React.forwardRef<
@@ -35,7 +36,7 @@ const NavigationButton = React.forwardRef<
   NavigationButtonProps
 >(
   (
-    { onClick, icon, disabled, ...props }: NavigationButtonProps,
+    { onClick, icon, disabled, iconClassName, ...props }: NavigationButtonProps,
     forwardedRef,
   ) => {
     const Icon = icon
@@ -63,7 +64,7 @@ const NavigationButton = React.forwardRef<
         onClick={onClick}
         {...props}
       >
-        <Icon className="size-full shrink-0" />
+        <Icon className={cx("size-full shrink-0", iconClassName)} />
       </button>
     )
   },
@@ -111,9 +112,9 @@ const Calendar = ({
       showOutsideDays={numberOfMonths === 1}
       className={cx(className)}
       classNames={{
-        months: "flex space-y-0",
+        months: "flex space-y-0 [direction:ltr]",
         month: "space-y-4 p-3",
-        nav: "gap-1 flex items-center rounded-full size-full justify-between p-4",
+        nav: "gap-1 flex items-center rounded-full size-full justify-between p-4 [direction:ltr]",
         table: "w-full border-collapse space-y-1",
         head_cell:
           "w-9 font-medium text-sm sm:text-xs text-center text-gray-400 dark:text-gray-600 pb-2",
@@ -130,8 +131,8 @@ const Calendar = ({
         day_today: "font-semibold",
         day_selected: cx(
           "rounded",
-          "aria-selected:bg-indigo-600 aria-selected:text-gray-50",
-          "dark:aria-selected:bg-indigo-500 dark:aria-selected:text-gray-50",
+          "aria-selected:bg-primary-500 aria-selected:text-white",
+          "dark:aria-selected:bg-primary-400 dark:aria-selected:text-white",
         ),
         day_disabled:
           "!text-gray-300 dark:!text-gray-700 line-through disabled:hover:bg-transparent",
@@ -148,10 +149,10 @@ const Calendar = ({
       }}
       components={{
         IconLeft: () => (
-          <RiArrowLeftSLine aria-hidden="true" className="size-4" />
+          <RiArrowLeftSLine aria-hidden="true" className="size-4 rtl:rotate-180" />
         ),
         IconRight: () => (
-          <RiArrowRightSLine aria-hidden="true" className="size-4" />
+          <RiArrowRightSLine aria-hidden="true" className="size-4 rtl:rotate-180" />
         ),
         Caption: ({ ...props }) => {
           const {
@@ -207,6 +208,7 @@ const Calendar = ({
                     aria-label="Go to previous year"
                     onClick={goToPreviousYear}
                     icon={RiArrowLeftDoubleLine}
+                    iconClassName="rtl:rotate-180"
                   />
                 )}
                 {!hidePreviousButton && (
@@ -215,6 +217,7 @@ const Calendar = ({
                     aria-label="Go to previous month"
                     onClick={() => previousMonth && goToMonth(previousMonth)}
                     icon={RiArrowLeftSLine}
+                    iconClassName="rtl:rotate-180"
                   />
                 )}
               </div>
@@ -234,6 +237,7 @@ const Calendar = ({
                     aria-label="Go to next month"
                     onClick={() => nextMonth && goToMonth(nextMonth)}
                     icon={RiArrowRightSLine}
+                    iconClassName="rtl:rotate-180"
                   />
                 )}
                 {enableYearNavigation && !hideNextButton && (
@@ -247,6 +251,7 @@ const Calendar = ({
                     aria-label="Go to next year"
                     onClick={goToNextYear}
                     icon={RiArrowRightDoubleLine}
+                    iconClassName="rtl:rotate-180"
                   />
                 )}
               </div>
@@ -295,7 +300,7 @@ const Calendar = ({
                   className={cx(
                     "absolute inset-x-1/2 bottom-1.5 h-0.5 w-4 -translate-x-1/2 rounded-[2px]",
                     {
-                      "bg-blue-500 dark:bg-blue-500": !selected,
+                      "bg-primary-500 dark:bg-primary-400": !selected,
                       "!bg-white dark:!bg-gray-950": selected,
                       "!bg-gray-400 dark:!bg-gray-600":
                         selected && range_middle,

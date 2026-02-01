@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { RiCalendarLine, RiPhoneLine } from "@remixicon/react"
 import { Button } from "@/components/Button"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { getAppointmentTypeLabel } from "../appointmentTypes"
 import { Badge } from "@/components/Badge"
 import { formatSlotTime } from "../utils/slotFormatters"
 import type { Slot } from "../types"
@@ -13,6 +15,7 @@ interface CancelledSlotRowProps {
 }
 
 export function CancelledSlotRow({ slot, onFillSlot }: CancelledSlotRowProps) {
+  const t = useAppTranslations()
   const startTime = formatSlotTime(slot.startAt)
   const endTime = formatSlotTime(slot.endAt)
   const timeRange = `${startTime} - ${endTime}`
@@ -44,7 +47,7 @@ export function CancelledSlotRow({ slot, onFillSlot }: CancelledSlotRowProps) {
             {slot.appointmentType && slot.appointmentType !== "flexible" && (
               <>
                 <span className="text-gray-300 dark:text-gray-600">·</span>
-                <span>{slot.appointmentType}</span>
+                <span>{getAppointmentTypeLabel(slot.appointmentType, t.appointments)}</span>
               </>
             )}
           </div>
@@ -57,8 +60,8 @@ export function CancelledSlotRow({ slot, onFillSlot }: CancelledSlotRowProps) {
         )}
       </div>
       <div className="shrink-0">
-        <Button variant="primary" size="sm" onClick={() => onFillSlot(slot)} className="btn-card-action">
-          Fill Slot
+        <Button variant="primary" size="sm" onClick={() => onFillSlot(slot)} className="btn-card-action inline-flex items-center gap-2 rtl:flex-row-reverse">
+          {t.appointments.fillSlot}
         </Button>
       </div>
     </div>

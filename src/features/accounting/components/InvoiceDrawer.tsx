@@ -1,6 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -33,6 +35,7 @@ import {
   type PatientAppointment,
 } from "./invoiceDrawer.utils"
 import { CreateInvoiceForm, type CreateInvoiceFormReadyState } from "./CreateInvoiceForm"
+import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 import { RiFileLine, RiUserLine, RiStethoscopeLine, RiCalendarLine } from "@remixicon/react"
 
 export type { PatientAppointment }
@@ -63,6 +66,8 @@ export function InvoiceDrawer({
   patientAppointments = [],
   defaultAppointmentId,
 }: InvoiceDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const { currentClinic, currentUser } = useUserClinic()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
@@ -75,7 +80,7 @@ export function InvoiceDrawer({
   const [capturePatient, setCapturePatient] = useState<Patient | null>(null)
   const [formState, setFormState] = useState<CreateInvoiceFormReadyState>({
     canSubmit: false,
-    submitLabel: "Save",
+    submitLabel: t.common.save,
     loading: false,
     submit: async () => {},
   })
@@ -124,9 +129,9 @@ export function InvoiceDrawer({
       })
       setProofFileId(uploaded.fileId)
       setProofFile(file)
-      showToast("Proof uploaded", "success")
+      showToast(t.invoice.proofUploaded, "success")
     } catch (error) {
-      showToast("Failed to upload proof", "error")
+      showToast(t.invoice.proofUploadFailed, "error")
     } finally {
       setUploadingProof(false)
     }
@@ -153,7 +158,7 @@ export function InvoiceDrawer({
             createdByUserId: currentUser?.id ?? "user-001",
           })
           await markInvoicePaid(invoiceProp.id)
-          showToast("Payment recorded successfully", "success")
+          showToast(t.invoice.paymentRecorded, "success")
         } else {
           await voidInvoice(invoiceProp.id)
           const { dueInvoice } = await recordPartialPaymentWithOptionalDue({
@@ -168,15 +173,15 @@ export function InvoiceDrawer({
             createdByUserId: currentUser?.id ?? "user-001",
           })
           if (dueInvoice) {
-            showToast(`Payment recorded. Due record created for ${dueInvoice.amount.toFixed(2)} EGP.`, "success")
+            showToast(t.invoice.dueCreatedFor.replace("{amount}", dueInvoice.amount.toFixed(2)), "success")
           } else {
-            showToast("Payment recorded successfully", "success")
+            showToast(t.invoice.paymentRecorded, "success")
           }
         }
         onSuccess()
         onOpenChange(false)
       } catch (error) {
-        showToast("Failed to record payment", "error")
+        showToast(t.invoice.paymentRecordFailed, "error")
       } finally {
         setLoading(false)
       }
@@ -188,12 +193,12 @@ export function InvoiceDrawer({
 
   const canSubmitPayOnly = payOnlyMode && Number.isFinite(parsedAmount) && parsedAmount > 0
 
-  const title = "Create invoice"
-  const submitLabelPayOnly = "Mark as Paid"
+  const title = t.invoice.createInvoice
+  const submitLabelPayOnly = t.invoice.markAsPaid
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-2xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-2xl">
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>
@@ -202,12 +207,12 @@ export function InvoiceDrawer({
             {/* Pay-only: invoice summary */}
             {payOnlyMode && invoiceProp && (
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-900">
-                <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-50">Appointment Summary</h3>
+                <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-gray-50">{t.invoice.appointmentSummary}</h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <RiUserLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
                     <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Patient</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.patient}</div>
                       <div className="font-medium text-gray-900 dark:text-gray-50">
                         {getPatientName(invoiceProp.patientId)}
                       </div>
@@ -216,7 +221,7 @@ export function InvoiceDrawer({
                   <div className="flex items-center gap-3">
                     <RiStethoscopeLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
                     <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Doctor</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.doctor}</div>
                       <div className="font-medium text-gray-900 dark:text-gray-50">
                         {getDoctorName(invoiceProp.doctorId)}
                       </div>
@@ -225,9 +230,9 @@ export function InvoiceDrawer({
                   <div className="flex items-center gap-3">
                     <RiStethoscopeLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
                     <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Appointment Type</div>
-                      <div className="font-medium text-gray-900 dark:text-gray-50 capitalize">
-                        {invoiceProp.appointmentType}
+                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.appointmentType}</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-50">
+                        {getAppointmentTypeLabel(invoiceProp.appointmentType, t.appointments)}
                       </div>
                     </div>
                   </div>
@@ -235,7 +240,7 @@ export function InvoiceDrawer({
                     <div className="flex items-center gap-3">
                       <RiCalendarLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
                       <div className="flex-1">
-                        <div className="text-xs text-gray-600 dark:text-gray-400">Date & Time</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.dateTime}</div>
                         <div className="font-medium text-gray-900 dark:text-gray-50">
                           {appointmentData.date} at {appointmentData.time}
                         </div>
@@ -245,7 +250,7 @@ export function InvoiceDrawer({
                   <div className="flex items-center gap-3">
                     <RiFileLine className="size-5 shrink-0 text-gray-600 dark:text-gray-400" />
                     <div className="flex-1">
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Invoice Amount</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">{t.invoice.invoiceAmount}</div>
                       <div className="text-lg font-bold text-gray-900 dark:text-gray-50">
                         {invoiceProp.amount.toFixed(2)} EGP
                       </div>
@@ -260,7 +265,7 @@ export function InvoiceDrawer({
               <>
                 <div className="space-y-2">
                   <Label htmlFor="amount-payonly">
-                    Amount to collect (EGP) <span className="text-red-500">*</span>
+                    {t.invoice.amountToCollect} <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="amount-payonly"
@@ -276,29 +281,29 @@ export function InvoiceDrawer({
                     const partial = Number.isFinite(parsedAmount) && Math.abs(parsedAmount - invoiceProp.amount) > 0.0001
                     return partial ? (
                       <p className="text-xs text-amber-600 dark:text-amber-400">
-                        Collecting {parsedAmount.toFixed(2)} of {invoiceProp.amount.toFixed(2)} EGP (partial payment)
+                        {t.invoice.partialPayment.replace("{collected}", parsedAmount.toFixed(2)).replace("{total}", invoiceProp.amount.toFixed(2))}
                       </p>
                     ) : null
                   })()}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="method-payonly">
-                    Payment method <span className="text-red-500">*</span>
+                    {t.invoice.paymentMethod} <span className="text-red-500">*</span>
                   </Label>
                   <Select
                     id="method-payonly"
                     value={method}
                     onChange={(e) => setMethod(e.target.value as PaymentMethod)}
                   >
-                    <option value="cash">Cash</option>
-                    <option value="visa">Visa</option>
-                    <option value="instapay">InstaPay</option>
+                    <option value="cash">{t.invoice.cash}</option>
+                    <option value="visa">{t.invoice.visa}</option>
+                    <option value="instapay">{t.invoice.instapay}</option>
                   </Select>
                 </div>
                 {(method === "visa" || method === "instapay") && (
                   <div className="space-y-2">
                     <Label htmlFor="proof-payonly">
-                      Payment proof <span className="text-red-500">*</span>
+                      {t.invoice.paymentProof} <span className="text-red-500">*</span>
                     </Label>
                     <div className="flex items-center gap-2">
                       <Input
@@ -330,7 +335,7 @@ export function InvoiceDrawer({
                         className="size-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700"
                       />
                       <Label htmlFor="create-due-payonly" className="flex-1 cursor-pointer text-sm">
-                        Create due for remainder ({(invoiceProp.amount - parsedAmount).toFixed(2)} EGP)
+                        {t.invoice.createDueForRemainder.replace("{amount}", (invoiceProp.amount - parsedAmount).toFixed(2))}
                       </Label>
                     </div>
                   )}
@@ -342,7 +347,7 @@ export function InvoiceDrawer({
               <>
                 <div className="space-y-2">
                   <Label htmlFor="capture-patient">
-                    Patient <span className="text-red-500">*</span>
+                    {t.invoice.patient} <span className="text-red-500">*</span>
                   </Label>
                   <PatientSelector
                     initialPatient={capturePatient}
@@ -364,7 +369,7 @@ export function InvoiceDrawer({
                     createdByUserId={currentUser?.id ?? "user-001"}
                     formMode="create"
                     allowUnlinked={false}
-                    submitLabel="Save & Mark as Paid"
+                    submitLabel={t.invoice.saveAndMarkAsPaid}
                     onSuccess={onSuccess}
                     onCancel={() => onOpenChange(false)}
                     onReady={handleFormReady}
@@ -400,7 +405,7 @@ export function InvoiceDrawer({
                 createdByUserId={currentUser?.id ?? "user-001"}
                 formMode="create"
                 allowUnlinked={false}
-                submitLabel={invoiceProp ? undefined : "Save & Mark as Paid"}
+                submitLabel={invoiceProp ? undefined : t.invoice.saveAndMarkAsPaid}
                 onSuccess={onSuccess}
                 onCancel={() => onOpenChange(false)}
                 onReady={handleFormReady}
@@ -427,18 +432,18 @@ export function InvoiceDrawer({
         </DrawerBody>
         <DrawerFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t.common.cancel}
           </Button>
           {payOnlyMode ? (
             <Button onClick={handleSubmit} disabled={!canSubmitPayOnly || loading}>
-              {loading ? "Processing…" : submitLabelPayOnly}
+              {loading ? t.common.processing : submitLabelPayOnly}
             </Button>
           ) : (
             <Button
               onClick={() => formSubmitRef.current()}
               disabled={!formState.canSubmit || formState.loading}
             >
-              {formState.loading ? "Processing…" : formState.submitLabel}
+              {formState.loading ? t.common.processing : formState.submitLabel}
             </Button>
           )}
         </DrawerFooter>

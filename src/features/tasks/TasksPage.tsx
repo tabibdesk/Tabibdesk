@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
@@ -8,7 +9,6 @@ import { Skeleton } from "@/components/Skeleton"
 import { RiTaskLine, RiAddLine } from "@remixicon/react"
 import { useDebounce } from "@/lib/useDebounce"
 import { TasksToolbar } from "./TasksToolbar"
-import { TasksTable } from "./TasksTable"
 import { TasksCards } from "./TasksCards"
 import { AddTaskDrawer } from "./AddTaskDrawer"
 import { AssignModal } from "./TaskModals"
@@ -43,6 +43,7 @@ export function TasksPage({
   clinicId,
   pageTitle,
 }: TasksPageProps) {
+  const t = useAppTranslations()
   const [tasks, setTasks] = useState<TaskListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -167,7 +168,7 @@ export function TasksPage({
   return (
     <div className="page-content">
       <PageHeader
-        title={pageTitle || "Tasks"}
+        title={pageTitle ?? t.nav.tasks}
       />
 
       <TasksToolbar
@@ -199,29 +200,14 @@ export function TasksPage({
         </Card>
       ) : (
         <>
-          {/* Desktop View */}
-          <div className="hidden md:block">
-            <TasksTable
-              tasks={tasks}
-              onMarkDone={handleMarkDone}
-              onAssign={(task) => setAssignTaskData(task)}
-              onSnooze={handleSnooze}
-              onNextAttempt={handleNextAttempt}
-              role={role}
-            />
-          </div>
-          
-          {/* Mobile View */}
-          <div className="md:hidden">
-            <TasksCards
-              tasks={tasks}
-              onMarkDone={handleMarkDone}
-              onAssign={(task) => setAssignTaskData(task)}
-              onSnooze={handleSnooze}
-              onNextAttempt={handleNextAttempt}
-              role={role}
-            />
-          </div>
+          <TasksCards
+            tasks={tasks}
+            onMarkDone={handleMarkDone}
+            onAssign={(task) => setAssignTaskData(task)}
+            onSnooze={handleSnooze}
+            onNextAttempt={handleNextAttempt}
+            role={role}
+          />
 
           {hasMore && (
             <div className="flex justify-center">

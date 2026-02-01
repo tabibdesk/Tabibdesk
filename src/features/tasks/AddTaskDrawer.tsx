@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -47,6 +49,8 @@ export function AddTaskDrawer({
   currentUserId,
   clinicId,
 }: AddTaskDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [type, setType] = useState<TaskType>("follow_up")
@@ -117,67 +121,67 @@ export function AddTaskDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-2xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-2xl">
         <DrawerHeader>
-          <DrawerTitle>New Task</DrawerTitle>
+          <DrawerTitle>{t.tasks.addTaskTitle}</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="title">
-                  Title <span className="text-red-500">*</span>
+                  {t.tasks.taskTitle} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter task title"
+                  placeholder={t.tasks.taskTitlePlaceholder}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t.tasks.taskDescription}</Label>
                 <Textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter task description (optional)"
+                  placeholder={t.tasks.taskDescriptionPlaceholder}
                   rows={3}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="type">Type</Label>
+                <Label htmlFor="type">{t.tasks.taskType}</Label>
                 <Select id="type" value={type} onChange={(e) => setType(e.target.value as TaskType)}>
-                  <option value="follow_up">Follow Up</option>
-                  <option value="appointment">Appointment</option>
-                  <option value="labs">Labs</option>
-                  <option value="scan">Scan</option>
-                  <option value="billing">Billing</option>
-                  <option value="other">Other</option>
+                  <option value="follow_up">{t.tasks.typeFollowUp}</option>
+                  <option value="appointment">{t.tasks.typeAppointment}</option>
+                  <option value="labs">{t.tasks.typeLabs}</option>
+                  <option value="scan">{t.tasks.typeScan}</option>
+                  <option value="billing">{t.tasks.typeBilling}</option>
+                  <option value="other">{t.tasks.typeOther}</option>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="assignedTo">Assign To</Label>
+                <Label htmlFor="assignedTo">{t.tasks.assignTo}</Label>
                 <Select
                   id="assignedTo"
                   value={assignedToUserId}
                   onChange={(e) => setAssignedToUserId(e.target.value)}
                 >
-                  <option value="">Unassigned</option>
+                  <option value="">{t.tasks.unassigned}</option>
                   {availableUsers.map((user) => (
                     <option key={user.id} value={user.id}>
-                      {user.full_name} ({user.role === "doctor" ? "Doctor" : user.role === "assistant" ? "Assistant" : "Manager"})
+                      {user.full_name} ({user.role === "doctor" ? t.common.doctor : user.role === "assistant" ? t.common.assistant : t.common.manager})
                     </option>
                   ))}
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="patient">Patient {defaultPatientId ? "(Pre-filled)" : "(Optional)"}</Label>
+                <Label htmlFor="patient">{t.tasks.patientLabel} {defaultPatientId ? t.tasks.patientPrefilled : t.tasks.patientOptional}</Label>
                 <PatientSelector
                   initialPatient={effectiveInitialPatient}
                   onPatientSelect={(p) => {
@@ -191,7 +195,7 @@ export function AddTaskDrawer({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dueDate">Due Date (Optional)</Label>
+                <Label htmlFor="dueDate">{t.tasks.dueDate}</Label>
                 <Input
                   id="dueDate"
                   type="date"
@@ -212,10 +216,10 @@ export function AddTaskDrawer({
                 disabled={isSubmitting}
                 className="flex-1"
               >
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button type="submit" variant="primary" isLoading={isSubmitting} disabled={!title.trim()} className="flex-[2]">
-                Create Task
+                {t.tasks.createTask}
               </Button>
             </div>
           </form>

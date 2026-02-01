@@ -20,6 +20,7 @@ interface ConfirmationModalProps {
   description: string
   confirmText?: string
   cancelText?: string
+  loadingText?: string
   variant?: "danger" | "warning" | "info" | "success"
   isLoading?: boolean
 }
@@ -32,6 +33,7 @@ export function ConfirmationModal({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
+  loadingText = "Processing...",
   variant = "danger",
   isLoading = false,
 }: ConfirmationModalProps) {
@@ -69,17 +71,17 @@ export function ConfirmationModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-4 rtl:flex-row-reverse">
             <div className={`flex size-12 shrink-0 items-center justify-center rounded-full ${getIconBgColor()}`}>
               {getIcon()}
             </div>
-            <div className="flex-1">
-              <DialogTitle>{title}</DialogTitle>
-              <DialogDescription className="mt-2">{description}</DialogDescription>
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-start">{title}</DialogTitle>
+              <DialogDescription className="mt-2 text-start">{description}</DialogDescription>
             </div>
           </div>
         </DialogHeader>
-        <DialogFooter className="mt-6">
+        <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
           <DialogClose asChild>
             <Button variant="secondary" disabled={isLoading}>
               {cancelText}
@@ -90,7 +92,7 @@ export function ConfirmationModal({
             onClick={handleConfirm}
             disabled={isLoading}
           >
-            {isLoading ? "Processing..." : confirmText}
+            {isLoading ? loadingText : confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

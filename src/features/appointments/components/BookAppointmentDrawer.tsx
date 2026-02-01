@@ -1,5 +1,7 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -58,6 +60,8 @@ export function BookAppointmentDrawer({
   clinicId,
   doctorId,
 }: BookAppointmentDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const handleBookingComplete = () => {
     if (onBookingComplete) {
       onBookingComplete()
@@ -65,11 +69,11 @@ export function BookAppointmentDrawer({
     onClose()
   }
 
-  const title = preSelectedSlot ? "Fill Slot" : waitlistEntry ? "Book from Waitlist" : "Reschedule Appointment"
+  const title = preSelectedSlot ? t.appointments.fillSlot : waitlistEntry ? t.appointments.bookFromWaitlist : t.appointments.rescheduleAppointment
 
   return (
     <Drawer open={open} onOpenChange={onClose}>
-      <DrawerContent side="right" className="w-full sm:max-w-2xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-2xl">
         <DrawerHeader>
           <DrawerTitle>{title}</DrawerTitle>
         </DrawerHeader>

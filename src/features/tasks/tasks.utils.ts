@@ -1,5 +1,30 @@
 import type { TaskStatus, TaskType, TaskPriority, TaskSource } from "./tasks.types"
 
+/** Translation keys for task badges - use with t.tasks[key] */
+export const TASK_STATUS_KEYS: Record<TaskStatus, string> = {
+  pending: "statusPending",
+  done: "statusDone",
+  cancelled: "statusCancelled",
+}
+export const TASK_TYPE_KEYS: Record<TaskType, string> = {
+  follow_up: "typeFollowUp",
+  appointment: "typeAppointment",
+  labs: "typeLabs",
+  scan: "typeScan",
+  billing: "typeBilling",
+  other: "typeOther",
+}
+export const TASK_SOURCE_KEYS: Record<TaskSource, string> = {
+  alert: "sourceAutomated",
+  manual: "sourceManual",
+  ai: "sourceAi",
+}
+export const TASK_PRIORITY_KEYS: Record<TaskPriority, string> = {
+  low: "low",
+  normal: "normal",
+  high: "high",
+}
+
 export function getStatusBadgeVariant(status: TaskStatus): "default" | "success" | "error" | "warning" | "neutral" {
   switch (status) {
     case "pending":
@@ -122,6 +147,39 @@ export function formatTaskDate(dateString?: string): string {
   }
 
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+}
+
+/** Get relative day key for translation, or null if absolute date */
+export function getTaskDateRelativeKey(dateString?: string): "today" | "tomorrow" | "yesterday" | null {
+  if (!dateString) return null
+  const date = new Date(dateString)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const taskDate = new Date(date)
+  taskDate.setHours(0, 0, 0, 0)
+
+  if (taskDate.getTime() === today.getTime()) return "today"
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  if (taskDate.getTime() === tomorrow.getTime()) return "tomorrow"
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  if (taskDate.getTime() === yesterday.getTime()) return "yesterday"
+  return null
+}
+
+/** Format task date with translations and locale-aware fallback */
+export function formatTaskDateTranslated(
+  dateString: string | undefined,
+  t: { common: { today: string; tomorrow: string; yesterday: string } },
+  lang: "en" | "ar"
+): string {
+  if (!dateString) return "—"
+  const relativeKey = getTaskDateRelativeKey(dateString)
+  if (relativeKey) return t.common[relativeKey]
+  const date = new Date(dateString)
+  const locale = lang === "ar" ? "ar-EG" : "en-US"
+  return date.toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric" })
 }
 
 export function isOverdue(dueDate?: string): boolean {

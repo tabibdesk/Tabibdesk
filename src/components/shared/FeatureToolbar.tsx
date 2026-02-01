@@ -2,6 +2,7 @@
 
 import React from "react"
 import { SearchInput } from "@/components/SearchInput"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { cx } from "@/lib/utils"
 
 interface FeatureToolbarProps {
@@ -20,10 +21,12 @@ interface FeatureToolbarProps {
 export function FeatureToolbar({
   searchQuery,
   onSearchChange,
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   children,
   className,
 }: FeatureToolbarProps) {
+  const t = useAppTranslations()
+  const placeholder = searchPlaceholder ?? t.common.searchPlaceholder
   return (
     <div className={cx(
       "flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm dark:border-gray-800 dark:bg-gray-900/50 md:flex-row md:items-center md:justify-between",
@@ -33,7 +36,7 @@ export function FeatureToolbar({
       {onSearchChange !== undefined && (
         <div className="flex-1 min-w-0 max-w-lg">
           <SearchInput
-            placeholder={searchPlaceholder}
+            placeholder={placeholder}
             value={searchQuery}
             onSearchChange={onSearchChange}
           />

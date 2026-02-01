@@ -6,6 +6,8 @@ import {
   RiArrowDownSLine,
   RiArrowUpSLine,
 } from "@remixicon/react"
+import { useLocale } from "@/contexts/locale-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +27,8 @@ interface SidebarClinicSwitcherProps {
 export function SidebarClinicSwitcher({ mode }: SidebarClinicSwitcherProps) {
   const { currentClinic, allClinics, setCurrentClinic } = useUserClinic()
   const [isOpen, setIsOpen] = React.useState(false)
+  const { isRtl } = useLocale()
+  const t = useAppTranslations()
 
   // Desktop modes (Expanded & Collapsed) use Dropdown
   if (mode === "dropdown" || mode === "collapsed") {
@@ -36,7 +40,7 @@ export function SidebarClinicSwitcher({ mode }: SidebarClinicSwitcherProps) {
           "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-50",
           focusRing
         )}
-        aria-label="Switch clinic"
+        aria-label={t.common.switchClinic}
       >
         <RiHospitalLine className="size-5 shrink-0" aria-hidden="true" />
         {mode === "dropdown" && (
@@ -48,7 +52,7 @@ export function SidebarClinicSwitcher({ mode }: SidebarClinicSwitcherProps) {
     return (
       <DropdownMenu>
         {mode === "collapsed" ? (
-          <Tooltip content="تبديل العيادة" side="right">
+          <Tooltip content={t.common.switchClinic} side={isRtl ? "left" : "right"}>
             <DropdownMenuTrigger asChild>
               {triggerButton}
             </DropdownMenuTrigger>
@@ -58,12 +62,12 @@ export function SidebarClinicSwitcher({ mode }: SidebarClinicSwitcherProps) {
             {triggerButton}
           </DropdownMenuTrigger>
         )}
-        <DropdownMenuContent 
-          align={mode === "collapsed" ? "center" : "start"} 
-          side={mode === "collapsed" ? "right" : "top"} 
+        <DropdownMenuContent
+          align={mode === "collapsed" ? "center" : "start"}
+          side={mode === "collapsed" ? (isRtl ? "left" : "right") : "top"}
           className="w-56"
         >
-          <DropdownMenuLabel>العيادات</DropdownMenuLabel>
+          <DropdownMenuLabel>{t.common.clinics}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           {allClinics.map((clinic) => (
             <DropdownMenuItem
@@ -86,7 +90,7 @@ export function SidebarClinicSwitcher({ mode }: SidebarClinicSwitcherProps) {
   return (
     <div className="flex flex-col gap-1">
       <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-        العيادة
+        {t.common.clinic}
       </label>
       <button
         onClick={() => setIsOpen(!isOpen)}

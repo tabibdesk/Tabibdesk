@@ -17,8 +17,10 @@ import {
   RiHistoryLine,
 } from "@remixicon/react"
 import Link from "next/link"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import type { AppointmentListItem } from "./appointments.types"
 import { getStatusBadgeVariant, getStatusLabel } from "./appointments.utils"
+import { getAppointmentTypeLabel } from "./appointmentTypes"
 
 interface AppointmentsCardsProps {
   appointments: AppointmentListItem[]
@@ -36,6 +38,7 @@ export function AppointmentsCards({
   onFillSlot,
   readOnly = false,
 }: AppointmentsCardsProps) {
+  const t = useAppTranslations()
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "completed":
@@ -83,7 +86,7 @@ export function AppointmentsCards({
                   {appointment.type && (
                     <>
                       <span className="text-gray-300 dark:text-gray-600">·</span>
-                      <span>{appointment.type}</span>
+                      <span>{getAppointmentTypeLabel(appointment.type, t.appointments)}</span>
                     </>
                   )}
                 </div>
@@ -92,11 +95,11 @@ export function AppointmentsCards({
                 <div className="shrink-0">
                   <Button
                     variant="primary"
-                    className="btn-card-action"
+                    className="btn-card-action inline-flex items-center gap-2 rtl:flex-row-reverse"
                     onClick={() => onFillSlot(appointment)}
                   >
-                    <RiUserAddLine className="mr-1 size-4" />
-                    Fill Slot
+                    <RiUserAddLine className="size-4 shrink-0" />
+                    {t.appointments.fillSlot}
                   </Button>
                 </div>
               )}
@@ -152,7 +155,7 @@ export function AppointmentsCards({
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <RiUserLine className="size-4 shrink-0" />
-              <span>{appointment.type}</span>
+              <span>{getAppointmentTypeLabel(appointment.type, t.appointments)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <RiPhoneLine className="size-4 shrink-0" />

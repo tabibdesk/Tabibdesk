@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Skeleton } from "@/components/Skeleton"
@@ -20,6 +21,7 @@ interface IncomeTabProps {
 }
 
 export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -159,16 +161,15 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
       {/* Search Bar and Capture Button - Always visible */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1 min-w-0">
-          <AccountingToolbar searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} />
+          <AccountingToolbar searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} searchPlaceholder={t.accounting.searchIncome} />
         </div>
         <Button
           variant="secondary"
           onClick={() => setShowCaptureDrawer(true)}
-          className="w-full sm:w-auto shrink-0 md:h-9 md:py-1.5 md:text-sm"
+          className="w-full sm:w-auto shrink-0 md:h-9 md:py-1.5 md:text-sm inline-flex items-center gap-2 rtl:flex-row-reverse"
         >
-          <RiAddLine className="mr-2 size-4" />
-          <span className="hidden sm:inline">Capture</span>
-          <span className="sm:hidden">Capture</span>
+          <RiAddLine className="size-4" />
+          <span>{t.accounting.capture}</span>
         </Button>
       </div>
 
@@ -200,11 +201,11 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
               <table className="w-full min-w-[800px]">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Date</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Patient</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Amount</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Method</th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold">Proof</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.date}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.patient}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.amount}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.method}</th>
+                    <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">{t.table.proof}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">

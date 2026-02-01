@@ -1,17 +1,20 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { RiCalendarLine } from "@remixicon/react"
 import Link from "next/link"
 import type { AppointmentListItem } from "@/features/appointments/appointments.types"
 import { getStatusBadgeVariant, getStatusLabel, formatAppointmentDate } from "@/features/appointments/appointments.utils"
+import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 
 interface ArchiveAppointmentsTableProps {
   appointments: AppointmentListItem[]
 }
 
 export function ArchiveAppointmentsTable({ appointments }: ArchiveAppointmentsTableProps) {
+  const t = useAppTranslations()
   const formatTime = (timeString: string) => {
     return timeString
   }
@@ -22,17 +25,17 @@ export function ArchiveAppointmentsTable({ appointments }: ArchiveAppointmentsTa
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Patient
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.patient}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Date & Time
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.dateTime}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Type
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.type}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Status
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.status}
               </th>
             </tr>
           </thead>
@@ -59,7 +62,7 @@ export function ArchiveAppointmentsTable({ appointments }: ArchiveAppointmentsTa
                   </div>
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                  {appointment.type}
+                  {getAppointmentTypeLabel(appointment.type, t.appointments)}
                 </td>
                 <td className="px-4 py-4">
                   <Badge color={getBadgeColor(getStatusBadgeVariant(appointment.status))} size="xs">

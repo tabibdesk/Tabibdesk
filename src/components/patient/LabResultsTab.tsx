@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
@@ -28,6 +29,7 @@ interface LabResultsTabProps {
 }
 
 export function LabResultsTab({ labResults }: LabResultsTabProps) {
+  const t = useAppTranslations()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Partial<LabResult>>({})
   const [addingToDate, setAddingToDate] = useState<string | null>(null)
@@ -169,26 +171,26 @@ export function LabResultsTab({ labResults }: LabResultsTabProps) {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-gray-200 dark:border-gray-800">
-                        <th className="pb-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Test Name
+                        <th className="pb-3 text-start text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {t.table.testName}
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Value
+                        <th className="pb-3 text-start text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {t.table.value}
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Unit
+                        <th className="pb-3 text-start text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {t.table.unit}
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Normal Range
+                        <th className="pb-3 text-start text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {t.table.normalRange}
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Status
+                        <th className="pb-3 text-start text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {t.table.status}
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Notes
+                        <th className="pb-3 text-start text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {t.table.notes}
                         </th>
-                        <th className="pb-3 text-right text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Actions
+                        <th className="pb-3 text-end text-sm font-medium text-gray-600 dark:text-gray-400">
+                          {t.table.actions}
                         </th>
                       </tr>
                     </thead>

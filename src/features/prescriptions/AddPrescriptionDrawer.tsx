@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import {
   Drawer,
   DrawerBody,
@@ -33,6 +35,8 @@ export function AddPrescriptionDrawer({
   clinicId,
   doctorId,
 }: AddPrescriptionDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
   const [notesToPatient, setNotesToPatient] = useState("")
   const [items, setItems] = useState<PrescriptionItem[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -92,9 +96,9 @@ export function AddPrescriptionDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-2xl">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-2xl">
         <DrawerHeader>
-          <DrawerTitle>New Prescription</DrawerTitle>
+          <DrawerTitle>{t.profile.newPrescription}</DrawerTitle>
         </DrawerHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col">
           <DrawerBody>
@@ -102,7 +106,7 @@ export function AddPrescriptionDrawer({
               {/* Medications Section */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-base font-semibold">Medications</Label>
+                  <Label className="text-base font-semibold">{t.profile.medications}</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -111,14 +115,14 @@ export function AddPrescriptionDrawer({
                     className="gap-2"
                   >
                     <RiAddLine className="size-4" />
-                    Add Medication
+                    {t.profile.addMedication}
                   </Button>
                 </div>
 
                 {items.length === 0 ? (
                   <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/30 p-8 text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      No medications added yet
+                      {t.profile.noMedicationsAdded}
                     </p>
                     <Button
                       type="button"
@@ -127,7 +131,7 @@ export function AddPrescriptionDrawer({
                       onClick={addItem}
                       className="mt-3"
                     >
-                      Add First Medication
+                      {t.profile.addFirstMedication}
                     </Button>
                   </div>
                 ) : (
@@ -140,7 +144,7 @@ export function AddPrescriptionDrawer({
                         {/* Medication Header */}
                         <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 pb-3">
                           <span className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-                            Medication {index + 1}
+                            {t.profile.medicationN.replace("{n}", String(index + 1))}
                           </span>
                           <Button
                             type="button"
@@ -166,12 +170,12 @@ export function AddPrescriptionDrawer({
 
               {/* Notes to Patient */}
               <div className="space-y-2">
-                <Label htmlFor="notesToPatient">Notes to Patient</Label>
+                <Label htmlFor="notesToPatient">{t.profile.notesToPatient}</Label>
                 <Textarea
                   id="notesToPatient"
                   value={notesToPatient}
                   onChange={(e) => setNotesToPatient(e.target.value)}
-                  placeholder="Additional instructions or notes for the patient"
+                  placeholder={t.profile.notesToPatientPlaceholder}
                   rows={3}
                 />
               </div>
@@ -184,7 +188,7 @@ export function AddPrescriptionDrawer({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -192,7 +196,7 @@ export function AddPrescriptionDrawer({
               isLoading={isSubmitting}
               disabled={items.filter((item) => item.name.trim() && item.sig.trim()).length === 0}
             >
-              Save Prescription
+              {t.profile.savePrescription}
             </Button>
           </DrawerFooter>
         </form>

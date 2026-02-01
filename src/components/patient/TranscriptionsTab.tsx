@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
@@ -24,6 +25,7 @@ interface TranscriptionsTabProps {
 }
 
 export function TranscriptionsTab({ transcriptions }: TranscriptionsTabProps) {
+  const t = useAppTranslations()
   const [showAIModal, setShowAIModal] = useState(false)
   const [selectedTranscription, setSelectedTranscription] = useState<Transcription | null>(null)
 
@@ -49,11 +51,11 @@ export function TranscriptionsTab({ transcriptions }: TranscriptionsTabProps) {
     const diffTime = Math.abs(now.getTime() - date.getTime())
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
-    if (diffDays === 0) return "Today"
-    if (diffDays === 1) return "Yesterday"
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
+    if (diffDays === 0) return t.common.today
+    if (diffDays === 1) return t.common.yesterday
+    if (diffDays < 7) return t.common.daysAgo.replace("{n}", String(diffDays))
+    if (diffDays < 30) return t.common.weeksAgo.replace("{n}", String(Math.floor(diffDays / 7)))
+    if (diffDays < 365) return t.common.monthsAgo.replace("{n}", String(Math.floor(diffDays / 30)))
     return date.toLocaleDateString()
   }
 

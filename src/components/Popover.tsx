@@ -1,9 +1,12 @@
 // Tremor Raw Popover [v0.0.2]
 
+"use client"
+
 import * as PopoverPrimitives from "@radix-ui/react-popover"
 import React from "react"
 
 import { cx } from "@/lib/utils"
+import { useLocale } from "@/contexts/locale-context"
 
 const Popover = (
   props: React.ComponentPropsWithoutRef<typeof PopoverPrimitives.Root>,
@@ -59,15 +62,21 @@ const PopoverContent = React.forwardRef<
     }: ContentProps,
     forwardedRef,
   ) => {
+    const { isRtl } = useLocale()
+    const effectiveAlign =
+      align === "end" && isRtl ? "start" : align === "start" && isRtl ? "end" : align
+    const effectiveSide =
+      side === "left" && isRtl ? "right" : side === "right" && isRtl ? "left" : side
     return (
       <PopoverPrimitives.Portal>
         <PopoverPrimitives.Content
           ref={forwardedRef}
           sideOffset={sideOffset}
-          side={side}
-          align={align}
           collisionPadding={collisionPadding}
           avoidCollisions={avoidCollisions}
+          {...props}
+          side={effectiveSide}
+          align={effectiveAlign}
           className={cx(
             // base
             "max-h-[var(--radix-popper-available-height)] min-w-60 overflow-hidden rounded-md border p-2.5 text-sm shadow-md",
@@ -98,7 +107,6 @@ const PopoverContent = React.forwardRef<
               )
             }
           }}
-          {...props}
         />
       </PopoverPrimitives.Portal>
     )

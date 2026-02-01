@@ -38,11 +38,13 @@ import {
   RiStethoscopeLine,
   RiMoneyDollarCircleLine,
 } from "@remixicon/react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { usePatientPageData, orderProgressMetricsByTracked } from "./usePatientPageData"
 import { PatientPageHeader } from "./PatientPageHeader"
 
 export default function PatientDetailPage() {
   const params = useParams()
+  const t = useAppTranslations()
   const { isDemoMode } = useDemo()
   const { currentUser, currentClinic, role } = useUserClinic()
   const patientId = params.id as string
@@ -154,7 +156,7 @@ export default function PatientDetailPage() {
             The patient you&apos;re looking for doesn&apos;t exist.
           </p>
           <Link href="/patients">
-            <Button className="mt-4">Back to Patients</Button>
+            <Button className="mt-4">{t.patients.backToPatients}</Button>
           </Link>
         </div>
       </div>
@@ -163,17 +165,17 @@ export default function PatientDetailPage() {
 
   const lastVisited = getLastVisited()
   const tabs: Tab[] = [
-    { id: "note", label: "Note", icon: RiStethoscopeLine },
-    { id: "profile", label: "Profile", icon: RiUserLine },
-    { id: "tasks", label: "Tasks", icon: RiTaskLine },
-    { id: "files", label: "Files", icon: RiFolderLine },
-    { id: "invoices", label: "Invoices", icon: RiMoneyDollarCircleLine },
-    { id: "history", label: "History", icon: RiHistoryLine },
+    { id: "note", label: t.patients.note, icon: RiStethoscopeLine },
+    { id: "profile", label: t.patients.profile, icon: RiUserLine },
+    { id: "tasks", label: t.patients.tasks, icon: RiTaskLine },
+    { id: "files", label: t.patients.files, icon: RiFolderLine },
+    { id: "invoices", label: t.patients.invoices, icon: RiMoneyDollarCircleLine },
+    { id: "history", label: t.patients.history, icon: RiHistoryLine },
   ]
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-row items-start justify-between gap-4">
+      <div className="flex flex-row items-start justify-between gap-4 rtl:flex-row-reverse">
         <PatientPageHeader
           patient={patient}
           totalDue={totalDue}

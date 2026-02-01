@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/Button"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { RiArrowLeftLine } from "@remixicon/react"
 import { useDemo } from "@/contexts/demo-context"
 import { useBookAppointmentState } from "./useBookAppointmentState"
@@ -28,6 +29,7 @@ export function BookAppointmentFlow({
   onBookingComplete,
   onCancel,
 }: BookAppointmentFlowProps) {
+  const t = useAppTranslations()
   const { isDemoMode } = useDemo()
 
   const state = useBookAppointmentState({
@@ -54,10 +56,10 @@ export function BookAppointmentFlow({
       {showTitle && (
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-            Book Appointment
+            {t.appointments.bookAppointment}
           </h1>
           <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
-            Schedule a new appointment for a patient
+            {t.appointments.scheduleNewAppointment}
           </p>
         </div>
       )}
@@ -72,6 +74,7 @@ export function BookAppointmentFlow({
       <BookAppointmentStepper
         currentStep={currentStep}
         preSelectedSlot={preSelectedSlot}
+        t={t}
       />
 
       {currentStep === "patient" && (
@@ -86,6 +89,7 @@ export function BookAppointmentFlow({
           services={state.services}
           isLoading={state.isLoadingServices}
           onServiceSelect={state.handleServiceSelect}
+          t={t}
         />
       )}
 
@@ -98,6 +102,7 @@ export function BookAppointmentFlow({
           isLoadingSlots={state.isLoadingSlots}
           onDateSelect={state.handleDateSelect}
           onSlotSelect={state.handleSlotSelect}
+          t={t}
         />
       )}
 
@@ -110,11 +115,12 @@ export function BookAppointmentFlow({
           isSubmitting={state.isSubmitting}
           onBack={state.handleBack}
           onConfirm={state.handleConfirmBooking}
+          t={t}
         />
       )}
 
       {currentStep === "success" && (
-        <SuccessStep rescheduleAppointmentId={rescheduleAppointmentId} />
+        <SuccessStep rescheduleAppointmentId={rescheduleAppointmentId} t={t} />
       )}
 
       {currentStep !== "success" &&
@@ -122,19 +128,19 @@ export function BookAppointmentFlow({
           <div className="flex items-center -ml-1 pt-2">
             {currentStep === "patient" ? (
               onCancel && (
-                <Button variant="link" onClick={onCancel} className="text-[11px] font-bold">
-                  <RiArrowLeftLine className="mr-1 size-3.5" />
-                  Cancel
+                <Button variant="link" onClick={onCancel} className="text-[11px] font-bold inline-flex items-center gap-1.5 rtl:flex-row-reverse">
+                  <RiArrowLeftLine className="size-3.5 rtl:rotate-180" />
+                  {t.common.cancel}
                 </Button>
               )
             ) : (
               <Button
                 variant="link"
                 onClick={state.handleBack}
-                className="text-[11px] font-bold"
+                className="text-[11px] font-bold inline-flex items-center gap-1.5 rtl:flex-row-reverse"
               >
-                <RiArrowLeftLine className="mr-1 size-3.5" />
-                Back
+                <RiArrowLeftLine className="size-3.5 rtl:rotate-180" />
+                {t.appointments.back}
               </Button>
             )}
           </div>

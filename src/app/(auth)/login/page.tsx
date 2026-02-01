@@ -1,17 +1,27 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
 import { RiGoogleFill, RiMicrosoftFill, RiFlaskLine } from "@remixicon/react"
 import { useDemo } from "@/contexts/demo-context"
+import { useLocale } from "@/contexts/locale-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { enableDemoMode } = useDemo()
+  const { setLanguage } = useLocale()
+  const t = useAppTranslations()
+
+  useEffect(() => {
+    const urlLang = searchParams.get("lang")
+    if (urlLang === "ar" || urlLang === "en") setLanguage(urlLang)
+  }, [searchParams, setLanguage])
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -19,19 +29,19 @@ export default function LoginPage() {
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {}
-    
+
     if (!email) {
-      newErrors.email = "Email is required"
+      newErrors.email = t.auth.emailRequired
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email is invalid"
+      newErrors.email = t.auth.emailInvalid
     }
-    
+
     if (!password) {
-      newErrors.password = "Password is required"
+      newErrors.password = t.auth.passwordRequired
     } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
+      newErrors.password = t.auth.passwordMinLength
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -60,7 +70,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen rtl:flex-row-reverse">
       {/* Left side - Form */}
       <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
@@ -84,7 +94,7 @@ export default function LoginPage() {
                 onClick={() => handleSocialLogin("google")}
                 className="w-full"
               >
-                <RiGoogleFill className="mr-2 size-5" />
+                <RiGoogleFill className="me-2 size-5" />
                 Google
               </Button>
               <Button
@@ -93,7 +103,7 @@ export default function LoginPage() {
                 onClick={() => handleSocialLogin("microsoft")}
                 className="w-full"
               >
-                <RiMicrosoftFill className="mr-2 size-5" />
+                <RiMicrosoftFill className="me-2 size-5" />
                 Microsoft
               </Button>
             </div>
@@ -104,7 +114,7 @@ export default function LoginPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-gray-500 dark:bg-gray-950 dark:text-gray-400">
-                  Or continue with email
+                  {t.auth.orContinueWithEmail}
                 </span>
               </div>
             </div>
@@ -112,7 +122,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="mt-6 space-y-5">
               <div>
                 <Label htmlFor="email" className="mb-2 block">
-                  Email address
+                  {t.auth.email}
                 </Label>
                 <Input
                   id="email"
@@ -136,7 +146,7 @@ export default function LoginPage() {
 
               <div>
                 <Label htmlFor="password" className="mb-2 block">
-                  Password
+                  {t.auth.password}
                 </Label>
                 <Input
                   id="password"
@@ -168,9 +178,9 @@ export default function LoginPage() {
                   />
                   <label
                     htmlFor="remember-me"
-                    className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                    className="ms-2 block text-sm text-gray-700 dark:text-gray-300"
                   >
-                    Remember me
+                    {t.auth.rememberMe}
                   </label>
                 </div>
 
@@ -179,7 +189,7 @@ export default function LoginPage() {
                     href="#"
                     className="font-medium text-primary-600 transition hover:text-primary-500 dark:text-primary-400"
                   >
-                    Forgot password?
+                    {t.auth.forgotPassword}
                   </a>
                 </div>
               </div>
@@ -189,9 +199,9 @@ export default function LoginPage() {
                 variant="primary"
                 className="w-full"
                 isLoading={isLoading}
-                loadingText="Signing in..."
+                loadingText={t.auth.signingIn}
               >
-                Sign in
+                {t.auth.signIn}
               </Button>
 
               <div className="relative">
@@ -200,7 +210,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-sm">
                   <span className="bg-white px-2 text-gray-500 dark:bg-gray-950 dark:text-gray-400">
-                    Or
+                    {t.auth.or}
                   </span>
                 </div>
               </div>
@@ -211,18 +221,18 @@ export default function LoginPage() {
                 className="w-full"
                 onClick={handleDemoLogin}
               >
-                <RiFlaskLine className="mr-2 size-4" />
-                Try Demo Mode
+                <RiFlaskLine className="mr-2 size-4 rtl:ml-2 rtl:mr-0" />
+                {t.auth.tryDemoMode}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-              Don&apos;t have an account?{" "}
+              {t.auth.dontHaveAccount}{" "}
               <Link
                 href="/register"
                 className="font-medium text-primary-600 transition hover:text-primary-500 dark:text-primary-400"
               >
-                Sign up for free
+                {t.auth.signUpForFree}
               </Link>
             </p>
           </div>
@@ -232,7 +242,7 @@ export default function LoginPage() {
       {/* Right side - Branding */}
       <div className="relative hidden lg:block lg:w-1/2">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-900" />
-        <div className="absolute right-8 top-8 flex items-center gap-3">
+        <div className="absolute right-8 top-8 flex items-center gap-3 rtl:right-auto rtl:left-8">
           <div className="flex size-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
             <span className="text-xl font-bold text-white">TD</span>
           </div>
@@ -240,6 +250,22 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LoginPageFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+    </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginPageFallback />}>
+      <LoginPageContent />
+    </Suspense>
   )
 }
 

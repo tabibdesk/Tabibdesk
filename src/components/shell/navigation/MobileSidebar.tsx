@@ -6,6 +6,7 @@ import {
   isActiveRoute,
   type Role,
 } from "@/lib/navigation"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/Button"
@@ -35,17 +36,18 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
   const navigation = getNavigationForRole(role)
   const { currentUser, currentClinic, allClinics, setCurrentClinic } = useUserClinic()
   const { effective } = useFeatures()
-  
+  const t = useAppTranslations()
+
   const [isRtl, setIsRtl] = useState(false)
-  
+
   useEffect(() => {
     setIsRtl(document.documentElement.dir === "rtl")
   }, [])
 
-  const roleLabel = 
-    currentUser.role === "doctor" ? "Doctor" : 
-    currentUser.role === "manager" ? "Manager" : 
-    "Assistant"
+  const roleLabel =
+    currentUser.role === "doctor" ? t.common.doctor :
+    currentUser.role === "manager" ? t.common.manager :
+    t.common.assistant
 
   // Filter navigation based on feature flags
   const filteredNavigation = navigation.filter((item) => {
@@ -59,7 +61,7 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
         <DrawerTrigger asChild>
           <Button
             variant="ghost"
-            aria-label="Open menu"
+            aria-label={t.common.openMenu}
             className="group flex items-center rounded-md p-2 text-sm font-medium hover:bg-gray-100 data-[state=open]:bg-gray-100 dark:hover:bg-gray-800"
           >
             <RiMenuLine
@@ -82,7 +84,7 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
                   const active = isActiveRoute(item.href, pathname)
 
                   return (
-                    <li key={item.name}>
+                    <li key={item.navKey}>
                       <DrawerClose asChild>
                         <Link
                           href={item.href}
@@ -97,7 +99,7 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
                         >
                           <div className="flex items-center gap-3">
                             <item.icon className="size-5 shrink-0" aria-hidden="true" />
-                            <span>{item.name}</span>
+                            <span>{t.nav[item.navKey]}</span>
                           </div>
                           {item.badge && item.badge > 0 && (
                             <Badge color="indigo" size="xs">{item.badge}</Badge>
@@ -114,7 +116,7 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
               {/* Clinic Switcher */}
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                  العيادة
+                  {t.common.clinic}
                 </label>
                 <div className="relative">
                   <Select

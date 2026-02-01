@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
 import { Label } from "@/components/Label"
@@ -71,6 +72,7 @@ export function CreateInvoiceForm({
   onCancel,
   onReady,
 }: CreateInvoiceFormProps) {
+  const t = useAppTranslations()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
   const [appointmentId, setAppointmentId] = useState<"unlinked" | string>("unlinked")
@@ -175,7 +177,7 @@ export function CreateInvoiceForm({
     }
 
     if (invoiceProp && (!invoiceProp.lineItems || invoiceProp.lineItems.length === 0)) {
-      getPriceForAppointmentType({ clinicId, doctorId, appointmentType: "Consultation" }).then(
+      getPriceForAppointmentType({ clinicId, doctorId, appointmentType: "consultation" }).then(
         (price) => {
           if (cancelled) return
           const p = price ?? 500
@@ -205,7 +207,7 @@ export function CreateInvoiceForm({
     getPriceForAppointmentType({
       clinicId: clinicIdFinal,
       doctorId: doctorIdFinal,
-      appointmentType: apt?.type || "Consultation",
+      appointmentType: apt?.type || "consultation",
     }).then((price) => {
       if (cancelled) return
       const p = price ?? 500
@@ -283,9 +285,9 @@ export function CreateInvoiceForm({
       })
       setProofFileId(uploaded.fileId)
       setProofFile(file)
-      showToast("Proof uploaded", "success")
+      showToast(t.invoice.proofUploaded, "success")
     } catch (error) {
-      showToast("Failed to upload proof", "error")
+      showToast(t.invoice.proofUploadFailed, "error")
     } finally {
       setUploadingProof(false)
     }
@@ -315,7 +317,7 @@ export function CreateInvoiceForm({
             doctorId,
             patientId,
             appointmentId: aptId,
-            appointmentType: selectedApt?.type || "Consultation",
+            appointmentType: selectedApt?.type || "consultation",
             amount: total,
           })
           const updated = await updateInvoiceLineItems({
@@ -340,7 +342,7 @@ export function CreateInvoiceForm({
               createdByUserId,
             })
             await markInvoicePaid(updated.id)
-            showToast("Payment recorded successfully", "success")
+            showToast(t.invoice.paymentRecorded, "success")
           } else {
             await voidInvoice(updated.id)
             const { dueInvoice } = await recordPartialPaymentWithOptionalDue({
@@ -348,7 +350,7 @@ export function CreateInvoiceForm({
               doctorId: updated.doctorId,
               patientId: updated.patientId,
               appointmentId: updated.appointmentId ?? "",
-              appointmentType: updated.appointmentType ?? "Consultation",
+              appointmentType: updated.appointmentType ?? "consultation",
               amountPaid: parsedAmount,
               serviceAmount: total,
               createDueForRemainder: shouldCreateDue,
@@ -356,21 +358,21 @@ export function CreateInvoiceForm({
             })
             if (dueInvoice) {
               showToast(
-                `Payment recorded. Due created for ${dueInvoice.amount.toFixed(2)} EGP.`,
+                t.invoice.dueCreatedFor.replace("{amount}", dueInvoice.amount.toFixed(2)),
                 "success"
               )
             } else {
-              showToast("Payment recorded successfully", "success")
+              showToast(t.invoice.paymentRecorded, "success")
             }
           }
           await clearDraftDue(draftUpdated.id)
         } else {
-          showToast(`Due updated: ${total.toFixed(2)} EGP`, "success")
+          showToast(t.invoice.dueUpdated.replace("{amount}", total.toFixed(2)), "success")
         }
         onSuccess()
         onCancel()
       } catch (error) {
-        showToast("Failed to update due", "error")
+        showToast(t.invoice.dueUpdateFailed, "error")
       } finally {
         setLoading(false)
       }
@@ -404,7 +406,7 @@ export function CreateInvoiceForm({
               createdByUserId,
             })
             await markInvoicePaid(invoiceProp.id)
-            showToast("Payment recorded successfully", "success")
+            showToast(t.invoice.paymentRecorded, "success")
           } else {
             await voidInvoice(invoiceProp.id)
             const { dueInvoice } = await recordPartialPaymentWithOptionalDue({
@@ -420,20 +422,20 @@ export function CreateInvoiceForm({
             })
             if (dueInvoice) {
               showToast(
-                `Payment recorded. Due record created for ${dueInvoice.amount.toFixed(2)} EGP.`,
+                t.invoice.dueCreatedFor.replace("{amount}", dueInvoice.amount.toFixed(2)),
                 "success"
               )
             } else {
-              showToast("Payment recorded successfully", "success")
+              showToast(t.invoice.paymentRecorded, "success")
             }
           }
         } else {
-          showToast(`Invoice updated: ${total.toFixed(2)} EGP`, "success")
+          showToast(t.invoice.invoiceUpdatedWithAmount.replace("{amount}", total.toFixed(2)), "success")
         }
         onSuccess()
         onCancel()
       } catch (error) {
-        showToast("Failed to update invoice", "error")
+        showToast(t.invoice.invoiceUpdateFailed, "error")
       } finally {
         setLoading(false)
       }
@@ -441,7 +443,7 @@ export function CreateInvoiceForm({
     }
 
     if (!selectedApt) {
-      showToast("Please select an appointment", "error")
+      showToast(t.invoice.selectAppointment, "error")
       return
     }
 
@@ -486,7 +488,7 @@ export function CreateInvoiceForm({
             doctorId: updated.doctorId,
             patientId: updated.patientId,
             appointmentId: updated.appointmentId ?? "",
-            appointmentType: updated.appointmentType ?? "Consultation",
+            appointmentType: updated.appointmentType ?? "consultation",
             amountPaid: parsedAmount,
             serviceAmount: total,
             createDueForRemainder: shouldCreateDue,
@@ -498,16 +500,16 @@ export function CreateInvoiceForm({
               "success"
             )
           } else {
-            showToast("Payment recorded successfully", "success")
+            showToast(t.invoice.paymentRecorded, "success")
           }
         }
       } else {
-        showToast(`Invoice created: ${total.toFixed(2)} EGP`, "success")
+        showToast(t.invoice.invoiceCreated.replace("{amount}", total.toFixed(2)), "success")
       }
       onSuccess()
       onCancel()
     } catch (error) {
-      showToast("Failed to create invoice", "error")
+      showToast(t.invoice.invoiceCreateFailed, "error")
     } finally {
       setLoading(false)
     }
@@ -521,11 +523,11 @@ export function CreateInvoiceForm({
     submitLabelProp ??
     (formMode === "update-due"
       ? markAsPaid
-        ? "Save & Mark as Paid"
-        : "Update due"
+        ? t.invoice.saveAndMarkAsPaid
+        : t.invoice.updateDue
       : markAsPaid
-        ? "Save & Mark as Paid"
-        : "Create invoice")
+        ? t.invoice.saveAndMarkAsPaid
+        : t.invoice.createInvoice)
 
   const handleSubmitRef = useRef(handleSubmit)
   handleSubmitRef.current = handleSubmit
@@ -536,7 +538,7 @@ export function CreateInvoiceForm({
     if (noAppointments) {
       onReady?.({
         canSubmit: false,
-        submitLabel: submitLabelProp ?? "Save",
+        submitLabel: submitLabelProp ?? t.common.save,
         loading: false,
         submit: async () => {},
       })
@@ -554,7 +556,7 @@ export function CreateInvoiceForm({
     return (
       <div className="space-y-4">
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          No appointments found for this patient.
+          {t.invoice.noAppointments}
         </p>
       </div>
     )
@@ -563,9 +565,9 @@ export function CreateInvoiceForm({
   return (
     <div className="space-y-5">
       <div className="space-y-2">
-        <Label>Appointment</Label>
+        <Label>{t.invoice.appointment}</Label>
         <Select value={appointmentId} onChange={(e) => setAppointmentId(e.target.value)}>
-          {allowUnlinked && <option value="unlinked">Unlinked</option>}
+          {allowUnlinked && <option value="unlinked">{t.invoice.unlinked}</option>}
           {sortedAppointments.map((apt) => (
             <option key={apt.id} value={apt.id}>
               {formatAptLabel(apt)}
@@ -575,11 +577,11 @@ export function CreateInvoiceForm({
       </div>
 
       <div className="space-y-3">
-        <Label>Procedures</Label>
+        <Label>{t.invoice.procedures}</Label>
         <ul className="space-y-2">
           <li className="flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 dark:border-gray-800 dark:bg-gray-950">
             <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-              {waiveConsultation ? "Consultation — Waived" : "Consultation"}
+              {waiveConsultation ? t.invoice.consultationWaived : t.invoice.consultation}
             </span>
             <div className="flex items-center gap-2 shrink-0">
               <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -592,7 +594,7 @@ export function CreateInvoiceForm({
                   onChange={(e) => setWaiveConsultation(e.target.checked)}
                   className="size-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700"
                 />
-                <span className="text-xs text-gray-500 dark:text-gray-400">Waive</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{t.invoice.waive}</span>
               </label>
             </div>
           </li>
@@ -612,7 +614,7 @@ export function CreateInvoiceForm({
                   type="button"
                   onClick={() => removeProcedure(p.id)}
                   className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-red-600 dark:hover:bg-gray-800 dark:hover:text-red-400"
-                  aria-label="Remove line"
+                  aria-label={t.invoice.removeLine}
                 >
                   <RiDeleteBinLine className="size-4" />
                 </button>
@@ -623,7 +625,7 @@ export function CreateInvoiceForm({
         <div ref={procedureAutocompleteRef} className="flex flex-1 flex-wrap gap-2">
           <div className="relative min-w-0 flex-1">
             <Input
-              placeholder="Search or add procedure"
+              placeholder={t.invoice.searchOrAddProcedure}
               value={procedureInput}
               onChange={(e) => {
                 setProcedureInput(e.target.value)
@@ -671,11 +673,11 @@ export function CreateInvoiceForm({
                   ))
                 ) : procedureInput.trim() ? (
                   <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                    No saved services match. Type amount and tap Add for custom.
+                    {t.invoice.noMatchAddCustom}
                   </div>
                 ) : (
                   <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-                    Type to search saved services, or enter a custom label.
+                    {t.invoice.typeToSearch}
                   </div>
                 )}
               </div>
@@ -685,7 +687,7 @@ export function CreateInvoiceForm({
             type="number"
             step="0.01"
             min="0"
-            placeholder="Amount"
+            placeholder={t.invoice.amount}
             value={procedureAmount}
             onChange={(e) => setProcedureAmount(e.target.value)}
             className="w-24"
@@ -717,14 +719,14 @@ export function CreateInvoiceForm({
           }}
           className="size-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700"
         />
-        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Mark as paid</span>
+        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{t.invoice.markAsPaid}</span>
       </label>
 
       {markAsPaid && (
         <>
           <div className="space-y-2">
             <Label htmlFor="amount">
-              Amount collected (EGP) <span className="text-red-500">*</span>
+              {t.invoice.amountCollected} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="amount"
@@ -738,26 +740,26 @@ export function CreateInvoiceForm({
             />
             {hasAmountChanged && (
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                Collecting {parsedAmount.toFixed(2)} of {total.toFixed(2)} EGP (partial payment)
+                {t.invoice.partialPayment.replace("{collected}", parsedAmount.toFixed(2)).replace("{total}", total.toFixed(2))}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="method">
-              Payment method <span className="text-red-500">*</span>
+              {t.invoice.paymentMethod} <span className="text-red-500">*</span>
             </Label>
             <Select id="method" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-              <option value="cash">Cash</option>
-              <option value="visa">Visa</option>
-              <option value="instapay">InstaPay</option>
+              <option value="cash">{t.invoice.cash}</option>
+              <option value="visa">{t.invoice.visa}</option>
+              <option value="instapay">{t.invoice.instapay}</option>
             </Select>
           </div>
 
           {(method === "visa" || method === "instapay") && (
             <div className="space-y-2">
               <Label htmlFor="proof">
-                Payment proof <span className="text-red-500">*</span>
+                {t.invoice.paymentProof} <span className="text-red-500">*</span>
               </Label>
               <div className="flex items-center gap-2">
                 <Input
@@ -788,7 +790,7 @@ export function CreateInvoiceForm({
                 className="size-4 rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700"
               />
               <Label htmlFor="create-due" className="flex-1 cursor-pointer text-sm">
-                Create due for remainder ({(total - parsedAmount).toFixed(2)} EGP)
+                {t.invoice.createDueForRemainder.replace("{amount}", (total - parsedAmount).toFixed(2))}
               </Label>
             </div>
           )}
@@ -796,14 +798,14 @@ export function CreateInvoiceForm({
       )}
 
       <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/30">
-        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">Total</span>
+        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t.invoice.total}</span>
         <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
           {total.toFixed(2)} EGP
         </span>
       </div>
 
       <div className="space-y-2">
-        <Label>Discount</Label>
+        <Label>{t.invoice.discount}</Label>
         <div className="flex flex-wrap gap-2">
           {([10, 20, 30] as const).map((val) => (
             <button

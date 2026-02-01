@@ -1,5 +1,6 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { Button } from "@/components/Button"
@@ -24,6 +25,7 @@ import {
 import Link from "next/link"
 import type { AppointmentListItem } from "./appointments.types"
 import { getStatusBadgeVariant, getStatusLabel, formatAppointmentDate } from "./appointments.utils"
+import { getAppointmentTypeLabel } from "./appointmentTypes"
 
 interface AppointmentsTableProps {
   appointments: AppointmentListItem[]
@@ -40,6 +42,7 @@ export function AppointmentsTable({
   onViewDetails,
   onFillSlot,
 }: AppointmentsTableProps) {
+  const t = useAppTranslations()
   const formatTime = (timeString: string) => {
     return timeString
   }
@@ -58,20 +61,20 @@ export function AppointmentsTable({
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Patient
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.patient}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Date & Time
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.dateTime}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Type
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.type}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Status
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.status}
               </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Actions
+              <th className="px-4 py-3 text-end text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.actions}
               </th>
             </tr>
           </thead>
@@ -108,7 +111,7 @@ export function AppointmentsTable({
                   </div>
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
-                  {appointment.type}
+                  {getAppointmentTypeLabel(appointment.type, t.appointments)}
                 </td>
                 <td className="px-4 py-4">
                   <Badge color={getBadgeColor(getStatusBadgeVariant(appointment.status))} size="xs">
@@ -172,10 +175,10 @@ export function AppointmentsTable({
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onFillSlot(appointment)}>
-                              <DropdownMenuIconWrapper className="mr-2">
+                              <DropdownMenuIconWrapper className="me-2">
                                 <RiUserAddLine className="size-4" />
                               </DropdownMenuIconWrapper>
-                              Fill This Slot
+                              {t.appointments.fillThisSlot}
                             </DropdownMenuItem>
                           </>
                         )}

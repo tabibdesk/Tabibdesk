@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { getDraftDueForPatient } from "@/api/draft-due.api"
@@ -12,6 +13,7 @@ import type { DraftDue } from "@/types/draft-due"
 import type { Invoice, InvoiceStatus } from "@/types/invoice"
 import { format } from "date-fns"
 import { RiMoneyDollarCircleLine, RiFileTextLine } from "@remixicon/react"
+import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 
 interface InvoicesTabProps {
   patientId: string
@@ -32,18 +34,18 @@ interface BillingItem {
   status?: InvoiceStatus
 }
 
-function getInvoiceStatusLabel(status: InvoiceStatus): string {
+function getInvoiceStatusLabel(status: InvoiceStatus, t: ReturnType<typeof useAppTranslations>): string {
   switch (status) {
     case "paid":
-      return "Paid"
+      return t.invoice.paid
     case "partial":
-      return "Partially paid"
+      return t.invoice.partiallyPaid
     case "unpaid":
-      return "Due"
+      return t.invoice.due
     case "void":
-      return "Void"
+      return t.invoice.void
     default:
-      return "Due"
+      return t.invoice.due
   }
 }
 
@@ -63,6 +65,7 @@ function getInvoiceBadgeVariant(status: InvoiceStatus): "success" | "warning" | 
 }
 
 export function InvoicesTab({ patientId, clinicId, refreshTrigger = 0 }: InvoicesTabProps) {
+  const t = useAppTranslations()
   const [draft, setDraft] = useState<DraftDue | null>(null)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
@@ -110,7 +113,7 @@ export function InvoicesTab({ patientId, clinicId, refreshTrigger = 0 }: Invoice
         type: "invoice",
         id: inv.id,
         date: inv.createdAt,
-        label: inv.appointmentType,
+        label: getAppointmentTypeLabel(inv.appointmentType, t.appointments),
         amount: inv.amount,
         status: inv.status,
       })
@@ -118,7 +121,7 @@ export function InvoicesTab({ patientId, clinicId, refreshTrigger = 0 }: Invoice
 
     list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     return list
-  }, [draft, invoices])
+  }, [draft, invoices, t.appointments])
 
   if (loading) {
     return (
@@ -133,15 +136,15 @@ export function InvoicesTab({ patientId, clinicId, refreshTrigger = 0 }: Invoice
       {items.length === 0 ? (
         <PatientEmptyState
           icon={RiMoneyDollarCircleLine}
-          title="No invoices or draft charges yet"
-          description="Invoices and draft charges for this patient will appear here."
+          title={t.invoice.noInvoices}
+          description={t.invoice.noInvoicesDesc}
         />
       ) : (
         <div className="space-y-3">
           {items.map((it) => {
             const isInvoice = it.type === "invoice"
             const canOpen = isInvoice && it.status !== "void"
-            const statusLabel = it.type === "draft" ? "Draft" : it.status ? getInvoiceStatusLabel(it.status) : ""
+            const statusLabel = it.type === "draft" ? t.invoice.draft : it.status ? getInvoiceStatusLabel(it.status, t) : ""
             return (
               <div
                 key={`${it.type}-${it.id}`}

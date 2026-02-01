@@ -1,12 +1,18 @@
 "use client"
 
 import { useRef, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card } from "@/components/Card"
 import { Input } from "@/components/Input"
 import { Button } from "@/components/Button"
 import { RiSendPlaneLine, RiExternalLinkLine, RiFileCopyLine, RiUserLine, RiRobot2Line } from "@remixicon/react"
 import { useRouter } from "next/navigation"
 import type { ChatMessage } from "./insights.types"
+
+export interface SettingsSectionItem {
+  label: string
+  tab: string
+}
 
 interface ChatBoxProps {
   messages: ChatMessage[]
@@ -16,6 +22,9 @@ interface ChatBoxProps {
   isLoading: boolean
   quickPrompts: string[]
   onQuickPrompt: (prompt: string) => void
+  /** Shown only when user role can change settings (e.g. doctor/manager). Sample ways to open settings tabs. */
+  settingsSection?: { title: string; items: SettingsSectionItem[] } | null
+  onSettingsAction?: (tab: string) => void
 }
 
 export function ChatBox({
@@ -26,7 +35,10 @@ export function ChatBox({
   isLoading,
   quickPrompts,
   onQuickPrompt,
+  settingsSection,
+  onSettingsAction,
 }: ChatBoxProps) {
+  const t = useAppTranslations()
   const router = useRouter()
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -46,35 +58,60 @@ export function ChatBox({
 
   return (
     <Card className="flex flex-col h-[calc(100vh-12rem)] min-h-[500px]">
-      <div className="p-4 border-b dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 rounded-t-2xl">
-        <h3 className="text-sm font-semibold flex items-center gap-2">
-          <RiRobot2Line className="size-4 text-primary-600" />
-          TabibDesk AI
-        </h3>
-      </div>
-
       <div 
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800"
       >
         {messages.length === 0 && (
-          <div className="text-center py-10 space-y-4">
-            <div className="size-12 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto">
-              <RiRobot2Line className="size-6 text-primary-600" />
+          <div className="py-10 px-12">
+            <div className="flex flex-col items-center mb-6">
+              <div className="size-12 bg-primary-50 dark:bg-primary-900/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <RiRobot2Line className="size-6 text-primary-600" />
+              </div>
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{t.insights.aiName}</span>
             </div>
-            <div>
-              <p className="text-sm font-medium">Ask about your clinic performance</p>
-            </div>
-            <div className="flex flex-col gap-2 pt-4 max-w-full px-2">
-              {quickPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => onQuickPrompt(prompt)}
-                  className="text-left text-xs p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                >
-                  {prompt}
-                </button>
-              ))}
+            <div
+              className={`grid gap-6 w-fit max-w-full mx-auto ${
+                settingsSection && settingsSection.items.length > 0 && onSettingsAction
+                  ? "grid-cols-1 lg:grid-cols-2"
+                  : "grid-cols-1"
+              }`}
+            >
+              <div className="flex flex-col items-center text-center lg:items-start lg:text-start rtl:lg:items-end rtl:lg:text-end max-w-xs w-full">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 text-end rtl:text-start">
+                  {t.insights.askAboutPerformance}
+                </p>
+                <div className="flex flex-col gap-2 w-full max-w-full px-0 text-end rtl:text-start">
+                  {quickPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      onClick={() => onQuickPrompt(prompt)}
+                      className="text-inherit text-xs p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {settingsSection && settingsSection.items.length > 0 && onSettingsAction && (
+                <div className="flex flex-col items-center text-center lg:items-start lg:text-start rtl:lg:items-end rtl:lg:text-end pt-4 lg:pt-0 max-w-xs w-full">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 text-end rtl:text-start">
+                    {settingsSection.title}
+                  </p>
+                  <div className="flex flex-col gap-2 w-full mb-4 text-end rtl:text-start">
+                    {settingsSection.items.map((item: SettingsSectionItem) => (
+                      <button
+                        key={item.tab}
+                        onClick={() => onSettingsAction(item.tab)}
+                        className="text-inherit text-xs p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors w-full"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -120,13 +157,13 @@ export function ChatBox({
                           className="h-8 text-[10px] font-bold px-2"
                         >
                           {action.label}
-                          <RiExternalLinkLine className="ml-1 size-3" />
+                          <RiExternalLinkLine className="ms-1 size-3" />
                         </Button>
                       ))}
                       <button 
                         onClick={() => handleCopy(message.content, message.response)}
                         className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-400"
-                        title="Copy"
+                        title={t.insights.copy}
                       >
                         <RiFileCopyLine className="size-3.5" />
                       </button>
@@ -172,7 +209,7 @@ export function ChatBox({
           <Input
             value={question}
             onChange={(e) => onQuestionChange(e.target.value)}
-            placeholder="Type your question..."
+            placeholder={t.insights.typeQuestion}
             className="flex-1 h-9 text-sm rounded-xl focus:ring-1"
             disabled={isLoading}
           />

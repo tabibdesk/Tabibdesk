@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/Button"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useDebounce } from "@/lib/useDebounce"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -18,6 +19,7 @@ import { useToast } from "@/hooks/useToast"
 const PAGE_SIZE = 10
 
 export function PatientsPage() {
+  const t = useAppTranslations()
   const router = useRouter()
   const { showToast } = useToast()
   const [patients, setPatients] = useState<PatientListItem[]>([])
@@ -88,7 +90,7 @@ export function PatientsPage() {
 
   return (
     <div className="page-content">
-      <PageHeader title="Patients" />
+      <PageHeader title={t.patients.title} />
       <PatientsHeader
         activeTab={activeTab}
         onTabChange={setActiveTab}

@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useRef } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { useLocale } from "@/contexts/locale-context"
 import { cx } from "@/lib/utils"
 import {
   Drawer,
@@ -51,18 +53,23 @@ interface AddFileDrawerProps {
   onUpload: (files: FileList, kind: AttachmentKind, thumbnails?: Record<string, string>) => void
 }
 
-const KIND_OPTIONS: { value: AttachmentKind; label: string; icon: typeof RiFlaskLine }[] = [
-  { value: "lab", label: "Lab", icon: RiFlaskLine },
-  { value: "scan", label: "Scan", icon: RiHeartPulseLine },
-  { value: "ecg", label: "ECG", icon: RiHeartPulseLine },
-  { value: "document", label: "Document", icon: RiFileTextLine },
-]
+function getKindOptions(t: { fileUpload: { lab: string; scan: string; ecg: string; document: string } }) {
+  return [
+    { value: "lab" as AttachmentKind, label: t.fileUpload.lab, icon: RiFlaskLine },
+    { value: "scan" as AttachmentKind, label: t.fileUpload.scan, icon: RiHeartPulseLine },
+    { value: "ecg" as AttachmentKind, label: t.fileUpload.ecg, icon: RiHeartPulseLine },
+    { value: "document" as AttachmentKind, label: t.fileUpload.document, icon: RiFileTextLine },
+  ]
+}
 
 export function AddFileDrawer({
   open,
   onOpenChange,
   onUpload,
 }: AddFileDrawerProps) {
+  const t = useAppTranslations()
+  const { isRtl } = useLocale()
+  const KIND_OPTIONS = getKindOptions(t)
   const [isDragging, setIsDragging] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<FileList | null>(null)
   const [selectedKind, setSelectedKind] = useState<AttachmentKind>("document")
@@ -133,9 +140,9 @@ export function AddFileDrawer({
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
-      <DrawerContent side="right" className="w-full sm:max-w-md">
+      <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-md">
         <DrawerHeader>
-          <DrawerTitle>Upload files</DrawerTitle>
+          <DrawerTitle>{t.fileUpload.uploadFiles}</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
           {!pendingFiles || pendingFiles.length === 0 ? (
@@ -152,10 +159,10 @@ export function AddFileDrawer({
             >
               <RiUploadLine className="mx-auto size-10 text-gray-400" />
               <p className="mt-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-                Drop files here to upload
+                {t.fileUpload.dropFilesHere}
               </p>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
-                Or click to browse
+                {t.fileUpload.orClickToBrowse}
               </p>
               <input
                 ref={inputRef}
@@ -168,7 +175,7 @@ export function AddFileDrawer({
           ) : (
             <div className="space-y-4">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {pendingFiles.length} {pendingFiles.length === 1 ? "file" : "files"} selected. Mark as:
+                {t.fileUpload.filesSelectedMarkAs.replace("{n}", String(pendingFiles.length))}
               </p>
               <div className="flex flex-wrap gap-2">
                 {KIND_OPTIONS.map(({ value, label, icon: Icon }) => (
@@ -197,11 +204,11 @@ export function AddFileDrawer({
               </ul>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={handleBack} disabled={isGeneratingThumbnails}>
-                  Back
+                  {t.fileUpload.back}
                 </Button>
                 <Button variant="primary" className="flex-1" onClick={handleConfirmUpload} disabled={isGeneratingThumbnails}>
-                  <RiUploadLine className="mr-2 size-4" />
-                  {isGeneratingThumbnails ? "Preparing…" : "Upload"}
+                  <RiUploadLine className="me-2 size-4" />
+                  {isGeneratingThumbnails ? t.fileUpload.preparing : t.fileUpload.upload}
                 </Button>
               </div>
             </div>

@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { RiFileTextLine, RiEditLine, RiDeleteBinLine, RiCheckLine, RiCloseLine, RiArrowRightSLine, RiAddLine } from "@remixicon/react"
 import { Button } from "@/components/Button"
 import { useUserClinic } from "@/contexts/user-clinic-context"
+import { useLocale } from "@/contexts/locale-context"
 import { Textarea } from "@/components/Textarea"
 import { create as createNote, update as updateNote, remove as removeNote } from "@/api/notes.api"
 import { useToast } from "@/hooks/useToast"
@@ -38,6 +40,8 @@ const INITIAL_VISIBLE_COUNT = 5
 const LOAD_MORE_INCREMENT = 5
 
 export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTabProps) {
+  const t = useAppTranslations()
+  const { isRtl, lang } = useLocale()
   const { role } = useUserClinic()
   const { showToast } = useToast()
   const [notes, setNotes] = useState(initialNotes)
@@ -85,13 +89,13 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
     if (!patient?.id || !editValue.trim()) return
     try {
       await createNote({ patientId: patient.id, note: editValue.trim() })
-      showToast("Note added successfully", "success")
+      showToast(t.profile.noteAddedSuccess, "success")
       setIsDrawerOpen(false)
       setIsAddMode(false)
       setEditValue("")
       onNoteAdded?.()
     } catch (error) {
-      showToast("Failed to add note", "error")
+      showToast(t.profile.failedToAddNote, "error")
     }
   }
 
@@ -122,9 +126,9 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
       )
       setSelectedNote(updatedNote)
       setIsEditing(false)
-      showToast("Note updated successfully", "success")
+      showToast(t.profile.noteUpdatedSuccess, "success")
     } catch (error) {
-      showToast("Failed to update note", "error")
+      showToast(t.profile.failedToUpdateNote, "error")
     }
   }
 
@@ -137,9 +141,9 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
       if (selectedNote?.id === id) {
         setIsDrawerOpen(false)
       }
-      showToast("Note deleted successfully", "success")
+      showToast(t.profile.noteDeletedSuccess, "success")
     } catch (error) {
-      showToast("Failed to delete note", "error")
+      showToast(t.profile.failedToDeleteNote, "error")
     }
   }
 
@@ -149,24 +153,24 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
     const diffTime = Math.abs(now.getTime() - date.getTime())
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
 
-    if (diffDays === 0) return "today"
-    if (diffDays === 1) return "Yesterday"
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
+    if (diffDays === 0) return t.common.today
+    if (diffDays === 1) return t.common.yesterday
+    if (diffDays < 7) return t.common.daysAgo.replace("{n}", String(diffDays))
+    if (diffDays < 30) return t.common.weeksAgo.replace("{n}", String(Math.floor(diffDays / 7)))
+    if (diffDays < 365) return t.common.monthsAgo.replace("{n}", String(Math.floor(diffDays / 30)))
     return date.toLocaleDateString()
   }
 
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden shadow-sm">
-        <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12 flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <RiFileTextLine className="size-4 text-primary-500/70 dark:text-primary-400/70" />
-            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Clinical Notes History</h3>
+        <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12 flex flex-row items-center justify-between rtl:flex-row-reverse">
+          <div className="flex items-center gap-2 rtl:flex-row-reverse">
+            <RiFileTextLine className="size-4 text-primary-500/70 dark:text-primary-400/70 shrink-0" />
+            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-start">{t.profile.clinicalNotesHistory}</h3>
           </div>
           {patient?.id && (
-            <Button variant="ghost" size="sm" onClick={handleAddNote} className="size-8 shrink-0 p-0" title="Add note">
+            <Button variant="ghost" size="sm" onClick={handleAddNote} className="size-8 shrink-0 p-0" title={t.profile.addNote}>
               <RiAddLine className="size-4" />
             </Button>
           )}
@@ -176,8 +180,8 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
             <div className="p-4">
               <PatientEmptyState
                 icon={RiFileTextLine}
-                title="No clinical notes yet"
-                description="Add clinical notes to see them here."
+                title={t.profile.noClinicalNotesYet}
+                description={t.profile.addClinicalNotesDesc}
               />
             </div>
           ) : (
@@ -194,16 +198,16 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                       handleViewNote(note)
                     }
                   }}
-                  className="w-full flex items-end gap-4 px-5 py-4 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors group text-left cursor-pointer"
+                  className="w-full flex items-end gap-4 px-5 py-4 hover:bg-gray-50/50 dark:hover:bg-gray-900/50 transition-colors group text-start cursor-pointer rtl:flex-row-reverse"
                 >
                   {/* Note content - primary (like patient name on card) */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2 text-start" dir="auto">
                       {note.note}
                     </p>
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                        {new Date(note.created_at).toLocaleDateString("en-US", {
+                        {new Date(note.created_at).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
                           month: "short",
                           day: "numeric",
                           year: "numeric",
@@ -214,8 +218,8 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                       </span>
                     </div>
                   </div>
-                  {/* Right: actions + chevron (like phone / last visited on patient card) */}
-                  <div className="flex shrink-0 items-center gap-2">
+                  {/* Actions + chevron - mirrored for RTL */}
+                  <div className="flex shrink-0 items-center gap-2 rtl:flex-row-reverse">
                     {isDoctor && (
                       <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity gap-0.5">
                         <Button
@@ -240,7 +244,7 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                         </Button>
                       </div>
                     )}
-                    <RiArrowRightSLine className="size-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors" aria-hidden />
+                    <RiArrowRightSLine className="size-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors rtl:rotate-180" aria-hidden />
                   </div>
                 </div>
               ))}
@@ -253,7 +257,7 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                 onClick={handleLoadMore}
                 className="w-full text-[10px] font-bold uppercase tracking-wider h-8 text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/10"
               >
-                Load More Notes
+                {t.profile.loadMoreNotes}
               </Button>
             </div>
           )}
@@ -262,12 +266,12 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
 
       {/* Note Details / Add Drawer */}
       <Drawer open={isDrawerOpen} onOpenChange={handleDrawerOpenChange}>
-        <DrawerContent side="right" className="w-full sm:max-w-lg">
+        <DrawerContent side={isRtl ? "left" : "right"} className="w-full sm:max-w-lg">
           <DrawerHeader>
-            <DrawerTitle>{isAddMode ? "Add Clinical Note" : "Clinical Note Details"}</DrawerTitle>
+            <DrawerTitle>{isAddMode ? t.profile.clinicalNoteAdd : t.profile.clinicalNoteDetails}</DrawerTitle>
             {!isAddMode && selectedNote && (
               <DrawerDescription className="text-sm mt-0.5">
-                {new Date(selectedNote.created_at).toLocaleDateString("en-US", {
+                {new Date(selectedNote.created_at).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
                   weekday: "long",
                   year: "numeric",
                   month: "long",
@@ -284,14 +288,14 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                 <Textarea
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
-                  placeholder="Enter clinical note details..."
+                  placeholder={t.profile.enterClinicalNotePlaceholder}
                   className="flex-1 min-h-[400px] resize-none text-base leading-relaxed"
                   autoFocus
                 />
               </div>
             ) : (
               <div className="prose prose-sm max-w-none dark:prose-invert">
-                <p className="whitespace-pre-wrap text-base leading-relaxed text-gray-700 dark:text-gray-300 font-medium">
+                <p className="whitespace-pre-wrap text-base leading-relaxed text-gray-700 dark:text-gray-300 font-medium" dir="auto">
                   {selectedNote?.note}
                 </p>
               </div>
@@ -301,34 +305,34 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
             {isAddMode ? (
               <>
                 <Button variant="outline" onClick={() => handleDrawerOpenChange(false)} className="flex-1 sm:flex-none">
-                  Cancel
+                  {t.common.cancel}
                 </Button>
                 <Button variant="primary" onClick={handleAddSave} disabled={!editValue.trim()} className="flex-1 sm:flex-none gap-2">
                   <RiCheckLine className="size-4" />
-                  Add Note
+                  {t.profile.addNote}
                 </Button>
               </>
             ) : isEditing ? (
               <>
                 <Button variant="outline" onClick={handleEditCancel} className="flex-1 sm:flex-none">
-                  Cancel
+                  {t.common.cancel}
                 </Button>
                 <Button variant="primary" onClick={handleEditSave} className="flex-1 sm:flex-none gap-2">
                   <RiCheckLine className="size-4" />
-                  Save Changes
+                  {t.profile.saveChanges}
                 </Button>
               </>
             ) : (
               <>
                 <DrawerClose asChild>
                   <Button variant="outline" className="flex-1 sm:flex-none">
-                    Close
+                    {t.common.close}
                   </Button>
                 </DrawerClose>
                 {isDoctor && (
                   <Button variant="primary" onClick={handleEditStart} className="flex-1 sm:flex-none gap-2">
                     <RiEditLine className="size-4" />
-                    Edit Note
+                    {t.profile.editNote}
                   </Button>
                 )}
               </>

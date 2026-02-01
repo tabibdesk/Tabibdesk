@@ -1,6 +1,8 @@
+import { LocaleSync } from "@/components/LocaleSync"
 import { AppLayoutWrapper } from "@/components/shell/AppLayoutWrapper"
 import { ConditionalMaxWidthWrapper } from "@/components/shell/ConditionalMaxWidthWrapper"
 import { DemoProvider } from "@/contexts/demo-context"
+import { LocaleProvider } from "@/contexts/locale-context"
 import { UserClinicProvider } from "@/contexts/user-clinic-context"
 import { ToastProvider } from "@/hooks/useToast"
 import type { Metadata } from "next"
@@ -64,15 +66,18 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ConditionalMaxWidthWrapper>
-          <ThemeProvider defaultTheme="system" attribute="class">
-            <DemoProvider>
-              <UserClinicProvider>
-                <ToastProvider>
-                  <AppLayoutWrapper>{children}</AppLayoutWrapper>
-                </ToastProvider>
-              </UserClinicProvider>
-            </DemoProvider>
-          </ThemeProvider>
+          <LocaleProvider>
+            <LocaleSync />
+            <ThemeProvider defaultTheme="system" attribute="class">
+              <DemoProvider>
+                <UserClinicProvider>
+                  <ToastProvider>
+                    <AppLayoutWrapper>{children}</AppLayoutWrapper>
+                  </ToastProvider>
+                </UserClinicProvider>
+              </DemoProvider>
+            </ThemeProvider>
+          </LocaleProvider>
         </ConditionalMaxWidthWrapper>
       </body>
     </html>

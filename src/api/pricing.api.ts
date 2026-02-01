@@ -10,31 +10,32 @@ const clinicAppointmentTypesStore: Record<string, string[]> = {}
 const doctorPricingStore: Record<string, Record<string, number>> = {} // key: `${clinicId}:${doctorId}`
 
 /**
- * Initialize mock pricing data
+ * Initialize mock pricing data.
+ * Uses type IDs (lowercase) for storage consistency.
  */
 function initializeMockPricing() {
-  // Set appointment types for clinic-001
+  // Set appointment types for clinic-001 (type IDs)
   clinicAppointmentTypesStore["clinic-001"] = [
-    "Consultation",
-    "Follow-up",
-    "Check-up",
-    "Procedure",
+    "consultation",
+    "followup",
+    "checkup",
+    "procedure",
   ]
 
   // Set pricing for user-001 (Dr. Ahmed Hassan) at clinic-001
   doctorPricingStore["clinic-001:user-001"] = {
-    "Consultation": 500,
-    "Follow-up": 300,
-    "Check-up": 400,
-    "Procedure": 600,
+    consultation: 500,
+    followup: 300,
+    checkup: 400,
+    procedure: 600,
   }
 
   // Set pricing for user-002 (Dr. Fatima Ali) at clinic-001
   doctorPricingStore["clinic-001:user-002"] = {
-    "Consultation": 500,
-    "Follow-up": 300,
-    "Check-up": 400,
-    "Procedure": 600,
+    consultation: 500,
+    followup: 300,
+    checkup: 400,
+    procedure: 600,
   }
 }
 
@@ -48,12 +49,12 @@ export async function getClinicAppointmentTypes(clinicId: string): Promise<strin
   await delay(100)
   
   if (!clinicAppointmentTypesStore[clinicId]) {
-    // Default appointment types
+    // Default appointment types (type IDs)
     clinicAppointmentTypesStore[clinicId] = [
-      "Consultation",
-      "Follow-up",
-      "Check-up",
-      "Procedure",
+      "consultation",
+      "followup",
+      "checkup",
+      "procedure",
     ]
   }
   
@@ -110,6 +111,22 @@ export async function setDoctorPricing(params: {
 }
 
 /**
+ * Normalize appointment type for pricing lookup (supports both ids and legacy names)
+ */
+function normalizeTypeForPricing(type: string): string {
+  const lower = type.toLowerCase()
+  const map: Record<string, string> = {
+    consultation: "consultation",
+    "follow-up": "followup",
+    followup: "followup",
+    "check-up": "checkup",
+    checkup: "checkup",
+    procedure: "procedure",
+  }
+  return map[lower] ?? lower
+}
+
+/**
  * Get price for a specific appointment type
  * Returns null if pricing not set
  */
@@ -122,6 +139,6 @@ export async function getPriceForAppointmentType(params: {
     clinicId: params.clinicId,
     doctorId: params.doctorId,
   })
-  
-  return pricing[params.appointmentType] ?? null
+  const typeKey = normalizeTypeForPricing(params.appointmentType)
+  return pricing[typeKey] ?? pricing[params.appointmentType] ?? null
 }

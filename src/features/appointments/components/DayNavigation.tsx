@@ -6,6 +6,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/Popover"
 import { Calendar } from "@/components/Calendar"
 import { RiArrowLeftSLine, RiArrowRightSLine, RiCalendarLine } from "@remixicon/react"
 import { format, isBefore, startOfDay } from "date-fns"
+import { useLocale } from "@/contexts/locale-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { DATEPICKER_LOCALE } from "@/lib/date-utils"
 
 interface DayNavigationProps {
   currentDate: Date
@@ -18,6 +21,8 @@ function isBeforeToday(date: Date): boolean {
 
 export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const t = useAppTranslations()
+  // Datepicker always uses English (no translation of month/day names)
   
   const goToPreviousDay = () => {
     const prev = new Date(currentDate)
@@ -55,7 +60,7 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
         disabled={cannotGoToPast}
         className="shrink-0 h-9 w-9 p-0 sm:h-auto sm:w-auto sm:px-3"
       >
-        <RiArrowLeftSLine className="size-5" />
+        <RiArrowLeftSLine className="size-5 rtl:rotate-180" />
       </Button>
       
       {/* Date Display & Calendar Popup */}
@@ -68,8 +73,8 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
             >
               <RiCalendarLine className="size-4 sm:size-5 text-gray-500 shrink-0" />
               <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
-                <span className="sm:hidden">{format(currentDate, "MMM d, yyyy")}</span>
-                <span className="hidden sm:inline">{format(currentDate, "EEEE, MMMM d, yyyy")}</span>
+                <span className="sm:hidden">{format(currentDate, "MMM d, yyyy", { locale: DATEPICKER_LOCALE })}</span>
+                <span className="hidden sm:inline">{format(currentDate, "EEEE, MMMM d, yyyy", { locale: DATEPICKER_LOCALE })}</span>
               </span>
             </button>
           </PopoverTrigger>
@@ -82,6 +87,8 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
               fromDate={startOfDay(new Date())}
               initialFocus
               enableYearNavigation
+              locale={DATEPICKER_LOCALE}
+              weekStartsOn={0}
             />
           </PopoverContent>
         </Popover>
@@ -96,7 +103,7 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
             onClick={goToToday}
             className="h-8 sm:h-9 px-2 sm:px-4 text-xs sm:text-sm"
           >
-            Today
+            {t.appointments.today}
           </Button>
         )}
         
@@ -107,7 +114,7 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
           onClick={goToNextDay}
           className="h-9 w-9 p-0 sm:h-auto sm:w-auto sm:px-3"
         >
-          <RiArrowRightSLine className="size-5" />
+          <RiArrowRightSLine className="size-5 rtl:rotate-180" />
         </Button>
       </div>
     </div>

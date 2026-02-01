@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
@@ -9,7 +10,9 @@ import { Switch } from "@/components/Switch"
 import { Badge } from "@/components/Badge"
 import { Tooltip } from "@/components/Tooltip"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { useLocale } from "@/contexts/locale-context"
 import { useUserClinic } from "@/contexts/user-clinic-context"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useFeatures } from "@/features/settings/useFeatures"
 import * as settingsApi from "@/api/settings.api"
 import { getPlanTierName, getPlanTierPrice } from "@/features/settings/planCatalog"
@@ -38,17 +41,35 @@ import { getBasicMetrics, getSpecialtyMetrics } from "@/types/progress"
 
 type TabId = "profile" | "clinic-team" | "modules" | "preferences" | "followup" | "patient"
 
-export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("modules")
+const TAB_IDS: TabId[] = ["profile", "clinic-team", "modules", "preferences", "followup", "patient"]
+
+function isValidTabId(value: string | null): value is TabId {
+  return value !== null && TAB_IDS.includes(value as TabId)
+}
+
+function SettingsPageContent() {
+  const searchParams = useSearchParams()
+  const tabFromUrl = searchParams.get("tab")
+  const [activeTab, setActiveTab] = useState<TabId>(() =>
+    isValidTabId(tabFromUrl) ? tabFromUrl : "modules"
+  )
   const { currentUser } = useUserClinic()
+  const t = useAppTranslations()
+
+  // Sync activeTab with ?tab= when URL changes (e.g. from Bot page deep link)
+  useEffect(() => {
+    if (isValidTabId(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl)
+    }
+  }, [tabFromUrl])
 
   const tabs = [
-    { id: "profile" as const, label: "Profile", icon: RiUserLine },
-    { id: "clinic-team" as const, label: "Clinic & Team", icon: RiBuildingLine },
-    { id: "modules" as const, label: "Modules", icon: RiPuzzleLine },
-    { id: "followup" as const, label: "Follow-up Rules", icon: RiRefreshLine },
-    { id: "patient" as const, label: "Patient", icon: RiUserHeartLine },
-    { id: "preferences" as const, label: "Appointments", icon: RiCalendarLine },
+    { id: "profile" as const, label: t.settings.profile, labelShort: t.settings.profile, icon: RiUserLine },
+    { id: "clinic-team" as const, label: t.settings.clinicTeam, labelShort: t.common.clinic.split(" ")[0], icon: RiBuildingLine },
+    { id: "modules" as const, label: t.settings.modules, labelShort: t.settings.modules, icon: RiPuzzleLine },
+    { id: "followup" as const, label: t.settings.followUpRules, labelShort: t.settings.followUpRules.split(" ")[0], icon: RiRefreshLine },
+    { id: "patient" as const, label: t.settings.patient, labelShort: t.settings.patient, icon: RiUserHeartLine },
+    { id: "preferences" as const, label: t.settings.appointments, labelShort: t.settings.appointments, icon: RiCalendarLine },
   ]
 
   // Check permissions
@@ -56,12 +77,12 @@ export default function SettingsPage() {
 
   return (
     <div className="page-content">
-      <PageHeader title="Settings" />
+      <PageHeader title={t.settings.title} />
 
       {/* Tab Navigation - same structure as Appointments/Accounting for consistent spacing */}
       <div className="space-y-3">
         <div className="border-b border-gray-200 dark:border-gray-800">
-          <nav className="-mb-px flex space-x-4 overflow-x-auto pb-px sm:space-x-8" aria-label="Settings tabs">
+          <nav className="-mb-px flex gap-4 overflow-x-auto pb-px sm:gap-8" aria-label="Settings tabs">
           {tabs.map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.id
@@ -84,7 +105,7 @@ export default function SettingsPage() {
                   }`}
                 />
                 <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
+                <span className="sm:hidden">{tab.labelShort}</span>
               </button>
             )
           })}
@@ -108,41 +129,42 @@ export default function SettingsPage() {
 // Profile Tab
 function ProfileTab() {
   const { currentUser } = useUserClinic()
+  const t = useAppTranslations()
 
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
-          <CardDescription>Update your personal information</CardDescription>
+          <CardTitle>{t.settings.profileSettings}</CardTitle>
+          <CardDescription>{t.settings.updatePersonalInfo}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="first-name">First Name</Label>
+              <Label htmlFor="first-name">{t.settings.firstName}</Label>
               <Input id="first-name" defaultValue={currentUser.first_name} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last-name">Last Name</Label>
+              <Label htmlFor="last-name">{t.settings.lastName}</Label>
               <Input id="last-name" defaultValue={currentUser.last_name} />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t.auth.email}</Label>
             <Input id="email" type="email" defaultValue={currentUser.email} />
           </div>
 
           {currentUser.specialization && (
             <div className="space-y-2">
-              <Label htmlFor="specialization">Specialization</Label>
+              <Label htmlFor="specialization">{t.settings.specialization}</Label>
               <Input id="specialization" defaultValue={currentUser.specialization} />
             </div>
           )}
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" className="w-full sm:w-auto">Cancel</Button>
-            <Button variant="primary" className="w-full sm:w-auto">Save Changes</Button>
+            <Button variant="secondary" className="w-full sm:w-auto">{t.common.cancel}</Button>
+            <Button variant="primary" className="w-full sm:w-auto">{t.settings.saveChanges}</Button>
           </div>
         </CardContent>
       </Card>
@@ -150,23 +172,17 @@ function ProfileTab() {
       {/* App Preferences */}
       <Card>
         <CardHeader>
-          <CardTitle>App Preferences</CardTitle>
-          <CardDescription>Customize your TabibDesk experience</CardDescription>
+          <CardTitle>{t.settings.appPreferences}</CardTitle>
+          <CardDescription>{t.settings.customizeExperience}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="language">Language</Label>
-            <select
-              id="language"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
-            >
-              <option>English</option>
-              <option>العربية</option>
-            </select>
+            <Label htmlFor="language">{t.settings.language}</Label>
+            <LanguageSelect />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date-format">Date Format</Label>
+            <Label htmlFor="date-format">{t.settings.dateFormat}</Label>
             <select
               id="date-format"
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
@@ -178,19 +194,19 @@ function ProfileTab() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="time-format">Time Format</Label>
+            <Label htmlFor="time-format">{t.settings.timeFormat}</Label>
             <select
               id="time-format"
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
             >
-              <option>12-hour (AM/PM)</option>
-              <option>24-hour</option>
+              <option>{t.settings.timeFormat12}</option>
+              <option>{t.settings.timeFormat24}</option>
             </select>
           </div>
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" className="w-full sm:w-auto">Cancel</Button>
-            <Button variant="primary" className="w-full sm:w-auto">Save Preferences</Button>
+            <Button variant="secondary" className="w-full sm:w-auto">{t.common.cancel}</Button>
+            <Button variant="primary" className="w-full sm:w-auto">{t.settings.saveChanges}</Button>
           </div>
         </CardContent>
       </Card>
@@ -198,8 +214,26 @@ function ProfileTab() {
   )
 }
 
+function LanguageSelect() {
+  const { lang, setLanguage } = useLocale()
+  const t = useAppTranslations()
+
+  return (
+    <select
+      id="language"
+      value={lang}
+      onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
+      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
+    >
+      <option value="en">{t.settings.english}</option>
+      <option value="ar">{t.settings.arabic}</option>
+    </select>
+  )
+}
+
 // Clinic & Team Tab (Merged)
 function ClinicTeamTab() {
+  const t = useAppTranslations()
   const { currentClinic, allClinics, setCurrentClinic, allUsers } = useUserClinic()
   const [clinicSettings, setClinicSettings] = useState(currentClinic)
 
@@ -208,13 +242,13 @@ function ClinicTeamTab() {
       {/* Clinic Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Clinic Settings</CardTitle>
-          <CardDescription>Manage clinic information and preferences</CardDescription>
+          <CardTitle>{t.settings.clinicSettings}</CardTitle>
+          <CardDescription>{t.settings.manageClinicInfo}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {allClinics.length > 1 && (
             <div className="space-y-2">
-              <Label htmlFor="clinic-selector">Selected Clinic</Label>
+              <Label htmlFor="clinic-selector">{t.settings.selectedClinic}</Label>
               <select
                 id="clinic-selector"
                 value={currentClinic.id}
@@ -231,7 +265,7 @@ function ClinicTeamTab() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="clinic-name">Clinic Name</Label>
+            <Label htmlFor="clinic-name">{t.settings.clinicName}</Label>
             <Input
               id="clinic-name"
               value={clinicSettings.name}
@@ -250,7 +284,7 @@ function ClinicTeamTab() {
 
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="timezone">Timezone</Label>
+              <Label htmlFor="timezone">{t.settings.timezone}</Label>
               <select
                 id="timezone"
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
@@ -261,7 +295,7 @@ function ClinicTeamTab() {
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="appointment-duration">Default Appointment (min)</Label>
+              <Label htmlFor="appointment-duration">{t.settings.defaultAppointmentMin}</Label>
               <Input id="appointment-duration" type="number" defaultValue={30} />
             </div>
           </div>
@@ -296,7 +330,7 @@ function ClinicTeamTab() {
                   </div>
                 </div>
                 <Badge color="gray" size="xs">
-                  {user.role}
+                  {user.role === "doctor" ? t.common.doctor : user.role === "assistant" ? t.common.assistant : t.common.manager}
                 </Badge>
               </div>
             ))}
@@ -309,6 +343,7 @@ function ClinicTeamTab() {
 
 // Modules Tab (Feature Flags) - MAIN TAB
 function ModulesTab({ canEdit }: { canEdit: boolean }) {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const { effective, isLocked, planTier, refetch } = useFeatures()
   const [updating, setUpdating] = useState<FeatureKey | null>(null)
@@ -329,32 +364,32 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
 
   const featureGroups = [
     {
-      title: "Core Modules",
-      description: "Essential features for patient care",
+      title: t.settings.coreModules,
+      description: t.settings.essentialFeatures,
       features: [
-        { key: "patients" as const, name: "Patients", description: "Patient records and profiles", icon: RiUserLine },
-        { key: "appointments" as const, name: "Appointments", description: "Scheduling and calendar management", icon: RiCalendarLine },
-        { key: "tasks" as const, name: "Tasks", description: "Task management and assignments", icon: RiTaskLine },
-        { key: "insights" as const, name: "Insights", description: "Analytics and reporting", icon: RiBarChartLine },
+        { key: "patients" as const, name: t.nav.patients, description: t.settings.patientsDesc, icon: RiUserLine },
+        { key: "appointments" as const, name: t.nav.appointments, description: t.settings.appointmentsDesc, icon: RiCalendarLine },
+        { key: "tasks" as const, name: t.nav.tasks, description: t.settings.tasksDesc, icon: RiTaskLine },
+        { key: "insights" as const, name: t.nav.insights, description: t.settings.insightsDesc, icon: RiBarChartLine },
       ],
     },
     {
-      title: "Optional Modules",
-      description: "Additional features for enhanced workflow",
+      title: t.settings.optionalModules,
+      description: t.settings.additionalFeatures,
       features: [
-        { key: "labs" as const, name: "Labs", description: "Lab results and test management", icon: RiTestTubeLine },
-        { key: "medications" as const, name: "Medications", description: "Prescription and medication tracking", icon: RiCapsuleLine },
-        { key: "files" as const, name: "Files", description: "Document storage and attachments", icon: RiFileLine },
-        { key: "reminders" as const, name: "Reminders", description: "Automated appointment reminders", icon: RiNotification3Line },
+        { key: "labs" as const, name: t.settings.labs, description: t.settings.labsDesc, icon: RiTestTubeLine },
+        { key: "medications" as const, name: t.settings.medications, description: t.settings.medicationsDesc, icon: RiCapsuleLine },
+        { key: "files" as const, name: t.settings.files, description: t.settings.filesDesc, icon: RiFileLine },
+        { key: "reminders" as const, name: t.settings.reminders, description: t.settings.remindersDesc, icon: RiNotification3Line },
       ],
     },
     {
-      title: "AI Features",
-      description: "Advanced AI-powered capabilities",
+      title: t.settings.aiFeatures,
+      description: t.settings.aiCapabilities,
       features: [
-        { key: "ai_summary" as const, name: "AI Clinical Notes", description: "Automatic visit note summaries", icon: RiRobotLine },
-        { key: "ai_dictation" as const, name: "AI Voice Dictation", description: "Voice-to-text transcription", icon: RiVoiceprintLine },
-        { key: "ai_lab_extraction" as const, name: "AI Lab Extraction", description: "Automated lab report parsing", icon: RiScan2Line },
+        { key: "ai_summary" as const, name: t.settings.aiClinicalNotes, description: t.settings.aiSummaryDesc, icon: RiRobotLine },
+        { key: "ai_dictation" as const, name: t.settings.aiVoiceDictation, description: t.settings.aiDictationDesc, icon: RiVoiceprintLine },
+        { key: "ai_lab_extraction" as const, name: t.settings.aiLabExtraction, description: t.settings.aiLabExtractionDesc, icon: RiScan2Line },
       ],
     },
   ]
@@ -362,12 +397,12 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Feature Modules</CardTitle>
+        <CardTitle>{t.settings.featureModules}</CardTitle>
         <CardDescription className="space-y-1">
-          <span>Control which features are available to your team.</span>
+          <span>{t.settings.controlFeatures}</span>
           {planTier && (
-            <span className="block sm:inline sm:ml-2">
-              Current plan: <strong>{getPlanTierName(planTier)}</strong> ({getPlanTierPrice(planTier)}/month)
+            <span className="block sm:inline sm:ms-2">
+              {t.settings.currentPlan} <strong>{getPlanTierName(planTier)}</strong> ({getPlanTierPrice(planTier)}{t.settings.perMonth})
             </span>
           )}
         </CardDescription>
@@ -376,7 +411,7 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
         {!canEdit && (
           <div className="rounded-lg bg-yellow-50 p-4 dark:bg-yellow-900/20">
             <p className="text-sm text-yellow-800 dark:text-yellow-400">
-              Only managers can modify feature settings. Contact your clinic administrator to make changes.
+              {t.settings.onlyManagersModify}
             </p>
           </div>
         )}
@@ -408,10 +443,10 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-medium text-gray-900 dark:text-gray-50">{feature.name}</p>
                           {locked && (
-                            <Tooltip content={`Upgrade to ${planTier === "solo" ? "Multi" : "More"} plan`}>
+                            <Tooltip content={planTier === "solo" ? t.settings.upgradeToMulti : t.settings.upgradeToMore}>
                               <Badge color="amber" size="xs">
                                 <RiLockLine className="size-3" />
-                                Upgrade
+                                {t.settings.upgrade}
                               </Badge>
                             </Tooltip>
                           )}
@@ -439,10 +474,10 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
 
         <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            <RiSparklingLine className="mr-1 inline-block size-4" />
-            Features locked by your subscription plan require an upgrade.{" "}
+            <RiSparklingLine className="me-1 inline-block size-4" />
+            {t.settings.featuresLockedPlan}{" "}
             <a href="/#pricing" className="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">
-              View Plans
+              {t.settings.viewPlans}
             </a>
           </p>
         </div>
@@ -455,6 +490,7 @@ const DEFAULT_ENABLED_METRIC_IDS = ["weight", "bmi", "bp", "pulse", "blood_sugar
 
 // Patient tab: progress metrics (enable/disable; all enabled metrics show in patient Progress section)
 function PatientTab() {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const [enabledIds, setEnabledIds] = useState<Set<string>>(new Set())
   const [isSaving, setIsSaving] = useState(false)
@@ -498,9 +534,9 @@ function PatientTab() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Progress Metrics</CardTitle>
+          <CardTitle>{t.settings.progressMetrics}</CardTitle>
           <CardDescription>
-            Enable metrics to remind doctors to record them in notes and to show them in the patient Progress section. Toggle basic vitals and specialty metrics below.
+            {t.settings.progressMetricsDesc}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -542,7 +578,7 @@ function PatientTab() {
           </div>
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button variant="primary" onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isSaving ? t.settings.saving : t.settings.saveChanges}
             </Button>
           </div>
         </CardContent>
@@ -553,6 +589,7 @@ function PatientTab() {
 
 // Appointments Tab
 function PreferencesTab() {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const [bufferMinutes, setBufferMinutes] = useState(5)
   const [isSaving, setIsSaving] = useState(false)
@@ -582,12 +619,12 @@ function PreferencesTab() {
       {/* Appointment Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Appointment Settings</CardTitle>
-          <CardDescription>Configure default appointment behavior</CardDescription>
+          <CardTitle>{t.settings.appointmentSettings}</CardTitle>
+          <CardDescription>{t.settings.configureAppointment}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="buffer-minutes">Buffer Time Between Appointments</Label>
+            <Label htmlFor="buffer-minutes">{t.settings.bufferTime}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="buffer-minutes"
@@ -598,23 +635,37 @@ function PreferencesTab() {
                 onChange={(e) => setBufferMinutes(Number(e.target.value))}
                 className="w-24"
               />
-              <span className="text-sm text-gray-600 dark:text-gray-400">minutes</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t.settings.minutes}</span>
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Time gap between appointments for preparation and cleanup
+              {t.settings.bufferTimeHint}
             </p>
           </div>
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button variant="secondary" onClick={() => setBufferMinutes(5)} className="w-full sm:w-auto">
-              Reset
+              {t.settings.reset}
             </Button>
             <Button variant="primary" onClick={handleSaveAppointmentSettings} disabled={isSaving} className="w-full sm:w-auto">
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isSaving ? t.settings.saving : t.settings.saveChanges}
             </Button>
           </div>
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="page-content flex min-h-[200px] items-center justify-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>
+        </div>
+      }
+    >
+      <SettingsPageContent />
+    </Suspense>
   )
 }

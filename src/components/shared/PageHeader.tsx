@@ -19,7 +19,7 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
         className,
       )}
     >
-      <div className="flex-1 space-y-0.5">
+      <div className="hidden flex-1 space-y-0.5 lg:block">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl">{title}</h1>
         {description && (
           <p className="text-sm text-gray-500 dark:text-gray-400">

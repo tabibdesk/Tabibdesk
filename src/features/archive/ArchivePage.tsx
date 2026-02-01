@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useSearchParams, useRouter } from "next/navigation"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Select } from "@/components/Select"
@@ -11,29 +12,47 @@ import { ArchivedActivityTab } from "./tabs/ArchivedActivityTab"
 import type { DateRangePreset } from "./archive.types"
 import { DateRange } from "react-day-picker"
 
+const VALID_ARCHIVE_TABS = ["appointments", "tasks", "activity"] as const
+export type ArchiveTab = (typeof VALID_ARCHIVE_TABS)[number]
+
+function isValidArchiveTab(value: string | null): value is ArchiveTab {
+  return value !== null && VALID_ARCHIVE_TABS.includes(value as ArchiveTab)
+}
+
+const VALID_DATE_RANGE_PRESETS: DateRangePreset[] = ["7", "30", "90", "custom"]
+
+function isValidDateRangePreset(value: string): value is DateRangePreset {
+  return VALID_DATE_RANGE_PRESETS.includes(value as DateRangePreset)
+}
+
 interface ArchivePageProps {
   clinicId: string
 }
 
 export function ArchivePage({ clinicId }: ArchivePageProps) {
+  const t = useAppTranslations()
   const searchParams = useSearchParams()
   const router = useRouter()
   const tabParam = searchParams.get("tab")
-  const initialTab = (tabParam === "tasks" || tabParam === "activity" ? tabParam : "appointments") as "appointments" | "tasks" | "activity"
-  
-  const [activeTab, setActiveTab] = useState<"appointments" | "tasks" | "activity">(initialTab)
+  const initialTab: ArchiveTab = isValidArchiveTab(tabParam) ? tabParam : "appointments"
+
+  const [activeTab, setActiveTab] = useState<ArchiveTab>(initialTab)
   const [searchQuery, setSearchQuery] = useState("")
   const [dateRangePreset, setDateRangePreset] = useState<DateRangePreset>("30")
   const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>(undefined)
 
-  // Sync tab with URL param
+  // Sync tab with URL param (only accept valid values)
   useEffect(() => {
-    if (tabParam && (tabParam === "tasks" || tabParam === "activity" || tabParam === "appointments")) {
-      setActiveTab(tabParam as "appointments" | "tasks" | "activity")
+    if (isValidArchiveTab(tabParam)) {
+      setActiveTab(tabParam)
     }
   }, [tabParam])
 
-  const handleTabChange = (tab: "appointments" | "tasks" | "activity") => {
+  const handleDateRangeChange = (value: string) => {
+    setDateRangePreset(isValidDateRangePreset(value) ? value : "30")
+  }
+
+  const handleTabChange = (tab: ArchiveTab) => {
     setActiveTab(tab)
     const params = new URLSearchParams(searchParams.toString())
     params.set("tab", tab)
@@ -43,25 +62,25 @@ export function ArchivePage({ clinicId }: ArchivePageProps) {
   return (
     <div className="page-content">
       <PageHeader
-        title="Archive"
+        title={t.archive.title}
         actions={
           <Select
             id="date-range"
             value={dateRangePreset}
-            onChange={(e) => setDateRangePreset(e.target.value as DateRangePreset)}
+            onChange={(e) => handleDateRangeChange(e.target.value)}
             className="w-32"
           >
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="90">Last 90 days</option>
-            <option value="custom">Custom range</option>
+            <option value="7">{t.archive.last7days}</option>
+            <option value="30">{t.archive.last30days}</option>
+            <option value="90">{t.archive.last90days}</option>
+            <option value="custom">{t.archive.customRange}</option>
           </Select>
         }
       />
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-800">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex gap-8 justify-end rtl:justify-start">
           <button
             onClick={() => handleTabChange("appointments")}
             className={`border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
@@ -70,7 +89,7 @@ export function ArchivePage({ clinicId }: ArchivePageProps) {
                 : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             }`}
           >
-            Appointments
+            {t.archive.tabAppointments}
           </button>
           <button
             onClick={() => handleTabChange("tasks")}
@@ -80,7 +99,7 @@ export function ArchivePage({ clinicId }: ArchivePageProps) {
                 : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             }`}
           >
-            Tasks
+            {t.archive.tabTasks}
           </button>
           <button
             onClick={() => handleTabChange("activity")}
@@ -90,7 +109,7 @@ export function ArchivePage({ clinicId }: ArchivePageProps) {
                 : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
             }`}
           >
-            Activity
+            {t.archive.tabActivity}
           </button>
         </nav>
       </div>

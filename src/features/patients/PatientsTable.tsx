@@ -6,12 +6,14 @@ import { RiPhoneLine, RiStethoscopeLine } from "@remixicon/react"
 import Link from "next/link"
 import type { PatientListItem } from "./patients.types"
 import { calculateAge, getStatusBadgeVariant, getStatusLabel } from "./patients.utils"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 
 interface PatientsTableProps {
   patients: PatientListItem[]
 }
 
 export function PatientsTable({ patients }: PatientsTableProps) {
+  const t = useAppTranslations()
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—"
     const date = new Date(dateString)
@@ -24,17 +26,17 @@ export function PatientsTable({ patients }: PatientsTableProps) {
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Name
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.name}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Phone
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.phone}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Last Appointment
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.lastAppointment}
               </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-50">
-                Status
+              <th className="px-4 py-3 text-start text-sm font-semibold text-gray-900 dark:text-gray-50">
+                {t.table.status}
               </th>
             </tr>
           </thead>
@@ -68,7 +70,7 @@ export function PatientsTable({ patients }: PatientsTableProps) {
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-1.5 rtl:flex-row-reverse text-sm text-gray-600 dark:text-gray-400">
                       <RiPhoneLine className="size-4 shrink-0" />
                       <span>{patient.phone}</span>
                     </div>

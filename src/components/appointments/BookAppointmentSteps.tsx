@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/Button"
+import type { AppTranslations } from "@/lib/app-translations"
 import { Label } from "@/components/Label"
 import {
   RiUserLine,
@@ -19,14 +20,15 @@ import type { AppBookableService, TimeSlot, AvailableDate, PreSelectedSlot } fro
 interface BookAppointmentStepperProps {
   currentStep: string
   preSelectedSlot: PreSelectedSlot | null
+  t: AppTranslations
 }
 
-export function BookAppointmentStepper({ currentStep, preSelectedSlot }: BookAppointmentStepperProps) {
+export function BookAppointmentStepper({ currentStep, preSelectedSlot, t }: BookAppointmentStepperProps) {
   const steps = [
-    { key: "patient", label: "Patient" },
-    { key: "service", label: "Service" },
-    ...(preSelectedSlot ? [] : [{ key: "datetime", label: "Date & Time" }]),
-    { key: "confirmation", label: "Confirm" },
+    { key: "patient", label: t.appointments.stepPatient },
+    { key: "service", label: t.appointments.stepService },
+    ...(preSelectedSlot ? [] : [{ key: "datetime", label: t.appointments.stepDateTime }]),
+    { key: "confirmation", label: t.appointments.stepConfirm },
   ]
   const stepIndex = steps.findIndex((s) => s.key === currentStep)
   const isSuccess = currentStep === "success"
@@ -125,13 +127,14 @@ interface ServiceStepProps {
   services: AppBookableService[]
   isLoading: boolean
   onServiceSelect: (service: AppBookableService) => void
+  t: AppTranslations
 }
 
-export function ServiceStep({ services, isLoading, onServiceSelect }: ServiceStepProps) {
+export function ServiceStep({ services, isLoading, onServiceSelect, t }: ServiceStepProps) {
   return (
     <div className="space-y-4">
-      <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ml-1">
-        Choose Service Type
+      <Label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 ms-1">
+        {t.appointments.chooseServiceType}
       </Label>
       {isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -178,6 +181,7 @@ interface DateTimeStepProps {
   isLoadingSlots: boolean
   onDateSelect: (date: string) => void
   onSlotSelect: (slot: TimeSlot) => void
+  t: AppTranslations
 }
 
 export function DateTimeStep({
@@ -188,12 +192,13 @@ export function DateTimeStep({
   isLoadingSlots,
   onDateSelect,
   onSlotSelect,
+  t,
 }: DateTimeStepProps) {
   return (
     <div className="space-y-4">
       <div>
-        <Label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 ml-1">
-          Select Date
+        <Label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 ms-1">
+          {t.appointments.selectDate}
         </Label>
         {isLoadingDates ? (
           <div className="mt-2 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
@@ -241,8 +246,8 @@ export function DateTimeStep({
       </div>
       {selectedDate && (
         <div>
-          <Label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 ml-1">
-            Select Time
+          <Label className="text-[11px] font-bold uppercase tracking-widest text-gray-400 ms-1">
+            {t.appointments.selectTime}
           </Label>
           {isLoadingSlots ? (
             <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -282,6 +287,7 @@ interface ConfirmationStepProps {
   isSubmitting: boolean
   onBack: () => void
   onConfirm: () => void
+  t: AppTranslations
 }
 
 export function ConfirmationStep({
@@ -292,13 +298,14 @@ export function ConfirmationStep({
   isSubmitting,
   onBack,
   onConfirm,
+  t,
 }: ConfirmationStepProps) {
   return (
     <div className="space-y-4">
       <div className="rounded-xl bg-primary-50/50 border border-primary-100 p-3 dark:bg-primary-900/10 dark:border-primary-800">
         <p className="text-xs font-semibold text-primary-700 dark:text-primary-300 flex items-center gap-1.5">
           <RiCheckLine className="size-4" />
-          Review details before confirming
+          {t.appointments.reviewDetailsBeforeConfirm}
         </p>
       </div>
       <div className="space-y-2.5">
@@ -308,7 +315,7 @@ export function ConfirmationStep({
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-              Patient
+              {t.appointments.labelPatient}
             </p>
             <p className="text-sm font-bold text-gray-900 dark:text-gray-50">
               {selectedPatient?.first_name} {selectedPatient?.last_name}
@@ -321,7 +328,7 @@ export function ConfirmationStep({
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-              Service
+              {t.appointments.labelService}
             </p>
             <p className="text-sm font-bold text-gray-900 dark:text-gray-50">
               {selectedService?.title} • {selectedService?.duration_minutes}m
@@ -334,7 +341,7 @@ export function ConfirmationStep({
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-              Date & Time
+              {t.appointments.labelDateTime}
             </p>
             <p className="text-sm font-bold text-gray-900 dark:text-gray-50">
               {selectedDate && format(new Date(selectedDate), "EEEE, MMMM d")}
@@ -353,7 +360,7 @@ export function ConfirmationStep({
           onClick={onBack}
           disabled={isSubmitting}
         >
-          Back
+          {t.appointments.back}
         </Button>
         <Button
           variant="primary"
@@ -361,7 +368,7 @@ export function ConfirmationStep({
           onClick={onConfirm}
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Booking..." : "Confirm Booking"}
+          {isSubmitting ? t.appointments.booking : t.appointments.confirmBooking}
         </Button>
       </div>
     </div>
@@ -370,19 +377,20 @@ export function ConfirmationStep({
 
 interface SuccessStepProps {
   rescheduleAppointmentId: string | null
+  t: AppTranslations
 }
 
-export function SuccessStep({ rescheduleAppointmentId }: SuccessStepProps) {
+export function SuccessStep({ rescheduleAppointmentId, t }: SuccessStepProps) {
   return (
     <div className="py-12 text-center animate-in fade-in zoom-in duration-300">
       <div className="mx-auto flex size-20 items-center justify-center rounded-full bg-green-50 dark:bg-green-900/20 border-4 border-white dark:border-gray-900 shadow-sm">
         <RiCheckLine className="size-12 text-green-600 dark:text-green-400" />
       </div>
       <h3 className="mt-6 text-xl font-bold text-gray-900 dark:text-gray-50">
-        {rescheduleAppointmentId ? "Rescheduled!" : "Booking Confirmed!"}
+        {rescheduleAppointmentId ? t.appointments.rescheduled : t.appointments.bookingConfirmed}
       </h3>
       <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
-        The appointment has been successfully updated in the system.
+        {t.appointments.appointmentUpdatedSuccess}
       </p>
     </div>
   )

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { WidgetSkeleton } from "@/components/skeletons"
 import { RiArrowRightLine, RiCalendarLine, RiCheckLine, RiUserLine } from "@remixicon/react"
 import type { DashboardAppointment } from "./dashboard.types"
@@ -16,11 +17,13 @@ interface NowQueueWidgetProps {
 }
 
 export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWidgetProps) {
+  const t = useAppTranslations()
+
   if (loading) {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Now Queue</h2>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.nowQueue}</h2>
         </div>
         <WidgetSkeleton rows={5} />
       </div>
@@ -30,11 +33,11 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Now Queue</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.nowQueue}</h2>
         <Link href="/appointments">
           <Button variant="ghost" className="text-[11px] font-bold tracking-wider -mr-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50">
-            view all
-            <RiArrowRightLine className="ml-1 size-3.5" />
+            {t.dashboard.viewAll}
+            <RiArrowRightLine className="ml-1 size-3.5 rtl:rotate-180 rtl:ml-0 rtl:mr-1" />
           </Button>
         </Link>
       </div>
@@ -62,7 +65,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
                         onMarkDone(apt.id)
                       }}
                       className={`flex size-10 shrink-0 items-center justify-center rounded-full transition-all group/done ${getIconBackgroundClass(index)} hover:bg-green-500 hover:text-white dark:hover:bg-green-600 cursor-pointer`}
-                      title="Mark as Done"
+                      title={t.dashboard.markAsDone}
                     >
                       <div className="group-hover/done:hidden">
                         <RiUserLine className={`size-5 ${getIconColorClass(index)}`} />
@@ -78,7 +81,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
                         </p>
                         {(isNow || isNext) ? (
                           <Badge color={getBadgeColor(badgeVariant)} size="xs">
-                            {badgeText}
+                            {badgeText === "now" ? t.dashboard.now : badgeText === "next" ? t.dashboard.next : badgeText}
                           </Badge>
                         ) : (
                           <span className="shrink-0 text-[10px] font-bold tracking-widest text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-sm lowercase">
@@ -95,7 +98,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
                   </div>
 
                   {apt.online_call_link ? (
-                    <div className="flex items-center gap-1.5 ml-4 shrink-0">
+                    <div className="flex items-center gap-1.5 ms-4 shrink-0">
                       <Button
                         type="button"
                         variant="primary"
@@ -106,7 +109,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
                           window.open(apt.online_call_link, "_blank")
                         }}
                       >
-                        join call
+                        {t.dashboard.joinCall}
                       </Button>
                     </div>
                   ) : null}
@@ -117,7 +120,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
         ) : (
           <div className="py-12 text-center text-gray-600 dark:text-gray-400">
             <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-2 text-sm">No appointments in queue</p>
+            <p className="mt-2 text-sm">{t.dashboard.noAppointmentsInQueue}</p>
           </div>
         )}
       </div>
