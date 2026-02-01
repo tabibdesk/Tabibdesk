@@ -118,3 +118,20 @@ export function hasOnlyOneValueForKey(
 
   return true
 }
+
+/** Maps a numeric delta to Tremor BadgeDelta deltaType. Used by LineChart and overview chart cards. */
+export type DeltaType =
+  | "increase"
+  | "moderateIncrease"
+  | "decrease"
+  | "moderateDecrease"
+  | "unchanged"
+
+export const getDeltaType = (value: number): DeltaType => {
+  if (value > 0) {
+    return value >= 50 ? "increase" : "moderateIncrease"
+  } else if (value < 0) {
+    return value < -50 ? "moderateDecrease" : "decrease"
+  }
+  return "unchanged"
+}

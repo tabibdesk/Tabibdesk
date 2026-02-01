@@ -29,7 +29,7 @@ import {
 import { useOnWindowResize } from "@/lib/useOnWindowResize"
 import { cx, percentageFormatter } from "@/lib/utils"
 import { BadgeDelta } from "@tremor/react"
-import { getDeltaType } from "./ui/overview/DashboardChartCard"
+import { getDeltaType } from "@/lib/chartUtils"
 
 //#region Legend
 

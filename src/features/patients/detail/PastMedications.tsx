@@ -7,7 +7,7 @@ import { Button } from "@/components/Button"
 import type { PastMedication } from "@/features/prescriptions/prescriptions.types"
 import { format } from "date-fns"
 import { useState } from "react"
-import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
+import { PatientEmptyState } from "./PatientEmptyState"
 
 interface PastMedicationsProps {
   medications: PastMedication[]

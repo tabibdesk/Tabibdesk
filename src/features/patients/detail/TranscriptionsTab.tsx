@@ -8,7 +8,7 @@ import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { AIExtractionModal } from "./AIExtractionModal"
 import { RiVoiceprintLine, RiTimeLine, RiRobot2Line } from "@remixicon/react"
-import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
+import { PatientEmptyState } from "./PatientEmptyState"
 
 interface Transcription {
   id: string

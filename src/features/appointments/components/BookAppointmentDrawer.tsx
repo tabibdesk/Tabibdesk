@@ -10,7 +10,7 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/Drawer"
-import { BookAppointmentFlow } from "@/components/appointments/BookAppointmentFlow"
+import { BookAppointmentFlow } from "./book-flow/BookAppointmentFlow"
 
 interface PreSelectedSlot {
   clinicId: string

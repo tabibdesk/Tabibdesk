@@ -1,6 +1,6 @@
 import { BadgeDelta, ProgressBar } from "@tremor/react"
 
-import { KpiEntry } from "@/app/(main)/overview/page"
+import type { KpiEntry } from "../overview.types"
 
 function getDeltaTypeFromChange(change: string): "increase" | "moderateIncrease" | "decrease" | "moderateDecrease" | "unchanged" {
   const trimmed = change.trim()

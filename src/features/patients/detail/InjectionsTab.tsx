@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import { RiSyringeLine, RiAddLine, RiCalendarLine } from "@remixicon/react"
-import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
+import { PatientEmptyState } from "./PatientEmptyState"
 
 interface Injection {
   id: string

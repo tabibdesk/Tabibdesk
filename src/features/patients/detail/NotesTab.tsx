@@ -11,7 +11,7 @@ import { Textarea } from "@/components/Textarea"
 import { create as createNote, update as updateNote, remove as removeNote } from "@/api/notes.api"
 import { useToast } from "@/hooks/useToast"
 import { cx } from "@/lib/utils"
-import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
+import { PatientEmptyState } from "./PatientEmptyState"
 import {
   Drawer,
   DrawerBody,

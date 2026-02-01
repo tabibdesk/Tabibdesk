@@ -1,8 +1,8 @@
 "use client"
-import { CategoryBarCard } from "@/components/ui/overview/DashboardCategoryBarCard"
-import { ChartCard } from "@/components/ui/overview/DashboardChartCard"
-import { Filterbar } from "@/components/ui/overview/DashboardFilterbar"
-import { ProgressBarCard } from "@/components/ui/overview/DashboardProgressBarCard"
+import { CategoryBarCard } from "./components/DashboardCategoryBarCard"
+import { ChartCard } from "./components/DashboardChartCard"
+import { Filterbar } from "./components/DashboardFilterbar"
+import { ProgressBarCard } from "./components/DashboardProgressBarCard"
 import { overviews } from "@/data/overview-data"
 import { OverviewData } from "@/data/schema"
 import { cx } from "@/lib/utils"
@@ -10,7 +10,9 @@ import { subDays, toDate } from "date-fns"
 import React from "react"
 import { DateRange } from "react-day-picker"
 
-export type PeriodValue = "previous-period" | "last-year" | "no-comparison"
+import type { KpiEntry, KpiEntryExtended, PeriodValue } from "./overview.types"
+
+export type { KpiEntry, KpiEntryExtended, PeriodValue } from "./overview.types"
 
 const categories: {
   title: keyof OverviewData
@@ -41,14 +43,6 @@ const categories: {
     type: "unit",
   },
 ]
-
-export type KpiEntry = {
-  title: string
-  percentage: number
-  current: number
-  allowed: number
-  unit?: string
-}
 
 const data: KpiEntry[] = [
   {
@@ -92,14 +86,6 @@ const data2: KpiEntry[] = [
     unit: "%",
   },
 ]
-
-export type KpiEntryExtended = Omit<
-  KpiEntry,
-  "current" | "allowed" | "unit"
-> & {
-  value: string
-  color: string
-}
 
 const data3: KpiEntryExtended[] = [
   {

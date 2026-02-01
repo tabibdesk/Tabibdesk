@@ -20,7 +20,7 @@ import {
 import type { ProgressMetric } from "@/types/progress"
 import type { PastMedication, Prescription } from "@/features/prescriptions/prescriptions.types"
 import { format } from "date-fns"
-import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
+import { PatientEmptyState } from "./PatientEmptyState"
 
 interface Patient {
   id: string

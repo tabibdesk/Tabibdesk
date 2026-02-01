@@ -1,6 +1,7 @@
 import { BadgeDelta } from "@tremor/react"
-import { PeriodValue } from "@/app/(main)/overview/page"
+import type { PeriodValue } from "../overview.types"
 import { LineChart } from "@/components/LineChart"
+import { getDeltaType } from "@/lib/chartUtils"
 import { overviews } from "@/data/overview-data"
 import { OverviewData } from "@/data/schema"
 import { cx, formatters, percentageFormatter } from "@/lib/utils"
@@ -24,17 +25,6 @@ export type CardProps = {
 const formattingMap = {
   currency: formatters.currency,
   unit: formatters.unit,
-}
-
-type DeltaType = "increase" | "moderateIncrease" | "decrease" | "moderateDecrease" | "unchanged"
-
-export const getDeltaType = (value: number): DeltaType => {
-  if (value > 0) {
-    return value >= 50 ? "increase" : "moderateIncrease"
-  } else if (value < 0) {
-    return value < -50 ? "moderateDecrease" : "decrease"
-  }
-  return "unchanged"
 }
 
 export function ChartCard({

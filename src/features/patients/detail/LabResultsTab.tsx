@@ -8,7 +8,7 @@ import { Input } from "@/components/Input"
 import { Badge } from "@/components/Badge"
 import { RiFlaskLine, RiAddLine, RiFileDownloadLine, RiSaveLine, RiCloseLine, RiEditLine, RiDeleteBinLine, RiArrowDownSLine, RiArrowRightSLine, RiAttachmentLine, RiCloseFill } from "@remixicon/react"
 import Image from "next/image"
-import { PatientEmptyState } from "@/components/patient/PatientEmptyState"
+import { PatientEmptyState } from "./PatientEmptyState"
 
 interface LabResult {
   id: string

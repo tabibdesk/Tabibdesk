@@ -1,7 +1,7 @@
 import { BadgeDelta } from "@tremor/react"
 import { cx } from "@/lib/utils"
 
-import type { KpiEntryExtended } from "@/app/(main)/overview/page"
+import type { KpiEntryExtended } from "../overview.types"
 
 function getDeltaTypeFromChange(change: string): "increase" | "moderateIncrease" | "decrease" | "moderateDecrease" | "unchanged" {
   const trimmed = change.trim()
