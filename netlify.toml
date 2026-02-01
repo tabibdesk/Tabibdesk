@@ -3,7 +3,8 @@
   publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18"
+  # Vitest 4 requires Node >= 20; Next.js supports Node 18+
+  NODE_VERSION = "20"
   # Use npm (no pnpm); skip husky in CI
   NPM_FLAGS = "--legacy-peer-deps"
   HUSKY = "0"
