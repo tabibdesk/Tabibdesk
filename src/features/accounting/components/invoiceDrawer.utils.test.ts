@@ -19,6 +19,9 @@ vi.mock("@/data/mock/mock-data", () => ({
       },
     ],
   },
+}))
+
+vi.mock("@/lib/constants", () => ({
   mockDoctor: { full_name: "Dr. Smith" },
 }))
 
