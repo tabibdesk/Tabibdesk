@@ -72,8 +72,9 @@ function LoginPageContent() {
       }
       router.push("/dashboard")
       router.refresh()
-    } catch {
-      setErrors({ general: "An unexpected error occurred. Please try again." })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred."
+      setErrors({ general: message })
     } finally {
       setIsLoading(false)
     }
@@ -91,8 +92,9 @@ function LoginPageContent() {
       if (error) {
         setErrors({ general: error.message })
       }
-    } catch {
-      setErrors({ general: "An unexpected error occurred. Please try again." })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred."
+      setErrors({ general: message })
     }
   }
 

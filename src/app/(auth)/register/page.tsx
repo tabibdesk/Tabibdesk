@@ -95,7 +95,6 @@ function RegisterPageContent() {
 
     try {
       const supabase = createClient()
-      console.log("[v0] Attempting signup with email:", formData.email)
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -107,9 +106,7 @@ function RegisterPageContent() {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
         },
       })
-      console.log("[v0] Signup response - data:", JSON.stringify(data), "error:", JSON.stringify(error))
       if (error) {
-        console.log("[v0] Signup error:", error.message, error.status)
         setErrors({ general: error.message })
         return
       }
@@ -125,9 +122,9 @@ function RegisterPageContent() {
       } else {
         router.push("/auth/signup-success")
       }
-    } catch (err) {
-      console.log("[v0] Signup catch error:", err)
-      setErrors({ general: "An unexpected error occurred. Please try again." })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred."
+      setErrors({ general: message })
     } finally {
       setIsLoading(false)
     }
