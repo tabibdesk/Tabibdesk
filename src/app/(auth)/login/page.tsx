@@ -10,6 +10,7 @@ import { RiGoogleFill, RiMicrosoftFill, RiFlaskLine } from "@remixicon/react"
 import { useDemo } from "@/contexts/demo-context"
 import { useLocale } from "@/contexts/locale-context"
 import { useAppTranslations } from "@/lib/useAppTranslations"
+import { createClient } from "@/lib/supabase/client"
 
 function LoginPageContent() {
   const router = useRouter()
@@ -25,7 +26,7 @@ function LoginPageContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({})
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {}
@@ -57,16 +58,42 @@ function LoginPageContent() {
     if (!validateForm()) return
     
     setIsLoading(true)
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    
-    // For now, just redirect to dashboard
-    router.push("/dashboard")
+    setErrors({})
+
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) {
+        setErrors({ general: error.message })
+        return
+      }
+      router.push("/dashboard")
+      router.refresh()
+    } catch {
+      setErrors({ general: "An unexpected error occurred. Please try again." })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleSocialLogin = (_provider: string) => {
-    // Implement social login here
+  const handleSocialLogin = async (provider: "google" | "azure") => {
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        },
+      })
+      if (error) {
+        setErrors({ general: error.message })
+      }
+    } catch {
+      setErrors({ general: "An unexpected error occurred. Please try again." })
+    }
   }
 
   return (
@@ -91,7 +118,7 @@ function LoginPageContent() {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => handleSocialLogin("google")}
+                onClick={() => handleSocialLogin("google" as "google")}
                 className="w-full"
               >
                 <RiGoogleFill className="me-2 size-5" />
@@ -100,7 +127,7 @@ function LoginPageContent() {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => handleSocialLogin("microsoft")}
+                onClick={() => handleSocialLogin("azure")}
                 className="w-full"
               >
                 <RiMicrosoftFill className="me-2 size-5" />
@@ -193,6 +220,12 @@ function LoginPageContent() {
                   </a>
                 </div>
               </div>
+
+              {errors.general && (
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {errors.general}
+                </p>
+              )}
 
               <Button
                 type="submit"
