@@ -107,11 +107,13 @@ function RegisterPageContent() {
         },
       })
       if (error) {
-        setErrors({ general: error.message })
+        console.error("[v0] Sign up error:", error.message, error.status)
+        setErrors({ general: "Unable to create account. Please try again." })
         return
       }
       // If email confirmation is required, Supabase returns a user with identities = []
       if (data.user && data.user.identities && data.user.identities.length === 0) {
+        console.warn("[v0] Account already exists for email:", formData.email)
         setErrors({ general: "An account with this email already exists." })
         return
       }
@@ -123,8 +125,8 @@ function RegisterPageContent() {
         router.push("/auth/signup-success")
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "An unexpected error occurred."
-      setErrors({ general: message })
+      console.error("[v0] Sign up exception:", err)
+      setErrors({ general: "Unable to create account. Please try again." })
     } finally {
       setIsLoading(false)
     }
@@ -157,10 +159,12 @@ function RegisterPageContent() {
         },
       })
       if (error) {
-        setErrors({ general: error.message })
+        console.error("[v0] OAuth sign up error:", error.message, error.status)
+        setErrors({ general: "Unable to sign up with this provider. Please try again." })
       }
-    } catch {
-      setErrors({ general: "An unexpected error occurred. Please try again." })
+    } catch (err: unknown) {
+      console.error("[v0] OAuth sign up exception:", err)
+      setErrors({ general: "Unable to sign up with this provider. Please try again." })
     }
   }
 

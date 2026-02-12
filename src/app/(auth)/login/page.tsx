@@ -67,14 +67,15 @@ function LoginPageContent() {
         password,
       })
       if (error) {
-        setErrors({ general: error.message })
+        console.error("[v0] Sign in error:", error.message, error.status)
+        setErrors({ general: "Unable to sign in. Please check your credentials and try again." })
         return
       }
       router.push("/dashboard")
       router.refresh()
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "An unexpected error occurred."
-      setErrors({ general: message })
+      console.error("[v0] Sign in exception:", err)
+      setErrors({ general: "Unable to sign in. Please check your credentials and try again." })
     } finally {
       setIsLoading(false)
     }
@@ -90,11 +91,12 @@ function LoginPageContent() {
         },
       })
       if (error) {
-        setErrors({ general: error.message })
+        console.error("[v0] OAuth sign in error:", error.message, error.status)
+        setErrors({ general: "Unable to sign in with this provider. Please try again." })
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "An unexpected error occurred."
-      setErrors({ general: message })
+      console.error("[v0] OAuth sign in exception:", err)
+      setErrors({ general: "Unable to sign in with this provider. Please try again." })
     }
   }
 
