@@ -13,7 +13,7 @@ import type {
   AppointmentSettings,
   ClinicFollowUpRules,
 } from "@/features/settings/settings.types"
-import { mockClinics } from "@/data/mock/users-clinics"
+import { mockClinics, getSubscriptionForClinic } from "@/data/mock/users-clinics"
 
 // LocalStorage keys
 const STORAGE_KEYS = {
@@ -65,12 +65,40 @@ function initializeStore() {
   }
 }
 
+const CURRENT_CLINIC_KEY = "currentClinicId"
+
 /**
- * Get current plan info
+ * Get current plan info from the current clinic's subscription.
+ * Uses Supabase subscription when backend is supabase; mock when demo/mock.
+ * Fallback: localStorage tabibdesk-plan-info for migration/demo.
  */
 export async function getPlanInfo(): Promise<PlanInfo> {
-  // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 100))
+
+  if (typeof window !== "undefined") {
+    const currentClinicId = localStorage.getItem(CURRENT_CLINIC_KEY)
+    if (currentClinicId) {
+      const { getBackendType } = await import("@/lib/api/repository-factory")
+      if (getBackendType() === "supabase") {
+        try {
+          const { getSubscriptionForClinic } = await import(
+            "@/lib/api/subscriptions.api"
+          )
+          const subscription = await getSubscriptionForClinic(currentClinicId)
+          if (subscription) {
+            return { planTier: subscription.plan_tier as PlanInfo["planTier"] }
+          }
+        } catch {
+          // fall through to fallback
+        }
+      } else {
+        const subscription = getSubscriptionForClinic(currentClinicId)
+        if (subscription) {
+          return { planTier: subscription.plan_tier }
+        }
+      }
+    }
+  }
 
   if (planInfoCache) {
     return planInfoCache
@@ -83,7 +111,6 @@ export async function getPlanInfo(): Promise<PlanInfo> {
     return planInfoCache!
   }
 
-  // Fallback
   const fallback: PlanInfo = { planTier: "multi" }
   planInfoCache = fallback
   return fallback

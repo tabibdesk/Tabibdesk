@@ -5,6 +5,7 @@
 
 import { DEMO_CLINIC_ID, DEMO_DOCTOR_ID } from "@/lib/constants"
 import { mockData } from "@/data/mock/mock-data"
+import { getClinicMembersByClinicId } from "@/data/mock/users-clinics"
 import type { DoctorAvailability } from "./types"
 
 // In-memory store for availability (demo mode only)
@@ -69,19 +70,21 @@ export async function listDoctorSchedules(params: {
 }
 
 /**
- * Get all doctor IDs who have availability at a specific clinic
+ * Get all doctor IDs who are members of a specific clinic (role = doctor).
+ * Driven by clinic_members so "doctors at this clinic" matches membership.
+ * Uses mock data when in demo/mock mode, Supabase when backend is supabase.
  */
 export async function listDoctorsByClinic(clinicId: string): Promise<string[]> {
-  initializeStore()
-  const uniqueDoctorIds = new Set<string>()
-  
-  availabilityStore
-    .filter((avail) => avail.clinicId === clinicId)
-    .forEach((avail) => {
-      uniqueDoctorIds.add(avail.doctorId)
-    })
-  
-  return Array.from(uniqueDoctorIds)
+  const { getBackendType } = await import("@/lib/api/repository-factory")
+  if (getBackendType() === "supabase") {
+    const { getClinicMembersByClinicId } = await import("@/lib/api/subscriptions.api")
+    const members = await getClinicMembersByClinicId(clinicId)
+    return members.filter((m) => m.role === "doctor").map((m) => m.user_id)
+  }
+  const members = getClinicMembersByClinicId(clinicId)
+  return members
+    .filter((m) => m.role === "doctor")
+    .map((m) => m.user_id)
 }
 
 /**

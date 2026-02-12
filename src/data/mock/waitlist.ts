@@ -176,7 +176,7 @@ export const mockApprovalRequests: AppointmentApprovalRequest[] = [
     requestedEndAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 30 * 60 * 1000).toISOString(),
     source: "integration",
     status: "pending",
-    notes: "Booked via TidyCal integration",
+    notes: "Booked via online booking",
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
   },
   {

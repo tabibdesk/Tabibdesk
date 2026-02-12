@@ -3,7 +3,6 @@
 import { Button } from "@/components/Button"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { RiArrowLeftLine } from "@remixicon/react"
-import { useDemo } from "@/contexts/demo-context"
 import { useBookAppointmentState } from "./useBookAppointmentState"
 import {
   BookAppointmentStepper,
@@ -30,7 +29,6 @@ export function BookAppointmentFlow({
   onCancel,
 }: BookAppointmentFlowProps) {
   const t = useAppTranslations()
-  const { isDemoMode } = useDemo()
 
   const state = useBookAppointmentState({
     initialPatient,
@@ -46,7 +44,6 @@ export function BookAppointmentFlow({
     clinicId,
     doctorId,
     onBookingComplete,
-    isDemoMode,
   })
 
   const { currentStep } = state

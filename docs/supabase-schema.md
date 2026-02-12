@@ -79,6 +79,16 @@ CREATE POLICY "Users can soft-delete own clinic patients"
 
 Adjust policies to match your auth model (e.g. filter by `auth.uid()` or a `clinic_id` claim).
 
+## Subscriptions and clinic members
+
+The app expects a subscription (tenant) model and user–clinic membership. Use the migration in `supabase/migrations/20250212000000_subscriptions_and_clinic_members.sql`, or apply equivalent SQL:
+
+- **subscriptions**: `id`, `plan_tier` (solo | multi | more), `owner_id` (auth user), `status`, `name`, `created_at`, `updated_at`
+- **clinics**: add `subscription_id` FK to `subscriptions`
+- **clinic_members**: `user_id`, `clinic_id`, `role` (doctor | assistant | manager), `invited_by`, with unique (user_id, clinic_id)
+
+RLS on `subscriptions` and `clinic_members` restricts reads to the current user (owner or member of a clinic in that subscription). See the migration file for full SQL and policies.
+
 ## TypeScript types
 
 The app’s types are in `src/lib/supabase/types.ts`. They match the schema above. Regenerate from Supabase if you use the Supabase CLI:

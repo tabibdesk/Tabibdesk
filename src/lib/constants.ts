@@ -32,7 +32,6 @@ export const mockClinic = {
   location: "Downtown Cairo",
   phone: "+20 123 456 7890",
   created_at: new Date().toISOString(),
-  tidycal_booking_type_id: "demo-booking-type",
 }
 
 export const mockDoctors = [mockDoctor]

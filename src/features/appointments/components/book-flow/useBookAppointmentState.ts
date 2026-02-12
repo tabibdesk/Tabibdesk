@@ -22,7 +22,6 @@ export interface UseBookAppointmentStateParams {
   clinicId?: string
   doctorId?: string
   onBookingComplete?: () => void
-  isDemoMode: boolean
 }
 
 export function useBookAppointmentState(params: UseBookAppointmentStateParams) {
@@ -34,7 +33,6 @@ export function useBookAppointmentState(params: UseBookAppointmentStateParams) {
     clinicId,
     doctorId,
     onBookingComplete,
-    isDemoMode,
   } = params
 
   const [currentStep, setCurrentStep] = useState<BookFlowStep>(
@@ -73,8 +71,42 @@ export function useBookAppointmentState(params: UseBookAppointmentStateParams) {
   const loadServices = async () => {
     setIsLoadingServices(true)
     try {
-      const response = await fetch(`/api/tidycal/booking-types?demo=${isDemoMode}`)
-      const data = await response.json()
+      // Inline bookable services (appointment types) for the booking flow
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      const data: AppBookableService[] = [
+        {
+          id: 1,
+          title: "General Consultation",
+          description: "Standard consultation for new or existing patients",
+          duration_minutes: 30,
+          app_appointment_type_id: "consultation",
+          app_appointment_type_name: "Consultation",
+        },
+        {
+          id: 2,
+          title: "Follow-up Visit",
+          description: "Short follow-up appointment for existing patients",
+          duration_minutes: 15,
+          app_appointment_type_id: "followup",
+          app_appointment_type_name: "Follow-up",
+        },
+        {
+          id: 3,
+          title: "Comprehensive Check-up",
+          description: "Full medical examination and health assessment",
+          duration_minutes: 60,
+          app_appointment_type_id: "checkup",
+          app_appointment_type_name: "Check-up",
+        },
+        {
+          id: 4,
+          title: "Procedure Consultation",
+          description: "Consultation for medical procedures and treatments",
+          duration_minutes: 45,
+          app_appointment_type_id: "procedure",
+          app_appointment_type_name: "Procedure",
+        },
+      ]
       setServices(data)
     } catch (error) {
       console.error("Failed to load services:", error)

@@ -23,7 +23,7 @@ export const APPOINTMENT_TYPE_TRANSLATION_KEYS: Record<AppointmentTypeId, string
   flexible: "typeFlexible",
 }
 
-/** Maps display names (from TidyCal, legacy data) to canonical type IDs */
+/** Maps display names (legacy data) to canonical type IDs */
 const NAME_TO_ID: Record<string, AppointmentTypeId> = {
   consultation: "consultation",
   "general consultation": "consultation",
@@ -51,7 +51,7 @@ export function toAppointmentTypeId(value: string | number | undefined): Appoint
     return key as AppointmentTypeId
   }
   if (key in NAME_TO_ID) return NAME_TO_ID[key]
-  // Map TidyCal numeric ids
+  // Map legacy numeric ids
   if (value === 1 || value === "1") return "consultation"
   if (value === 2 || value === "2") return "followup"
   if (value === 3 || value === "3") return "checkup"

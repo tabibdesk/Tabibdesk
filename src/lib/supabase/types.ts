@@ -3,9 +3,68 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export interface Database {
   public: {
     Tables: {
+      subscriptions: {
+        Row: {
+          id: string
+          plan_tier: string
+          owner_id: string
+          status: string
+          name: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          plan_tier: string
+          owner_id: string
+          status?: string
+          name?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          plan_tier?: string
+          owner_id?: string
+          status?: string
+          name?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      clinic_members: {
+        Row: {
+          id: string
+          user_id: string
+          clinic_id: string
+          role: string
+          invited_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          clinic_id: string
+          role: string
+          invited_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          clinic_id?: string
+          role?: string
+          invited_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       clinics: {
         Row: {
           id: string
+          subscription_id: string
           name: string
           address: string | null
           phone: string | null
@@ -16,6 +75,7 @@ export interface Database {
         }
         Insert: {
           id?: string
+          subscription_id: string
           name: string
           address?: string | null
           phone?: string | null
@@ -26,6 +86,7 @@ export interface Database {
         }
         Update: {
           id?: string
+          subscription_id?: string
           name?: string
           address?: string | null
           phone?: string | null

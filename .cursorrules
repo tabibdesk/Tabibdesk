@@ -70,6 +70,43 @@ Before pushing to production:
 - Images: `unoptimized: true` in next.config.mjs (required for Netlify)
 - Public folder images are served from root (e.g., `/landing/image.jpg`)
 
+## Backend & Supabase (Database)
+
+Multi-tenant clinic SaaS: follow these Supabase/Postgres rules.
+
+### Edge Functions vs client/DB
+- **Edge Functions**: external APIs (WhatsApp, Clawd, payments), PDFs, webhooks, anything needing **service role**. Do not use for simple CRUD—use client + RLS.
+
+### Business logic (RPC)
+- **Postgres functions (RPC)** for: multi-step transactions (e.g. invoice + line items + payment), calculated summaries, heavy dashboard queries. Use only when atomicity or performance requires it.
+
+### Security (RLS first)
+- **RLS on every tenant-scoped table.** Expose only what the user is allowed to do via RLS.
+- Use **SECURITY DEFINER** sparingly; keep functions narrow and validate clinic membership inside them.
+- Client reads/writes with RLS; functions do privileged work only after validating membership.
+
+### Multi-tenancy: always pass `clinic_id`
+- Every tenant table has `clinic_id`. Every insert/update includes it; every query filters by it.
+- Enforce in DB policies; do not rely on “current clinic” from UI only.
+
+### Helper functions for policies
+- Use small SQL helpers (e.g. `is_member(clinic_id)`, `has_role(clinic_id, 'manager')`) in RLS policies and RPCs.
+
+### Avoid N+1 and heavy client joins
+- For dashboards/insights: use a **view** or **RPC** that returns the full payload. Aim for 1–2 queries per page from the client.
+
+### Storage
+- Use Supabase Storage with paths like `clinic/{clinic_id}/patients/{patient_id}/...`. Use **signed URLs** for private files. Keep metadata in a `files` table (clinic_id, patient_id, type, url/path).
+
+### Triggers
+- Use DB triggers for “always true” behavior (e.g. `updated_at`, optional activity_log). Keep triggers small and predictable.
+
+### Integrations (outbox)
+- For events that drive integrations (e.g. appointment cancelled, due created): insert into `outbox_events`; let an Edge Function consume and notify (Clawd, WhatsApp). Keeps automations reliable.
+
+### Local dev & versioning
+- All schema and logic in code: migrations in `supabase/migrations/`, Edge Functions in `supabase/functions/`. Do not rely on one-off changes in the dashboard without migrating them back.
+
 ## Font Hierarchy
 
 When creating new components, always follow the font hierarchy established in `src/features/patients/PatientsPage.tsx`:
