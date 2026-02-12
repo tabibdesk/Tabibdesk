@@ -88,7 +88,7 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
   const handleAddSave = async () => {
     if (!patient?.id || !editValue.trim()) return
     try {
-      await createNote({ patientId: patient.id, note: editValue.trim() })
+      await createNote({ patient_id: patient.id, note: editValue.trim() })
       showToast(t.profile.noteAddedSuccess, "success")
       setIsDrawerOpen(false)
       setIsAddMode(false)

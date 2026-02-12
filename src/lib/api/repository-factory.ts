@@ -6,10 +6,12 @@
 import type { IPatientsRepository } from "./interfaces/patients.interface"
 import type { IAppointmentsRepository } from "./interfaces/appointments.interface"
 import type { IAuthRepository } from "./interfaces/auth.interface"
+import type { INotesRepository } from "./interfaces/notes.interface"
 
 let patientsRepo: IPatientsRepository | null = null
 let appointmentsRepo: IAppointmentsRepository | null = null
 let authRepo: IAuthRepository | null = null
+let notesRepo: INotesRepository | null = null
 
 export type BackendType = "mock" | "supabase"
 let currentBackend: BackendType = "mock"
@@ -23,6 +25,7 @@ export function initializeRepositories(backend: BackendType = "mock"): void {
   patientsRepo = null
   appointmentsRepo = null
   authRepo = null
+  notesRepo = null
 }
 
 /**
@@ -108,9 +111,33 @@ export async function getAuthRepository(): Promise<IAuthRepository> {
   return authRepo!
 }
 
+export async function getNotesRepository(): Promise<INotesRepository> {
+  if (notesRepo) return notesRepo
+  if (currentBackend === "supabase") {
+    try {
+      const { SupabaseNotesRepository } = await import(
+        "./implementations/supabase/notes"
+      )
+      notesRepo = new SupabaseNotesRepository()
+    } catch {
+      const { MockNotesRepository } = await import(
+        "./implementations/mock/notes"
+      )
+      notesRepo = new MockNotesRepository()
+    }
+  } else {
+    const { MockNotesRepository } = await import(
+      "./implementations/mock/notes"
+    )
+    notesRepo = new MockNotesRepository()
+  }
+  return notesRepo
+}
+
 /** Reset singletons (e.g. for tests or backend switch). */
 export function resetRepositories(): void {
   patientsRepo = null
   appointmentsRepo = null
   authRepo = null
+  notesRepo = null
 }
