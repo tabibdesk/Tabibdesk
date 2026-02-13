@@ -148,6 +148,7 @@ function RegisterPageContent() {
   const handleDemoMode = () => {
     enableDemoMode()
     router.push("/dashboard")
+    router.refresh()
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

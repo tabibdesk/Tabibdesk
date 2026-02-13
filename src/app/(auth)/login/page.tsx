@@ -50,6 +50,7 @@ function LoginPageContent() {
   const handleDemoLogin = () => {
     enableDemoMode()
     router.push("/dashboard")
+    router.refresh()
   }
 
   const isSupabaseConfigured = !!(
