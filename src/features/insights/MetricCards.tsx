@@ -9,9 +9,11 @@ import { mockData } from "@/data/mock/mock-data"
 import { calculatePercentageChange } from "./insights.utils"
 import { useEffect, useState } from "react"
 import { listPayments } from "@/api/payments.api"
+import { useDemo } from "@/contexts/demo-context"
 
 export function MetricCards() {
   const t = useAppTranslations()
+  const { isDemoMode } = useDemo()
   const now = new Date()
   const thirtyDaysAgo = new Date(now)
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
@@ -49,10 +51,98 @@ export function MetricCards() {
         console.error("Failed to fetch revenue:", error)
       }
     }
-    fetchRevenue()
-  }, [])
+    
+    // Only fetch revenue in demo mode
+    if (isDemoMode) {
+      fetchRevenue()
+    }
+  }, [isDemoMode])
 
-  // Data calculations
+  // Return zero metrics if not in demo mode
+  if (!isDemoMode) {
+    const emptyMetrics = [
+      {
+        id: "slot-fill-rate",
+        label: t.insights.slotFillRate,
+        value: "0.0%",
+        change: 0,
+        changeType: "neutral" as const,
+        data: [],
+        color: "blue" as const,
+      },
+      {
+        id: "no-show-rate",
+        label: t.insights.noShowRate,
+        value: "0.0%",
+        change: 0,
+        changeType: "neutral" as const,
+        data: [],
+        color: "pink" as const,
+      },
+      {
+        id: "cancellation-rate",
+        label: t.insights.cancellationRate,
+        value: "0.0%",
+        change: 0,
+        changeType: "neutral" as const,
+        data: [],
+        color: "amber" as const,
+      },
+      {
+        id: "revenue-collected",
+        label: t.insights.revenueCollected,
+        value: "EGP 0",
+        change: 0,
+        changeType: "neutral" as const,
+        data: [],
+        color: "emerald" as const,
+      },
+      {
+        id: "new-patients",
+        label: t.insights.newPatients,
+        value: "0",
+        change: 0,
+        changeType: "neutral" as const,
+        data: [],
+        color: "violet" as const,
+      },
+      {
+        id: "return-rate",
+        label: t.insights.returnRate,
+        value: "0.0%",
+        change: 0,
+        changeType: "neutral" as const,
+        data: [],
+        color: "cyan" as const,
+      },
+    ]
+    
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {emptyMetrics.map((metric) => (
+          <Card key={metric.id}>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{metric.label}</p>
+                <p className="mt-2 text-2xl font-bold">{metric.value}</p>
+              </div>
+              {metric.change !== 0 && (
+                <Badge
+                  color={getBadgeColor(metric.changeType)}
+                  className="text-xs"
+                >
+                  {metric.changeType === "positive" ? "+" : metric.changeType === "negative" ? "-" : ""}
+                  {metric.change}%
+                </Badge>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
+  // Data calculations (only in demo mode)
   const currentAppointments = mockData.appointments.filter(
     (apt) => new Date(apt.scheduled_at) >= thirtyDaysAgo && new Date(apt.scheduled_at) <= now
   )
