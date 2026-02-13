@@ -48,106 +48,6 @@ function getPatientName(patientId: string): string {
 }
 
 function mapToAccountingPayment(p: InvoicePayment): Payment {
-  return {
-    id: p.id,
-    clinicId: p.clinicId,
-    patientId: p.patientId,
-    patientName: getPatientName(p.patientId),
-    appointmentId: p.appointmentId ?? undefined,
-    amount: p.amount,
-    method: p.method as Payment["method"],
-    status: "paid",
-    reference: undefined,
-    evidenceUrl: p.proofFileId ? `/uploads/${p.proofFileId}` : undefined,
-    createdAt: p.createdAt,
-    createdByUserId: p.createdByUserId,
-  }
-}
-
-const expensesStore: Expense[] = [
-  {
-    id: "exp_001",
-    clinicId: "clinic_1",
-    category: "supplies",
-    amount: 1500,
-    vendor: "Medical Supplies Co.",
-    description: "Medical supplies and consumables",
-    paymentMethod: "bank_transfer",
-    date: new Date().toISOString().split("T")[0],
-    createdAt: new Date().toISOString(),
-    createdByUserId: "user_1",
-  },
-  {
-    id: "exp_002",
-    clinicId: "clinic_1",
-    category: "rent",
-    amount: 5000,
-    vendor: "Building Management",
-    description: "Monthly clinic rent",
-    paymentMethod: "bank_transfer",
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    createdByUserId: "user_1",
-  },
-  {
-    id: "exp_003",
-    clinicId: "clinic_1",
-    category: "utilities",
-    amount: 800,
-    vendor: "Electricity Company",
-    description: "Monthly electricity bill",
-    paymentMethod: "cash",
-    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    createdByUserId: "user_1",
-  },
-  {
-    id: "exp_004",
-    clinicId: "clinic_1",
-    category: "marketing",
-    amount: 1200,
-    vendor: "Digital Marketing Agency",
-    description: "Social media ads campaign",
-    paymentMethod: "credit_card",
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    createdByUserId: "user_1",
-  },
-]
-
-const settingsStore: Record<string, ClinicAccountingSettings> = {}
-const integrationStore: Record<string, AccountingIntegration> = {}
-
-// Refunds store (invoice-scoped; mock-only)
-const refundsStore: Refund[] = []
-
-// Helper to simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
-/**
- * PAYMENTS — read/write via single source (invoices.api + payments.api)
- */
-
-export async function createPayment(input: CreatePaymentInput): Promise<Payment> {
-  await delay(300)
-  const { createPayment: createInvoicePayment } = await import("@/api/payments.api")
-  const { getInvoiceByAppointmentId, createInvoiceWithAmount, markInvoicePaid } = await import("@/api/invoices.api")
-
-  let invoiceId: string
-  const appointmentId = input.appointmentId ?? ""
-
-  if (appointmentId) {
-    const existing = await getInvoiceByAppointmentId(appointmentId)
-    if (existing && existing.status === "unpaid") {
-      invoiceId = existing.id
-    } else if (existing && existing.status === "paid") {
-      throw new Error("This appointment is already paid.")
-    } else {
-      const apt = mockData.appointments.find((a) => a.id === appointmentId)
-      const clinicId = apt?.clinic_id ?? input.clinicId
-      const doctorId = apt?.doctor_id ?? "user-001"
-      const inv = await createInvoiceWithAmount({
-        clinicId,
         doctorId,
         patientId: input.patientId,
         appointmentId,
@@ -369,19 +269,26 @@ export function __testOnlyResetRefundsStore(): void {
 export async function createExpense(input: CreateExpenseInput): Promise<Expense> {
   await delay(300)
 
-  const expense: Expense = {
-    id: `exp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    clinicId: input.clinicId,
-    category: input.category,
-    amount: input.amount,
-    vendor: input.vendor,
-    description: input.description,
-    paymentMethod: input.paymentMethod,
-    receiptUrl: input.receiptUrl,
-    date: input.date,
-    createdAt: new Date().toISOString(),
-    createdByUserId: input.createdByUserId,
+  try {
+    // Use repository factory to get the appropriate backend
+    const { getExpensesRepository } = await import("@/lib/api/repository-factory")
+    const expensesRepo = await getExpensesRepository()
+    
+    const expense = await expensesRepo.create({
+      clinic_id: input.clinicId,
+      vendor_id: input.vendorId || undefined,
+      amount: input.amount,
+      description: input.description,
+      category: input.category,
+      date: input.date,
+    })
+    
+    return expense
+  } catch (error) {
+    console.error("[v0] Failed to create expense:", error)
+    throw new Error("Unable to create expense. Please try again.")
   }
+}
 
   expensesStore.push(expense)
   return expense
@@ -392,44 +299,45 @@ export async function listExpenses(
 ): Promise<ListExpensesResponse> {
   await delay(200)
 
-  // Return empty results if not in demo mode
-  if (!isDemoMode()) {
+  try {
+    // Use repository factory to get the appropriate backend (Supabase or mock)
+    const { getExpensesRepository } = await import("@/lib/api/repository-factory")
+    const expensesRepo = await getExpensesRepository()
+    
+    const expenses = await expensesRepo.list({
+      clinic_id: params.clinicId,
+      from: params.dateFrom,
+      to: params.dateTo,
+    })
+    
+    // Apply category filter if provided
+    let filtered = expenses
+    if (params.category) {
+      filtered = expenses.filter((e) => e.category === params.category)
+    }
+    
+    // Apply pagination
+    const page = params.page || 1
+    const pageSize = params.pageSize || 50
+    const start = (page - 1) * pageSize
+    const end = start + pageSize
+    const paginatedExpenses = filtered.slice(start, end)
+
+    return {
+      expenses: paginatedExpenses,
+      total: filtered.length,
+      page,
+      pageSize,
+    }
+  } catch (error) {
+    console.error("[v0] Failed to list expenses:", error)
+    // Fallback to empty results on error
     return {
       expenses: [],
       total: 0,
       page: params.page || 1,
       pageSize: params.pageSize || 50,
     }
-  }
-
-  let filtered = expensesStore.filter((e) => e.clinicId === params.clinicId)
-
-  // Apply filters
-  if (params.category) {
-    filtered = filtered.filter((e) => e.category === params.category)
-  }
-  if (params.dateFrom) {
-    filtered = filtered.filter((e) => e.date >= params.dateFrom!)
-  }
-  if (params.dateTo) {
-    filtered = filtered.filter((e) => e.date <= params.dateTo!)
-  }
-
-  // Sort by date desc
-  filtered.sort((a, b) => b.date.localeCompare(a.date))
-
-  // Pagination
-  const page = params.page || 1
-  const pageSize = params.pageSize || 50
-  const start = (page - 1) * pageSize
-  const end = start + pageSize
-  const paginatedExpenses = filtered.slice(start, end)
-
-  return {
-    expenses: paginatedExpenses,
-    total: filtered.length,
-    page,
-    pageSize,
   }
 }
 
