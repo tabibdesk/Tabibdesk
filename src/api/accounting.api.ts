@@ -48,6 +48,48 @@ function getPatientName(patientId: string): string {
 }
 
 function mapToAccountingPayment(p: InvoicePayment): Payment {
+  return {
+    id: p.id,
+    clinicId: p.clinicId,
+    patientId: p.patientId,
+    patientName: getPatientName(p.patientId),
+    appointmentId: p.appointmentId ?? undefined,
+    amount: p.amount,
+    method: p.method as Payment["method"],
+    status: "paid",
+    reference: undefined,
+    evidenceUrl: p.proofFileId ? `/uploads/${p.proofFileId}` : undefined,
+    createdAt: p.createdAt,
+    createdByUserId: p.createdByUserId,
+  }
+}
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * PAYMENTS — read/write via single source (invoices.api + payments.api)
+ */
+
+export async function createPayment(input: CreatePaymentInput): Promise<Payment> {
+  await delay(300)
+  const { createPayment: createInvoicePayment } = await import("@/api/payments.api")
+  const { getInvoiceByAppointmentId, createInvoiceWithAmount, markInvoicePaid } = await import("@/api/invoices.api")
+
+  let invoiceId: string
+  const appointmentId = input.appointmentId ?? ""
+
+  if (appointmentId) {
+    const existing = await getInvoiceByAppointmentId(appointmentId)
+    if (existing && existing.status === "unpaid") {
+      invoiceId = existing.id
+    } else if (existing && existing.status === "paid") {
+      throw new Error("This appointment is already paid.")
+    } else {
+      const apt = mockData.appointments.find((a) => a.id === appointmentId)
+      const clinicId = apt?.clinic_id ?? input.clinicId
+      const doctorId = apt?.doctor_id ?? "user-001"
+      const inv = await createInvoiceWithAmount({
+        clinicId,
         doctorId,
         patientId: input.patientId,
         appointmentId,
