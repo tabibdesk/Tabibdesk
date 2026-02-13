@@ -21,18 +21,21 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   // Initialize from localStorage to prevent flash of empty state
   const [isDemoMode, setIsDemoMode] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("demo-mode") === "true"
+      const stored = localStorage.getItem("demo-mode")
+      return stored === "false" ? false : true
     }
     return true // Default to demo mode for development
   })
 
   useEffect(() => {
     const storedDemoMode = localStorage.getItem("demo-mode")
-    if (storedDemoMode === null) {
+    if (storedDemoMode === "false") {
+      setIsDemoMode(false)
+    } else {
       setIsDemoMode(true)
-      localStorage.setItem("demo-mode", "true")
-    } else if (storedDemoMode === "true") {
-      setIsDemoMode(true)
+      if (storedDemoMode === null) {
+        localStorage.setItem("demo-mode", "true")
+      }
     }
   }, [])
 
@@ -49,7 +52,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
 
   const disableDemoMode = useCallback(() => {
     setIsDemoMode(false)
-    localStorage.removeItem("demo-mode")
+    localStorage.setItem("demo-mode", "false")
   }, [])
 
   const value: DemoContextType = {
