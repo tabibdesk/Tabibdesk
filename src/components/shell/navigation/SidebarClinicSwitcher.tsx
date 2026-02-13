@@ -30,6 +30,11 @@ export function SidebarClinicSwitcher({ mode }: SidebarClinicSwitcherProps) {
   const { isRtl } = useLocale()
   const t = useAppTranslations()
 
+  // Only show switcher if there are multiple clinics
+  if (allClinics.length <= 1) {
+    return null
+  }
+
   // Desktop modes (Expanded & Collapsed) use Dropdown
   if (mode === "dropdown" || mode === "collapsed") {
     const triggerButton = (
