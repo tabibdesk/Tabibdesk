@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/client"
 function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { enableDemoMode } = useDemo()
+  const { enableDemoMode, disableDemoMode } = useDemo()
   const { setLanguage } = useLocale()
   const t = useAppTranslations()
 
@@ -71,6 +71,7 @@ function LoginPageContent() {
         setErrors({ general: "Unable to sign in. Please check your credentials and try again." })
         return
       }
+      disableDemoMode()
       router.push("/dashboard")
       router.refresh()
     } catch (err: unknown) {

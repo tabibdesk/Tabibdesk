@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/client"
 function RegisterPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { enableDemoMode } = useDemo()
+  const { enableDemoMode, disableDemoMode } = useDemo()
   const { setLanguage } = useLocale()
   const t = useAppTranslations()
 
@@ -121,10 +121,12 @@ function RegisterPageContent() {
       // Redirect to success or dashboard depending on email confirmation setting
       if (data.session) {
         // Immediate login - redirect to dashboard
+        disableDemoMode()
         router.push("/dashboard")
         router.refresh()
       } else {
         // Email confirmation required - show banner on this page
+        disableDemoMode()
         setShowSuccessBanner(true)
         setFormData({
           clinicName: "",
