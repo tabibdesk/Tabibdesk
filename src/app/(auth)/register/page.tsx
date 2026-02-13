@@ -195,22 +195,6 @@ function RegisterPageContent() {
           </div>
 
           <div className="mt-8">
-            {/* Success Banner */}
-            {showSuccessBanner && (
-              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
-                <div className="flex items-start gap-3">
-                  <RiCheckLine className="mt-0.5 size-5 text-green-600 dark:text-green-400" />
-                  <div>
-                    <h3 className="font-semibold text-green-900 dark:text-green-100">
-                      {t.auth.thankYouForSigningUp || "Thank you for signing up!"}
-                    </h3>
-                    <p className="mt-1 text-sm text-green-800 dark:text-green-200">
-                      {t.auth.checkEmailToConfirm || "Check your email to confirm your account before signing in."}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
             {/* Social Signup Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <Button
@@ -449,6 +433,23 @@ function RegisterPageContent() {
                 {t.auth.tryDemoMode}
               </Button>
             </form>
+
+            {/* Success Banner */}
+            {showSuccessBanner && (
+              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
+                <div className="flex items-start gap-3">
+                  <RiCheckLine className="mt-0.5 size-5 text-green-600 dark:text-green-400" />
+                  <div>
+                    <h3 className="font-semibold text-green-900 dark:text-green-100">
+                      {t.auth.thankYouForSigningUp || "Thank you for signing up!"}
+                    </h3>
+                    <p className="mt-1 text-sm text-green-800 dark:text-green-200">
+                      {t.auth.checkEmailToConfirm || "Check your email to confirm your account before signing in."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
               {t.auth.alreadyHaveAccount}{" "}
