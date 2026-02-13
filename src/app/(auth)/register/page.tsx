@@ -32,6 +32,7 @@ function RegisterPageContent() {
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false)
   const [passwordStrength, setPasswordStrength] = useState<{
     score: number
     labelKey: "weak" | "medium" | "strong" | ""
@@ -119,10 +120,19 @@ function RegisterPageContent() {
       }
       // Redirect to success or dashboard depending on email confirmation setting
       if (data.session) {
+        // Immediate login - redirect to dashboard
         router.push("/dashboard")
         router.refresh()
       } else {
-        router.push("/auth/signup-success")
+        // Email confirmation required - show banner on this page
+        setShowSuccessBanner(true)
+        setFormData({
+          clinicName: "",
+          fullName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        })
       }
     } catch (err: unknown) {
       console.error("[v0] Sign up exception:", err)
@@ -185,6 +195,22 @@ function RegisterPageContent() {
           </div>
 
           <div className="mt-8">
+            {/* Success Banner */}
+            {showSuccessBanner && (
+              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
+                <div className="flex items-start gap-3">
+                  <RiCheckLine className="mt-0.5 size-5 text-green-600 dark:text-green-400" />
+                  <div>
+                    <h3 className="font-semibold text-green-900 dark:text-green-100">
+                      {t.auth.thankYouForSigningUp || "Thank you for signing up!"}
+                    </h3>
+                    <p className="mt-1 text-sm text-green-800 dark:text-green-200">
+                      {t.auth.checkEmailToConfirm || "Check your email to confirm your account before signing in."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Social Signup Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <Button
