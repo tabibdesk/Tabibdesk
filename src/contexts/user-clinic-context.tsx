@@ -70,9 +70,14 @@ export function UserClinicProvider({
   const [supabaseClinics, setSupabaseClinics] = useState<ClinicForUser[]>([])
   const [supabaseUser, setSupabaseUser] = useState<{ id: string; email: string; full_name?: string } | null>(null)
   const [userRole, setUserRole] = useState<"doctor" | "assistant" | "manager">("manager")
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setBackendType(getBackendType())
+    // If mock mode, finish loading immediately
+    if (getBackendType() === "mock") {
+      setIsLoading(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -80,11 +85,15 @@ export function UserClinicProvider({
     let cancelled = false
     async function load() {
       try {
+        setIsLoading(true)
         const { getAuthRepository } = await import("@/lib/api/repository-factory")
         const { createClient } = await import("@/lib/supabase/client")
         const auth = await getAuthRepository()
         const user = await auth.getCurrentUser()
-        if (cancelled || !user) return
+        if (cancelled || !user) {
+          setIsLoading(false)
+          return
+        }
         
         // Get full user metadata from Supabase
         const supabase = createClient()
@@ -121,8 +130,11 @@ export function UserClinicProvider({
             }
           }
         }
-      } catch {
+      } catch (err) {
+        console.error("[v0] Failed to load user clinic data:", err)
         if (!cancelled) setSupabaseClinics([])
+      } finally {
+        if (!cancelled) setIsLoading(false)
       }
     }
     load()
@@ -141,7 +153,7 @@ export function UserClinicProvider({
     [mockAllowedClinics]
   )
 
-  const currentUser = isSupabase && supabaseUser
+  const currentUser = !isLoading && isSupabase && supabaseUser
     ? authUserToMockUser(supabaseUser.id, supabaseUser.email, supabaseUser.full_name, userRole)
     : mockCurrentUser
   const allowedClinics = isSupabase
