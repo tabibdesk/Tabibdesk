@@ -332,10 +332,6 @@ export async function createExpense(input: CreateExpenseInput): Promise<Expense>
   }
 }
 
-  expensesStore.push(expense)
-  return expense
-}
-
 export async function listExpenses(
   params: ListExpensesParams
 ): Promise<ListExpensesResponse> {
