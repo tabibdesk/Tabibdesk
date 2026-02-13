@@ -93,6 +93,9 @@ function RegisterPageContent() {
 
     setIsLoading(true)
     setErrors({})
+    
+    // Disable demo mode immediately when registration is initiated
+    disableDemoMode()
 
     try {
       const supabase = createClient()
@@ -121,12 +124,10 @@ function RegisterPageContent() {
       // Redirect to success or dashboard depending on email confirmation setting
       if (data.session) {
         // Immediate login - redirect to dashboard
-        disableDemoMode()
         router.push("/dashboard")
         router.refresh()
       } else {
         // Email confirmation required - show banner on this page
-        disableDemoMode()
         setShowSuccessBanner(true)
         setFormData({
           clinicName: "",
@@ -162,6 +163,9 @@ function RegisterPageContent() {
   }
 
   const handleSocialSignup = async (provider: "google" | "azure") => {
+    // Disable demo mode immediately
+    disableDemoMode()
+    
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
@@ -177,6 +181,8 @@ function RegisterPageContent() {
     } catch (err: unknown) {
       console.error("[v0] OAuth sign up exception:", err)
       setErrors({ general: "Unable to sign up with this provider. Please try again." })
+    }
+  }
     }
   }
 

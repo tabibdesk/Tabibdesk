@@ -59,6 +59,9 @@ function LoginPageContent() {
     
     setIsLoading(true)
     setErrors({})
+    
+    // Disable demo mode immediately to prevent showing mock data
+    disableDemoMode()
 
     try {
       const supabase = createClient()
@@ -71,7 +74,6 @@ function LoginPageContent() {
         setErrors({ general: "Unable to sign in. Please check your credentials and try again." })
         return
       }
-      disableDemoMode()
       router.push("/dashboard")
       router.refresh()
     } catch (err: unknown) {
@@ -83,6 +85,9 @@ function LoginPageContent() {
   }
 
   const handleSocialLogin = async (provider: "google" | "azure") => {
+    // Disable demo mode immediately
+    disableDemoMode()
+    
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
@@ -98,6 +103,8 @@ function LoginPageContent() {
     } catch (err: unknown) {
       console.error("[v0] OAuth sign in exception:", err)
       setErrors({ general: "Unable to sign in with this provider. Please try again." })
+    }
+  }
     }
   }
 

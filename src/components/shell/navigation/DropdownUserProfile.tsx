@@ -13,6 +13,7 @@ import {
 } from "@remixicon/react"
 import { useTheme } from "next-themes"
 import { useUserClinic } from "@/contexts/user-clinic-context"
+import { useDemo } from "@/contexts/demo-context"
 import { useLocale } from "@/contexts/locale-context"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { cx, focusRing } from "@/lib/utils"
@@ -42,6 +43,7 @@ interface SidebarUserProfileProps {
 export function SidebarUserProfile({ mode, align = "start", children }: SidebarUserProfileProps) {
   const router = useRouter()
   const { currentUser, allUsers, setCurrentUser } = useUserClinic()
+  const { disableDemoMode } = useDemo()
   const { theme, setTheme } = useTheme()
   const { isRtl } = useLocale()
   const t = useAppTranslations()
@@ -54,6 +56,7 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
   const handleSignOut = async () => {
     setIsSigningOut(true)
     try {
+      disableDemoMode()
       const supabase = createClient()
       await supabase.auth.signOut()
       router.push("/")
