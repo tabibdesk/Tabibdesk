@@ -33,6 +33,15 @@ import { listPayments as listPaymentsFromStore } from "@/api/payments.api"
 import { listInvoices } from "@/api/invoices.api"
 import { mockData } from "@/data/mock/mock-data"
 
+// Helper to check if in demo mode
+function isDemoMode(): boolean {
+  if (typeof window !== "undefined") {
+    const storedDemoMode = localStorage.getItem("demo-mode")
+    return storedDemoMode === "true" || storedDemoMode === null
+  }
+  return true // Server-side defaults to demo mode
+}
+
 function getPatientName(patientId: string): string {
   const p = mockData.patients.find((x) => x.id === patientId)
   return p ? `${p.first_name} ${p.last_name}` : "Unknown Patient"
@@ -383,7 +392,17 @@ export async function listExpenses(
 ): Promise<ListExpensesResponse> {
   await delay(200)
 
-  let filtered = expensesStore
+  // Return empty results if not in demo mode
+  if (!isDemoMode()) {
+    return {
+      expenses: [],
+      total: 0,
+      page: params.page || 1,
+      pageSize: params.pageSize || 50,
+    }
+  }
+
+  let filtered = expensesStore.filter((e) => e.clinicId === params.clinicId)
 
   // Apply filters
   if (params.category) {
