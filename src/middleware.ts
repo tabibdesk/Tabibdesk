@@ -4,8 +4,8 @@ import { NextResponse, type NextRequest } from "next/server"
 // Routes that don't require authentication
 const PUBLIC_ROUTES = [
   "/",
-  "/auth/login",
-  "/auth/register", 
+  "/login",
+  "/register", 
   "/auth/callback",
   "/auth/error",
   "/auth/signup-success",
@@ -88,7 +88,7 @@ export async function middleware(request: NextRequest) {
   // Redirect to login if not authenticated
   if (!user) {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = "/auth/login"
+    redirectUrl.pathname = "/login"
     redirectUrl.searchParams.set("redirectTo", pathname)
     return NextResponse.redirect(redirectUrl)
   }
