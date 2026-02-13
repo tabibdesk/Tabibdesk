@@ -184,6 +184,7 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                 description={t.profile.addClinicalNotesDesc}
                 actionLabel={patient?.id ? t.profile.addNote : undefined}
                 onAction={patient?.id ? handleAddNote : undefined}
+                variant="simple"
               />
             </div>
           ) : (
@@ -223,7 +224,7 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                   {/* Actions + chevron - mirrored for RTL */}
                   <div className="flex shrink-0 items-center gap-2 rtl:flex-row-reverse">
                     {isDoctor && (
-                      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity gap-0.5">
+                      <div className="flex items-center gap-0.5">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -291,7 +292,7 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   placeholder={t.profile.enterClinicalNotePlaceholder}
-                  className="flex-1 min-h-[400px] resize-none text-base leading-relaxed"
+                  className="flex-1 min-h-[400px] resize-none text-base leading-relaxed dark:placeholder:text-gray-400"
                   autoFocus
                 />
               </div>

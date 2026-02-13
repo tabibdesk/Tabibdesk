@@ -7,6 +7,7 @@ import { Button } from "@/components/Button"
 import type { PastMedication } from "@/features/prescriptions/prescriptions.types"
 import { format } from "date-fns"
 import { useState } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { PatientEmptyState } from "./PatientEmptyState"
 
 interface PastMedicationsProps {
@@ -59,6 +60,7 @@ export function PastMedications({ medications, onAddMedication }: PastMedication
             description={t.profile.addMedicationDesc}
             actionLabel={onAddMedication ? t.profile.addFirstMedication : undefined}
             onAction={onAddMedication}
+            variant="simple"
           />
         ) : (
           <div className="space-y-4">

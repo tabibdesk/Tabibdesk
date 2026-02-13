@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/Input"
 import { cx } from "@/lib/utils"
 import { EmptyState } from "@/components/EmptyState"
+import { PatientEmptyState } from "@/features/patients/detail/PatientEmptyState"
 import {
   RiFlaskLine,
   RiAddLine,
@@ -485,40 +486,42 @@ export function FilesTab({
             </button>
           </div>
         )}
-        {/* Expanded content for scan and document */}
+        {/* Expanded content for scan and document - compact, matches card upper part */}
         {hasExpandableArea && expandedCardIds.has(id) && (
-          <div className="bg-gray-50/50 px-4 pb-4 pt-3 dark:bg-gray-900/20">
+          <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 px-4 py-2.5 dark:bg-gray-900/20">
             {isScan || isEcg ? (
               displayScanText ? (
-                <div className="rounded-r-lg border-l-4 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/40 dark:border-gray-600/40 bg-gray-50/80 dark:bg-gray-800/30 py-3 pl-3 pr-3">
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">AI extracted note</p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{displayScanText}</p>
+                <div className="rounded-r border-l-2 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/60 dark:border-gray-600/40 bg-white dark:bg-gray-900/50 py-2 px-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">AI note</p>
+                  <p className="mt-0.5 line-clamp-4 whitespace-pre-wrap text-xs text-gray-600 dark:text-gray-400">{displayScanText}</p>
                 </div>
               ) : (
-                <EmptyState
-                  variant="card"
-                  icon={RiQuillPenAiLine}
-                  title={t.profile.noAiNoteYet}
-                  description={t.profile.extractAiNoteDesc}
-                  actionLabel={t.profile.extractWithAi}
-                  onAction={() => setExtractConfirm({ type: isEcg ? "ecg" : "scan", attachmentId: id, fileName: attachment.file_name })}
-                />
+                <div className="flex items-center justify-between gap-3 py-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <RiQuillPenAiLine className="size-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400 truncate">{t.profile.noAiNoteYet}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" className="h-6 shrink-0 text-xs px-2" onClick={() => setExtractConfirm({ type: isEcg ? "ecg" : "scan", attachmentId: id, fileName: attachment.file_name })}>
+                    {t.profile.extractWithAi}
+                  </Button>
+                </div>
               )
             ) : (
               displayDocumentText ? (
-                <div className="rounded-r-lg border-l-4 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/40 dark:border-gray-600/40 bg-gray-50/80 dark:bg-gray-800/30 py-3 pl-3 pr-3">
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">AI extracted summary</p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{displayDocumentText}</p>
+                <div className="rounded-r border-l-2 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/60 dark:border-gray-600/40 bg-white dark:bg-gray-900/50 py-2 px-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">AI summary</p>
+                  <p className="mt-0.5 line-clamp-4 whitespace-pre-wrap text-xs text-gray-600 dark:text-gray-400">{displayDocumentText}</p>
                 </div>
               ) : (
-                <EmptyState
-                  variant="card"
-                  icon={RiQuillPenAiLine}
-                  title={t.profile.noAiNoteYet}
-                  description={t.profile.extractAiNoteDesc}
-                  actionLabel={t.profile.extractWithAi}
-                  onAction={() => setExtractConfirm({ type: "document", attachmentId: id, fileName: attachment.file_name })}
-                />
+                <div className="flex items-center justify-between gap-3 py-1">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <RiQuillPenAiLine className="size-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
+                    <span className="text-xs text-gray-600 dark:text-gray-400 truncate">{t.profile.noAiNoteYet}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" className="h-6 shrink-0 text-xs px-2" onClick={() => setExtractConfirm({ type: "document", attachmentId: id, fileName: attachment.file_name })}>
+                    {t.profile.extractWithAi}
+                  </Button>
+                </div>
               )
             )}
           </div>
@@ -533,8 +536,7 @@ export function FilesTab({
   return (
     <div className="space-y-4">
       {!hasFiles ? (
-        <EmptyState
-          variant="card"
+        <PatientEmptyState
           icon={RiFlaskLine}
           title={t.profile.noFilesYet}
           description={t.profile.addFilesDesc}

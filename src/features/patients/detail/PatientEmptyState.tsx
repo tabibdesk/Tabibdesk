@@ -9,6 +9,8 @@ interface PatientEmptyStateProps {
   description?: ReactNode
   actionLabel?: ReactNode
   onAction?: () => void
+  /** Use "simple" when already inside a card (e.g. Profile tab sections) to avoid card-in-card */
+  variant?: "card" | "simple"
 }
 
 export function PatientEmptyState({
@@ -17,10 +19,11 @@ export function PatientEmptyState({
   description,
   actionLabel,
   onAction,
+  variant = "card",
 }: PatientEmptyStateProps) {
   return (
     <EmptyState
-      variant="card"
+      variant={variant}
       icon={icon}
       title={title}
       description={description}

@@ -52,3 +52,11 @@ export async function cancel(id: string): Promise<Task> {
   const repo = await getTasksRepository()
   return repo.cancel(id)
 }
+
+// Aliases for consumers expecting legacy names
+export const listTasks = list
+export const createTask = create
+export const updateTaskStatus = updateStatus
+export const assignTask = assign
+export const snoozeTask = snooze
+export const createFollowUpTask = create

@@ -11,6 +11,7 @@ import { useDemo } from "@/contexts/demo-context"
 import { useLocale } from "@/contexts/locale-context"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { createClient } from "@/lib/supabase/client"
+import { BrandName } from "@/components/shared/BrandName"
 
 function RegisterPageContent() {
   const router = useRouter()
@@ -197,13 +198,9 @@ function RegisterPageContent() {
       <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div>
-            <div className="flex items-center gap-2">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-primary-600 dark:bg-primary-500">
-                <span className="text-lg font-bold text-white">TD</span>
-              </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-                TabibDesk
-              </span>
+            <div className="flex items-center gap-0.5">
+              <img src="/logo.svg" alt="" className="size-[2rem] object-contain" aria-hidden />
+              <BrandName className="text-2xl text-gray-900 dark:text-gray-50" />
             </div>
           </div>
 
@@ -478,15 +475,10 @@ function RegisterPageContent() {
       </div>
 
       {/* Right side - Branding */}
-      <div className="relative hidden lg:block lg:w-1/2">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-600 to-primary-900" />
-        <div className="absolute right-8 top-8 flex items-center gap-3 rtl:right-auto rtl:left-8">
-          <div className="flex size-12 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-            <span className="text-xl font-bold text-white">TD</span>
-          </div>
-          <span className="text-2xl font-bold text-white">TabibDesk</span>
-        </div>
-      </div>
+      <div
+        className="relative hidden lg:block lg:w-1/2 bg-cover bg-left bg-no-repeat"
+        style={{ backgroundImage: "url(/landing/pexels-karola-g-7195369.jpg)" }}
+      />
     </div>
   )
 }

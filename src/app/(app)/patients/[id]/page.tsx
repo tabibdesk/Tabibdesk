@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/Button"
-import { Card, CardContent } from "@/components/Card"
 import { PageSkeleton } from "@/components/skeletons"
 import { useDemo } from "@/contexts/demo-context"
 import { useUserClinic } from "@/contexts/user-clinic-context"
@@ -15,6 +14,7 @@ import { ProfileTab } from "@/features/patients/detail/ProfileTab"
 import { FilesTab } from "@/features/patients/detail/FilesTab"
 import { PatientHistoryTab } from "@/features/patients/detail/PatientHistoryTab"
 import { InvoicesTab } from "@/features/patients/detail/InvoicesTab"
+import { PatientEmptyState } from "@/features/patients/detail/PatientEmptyState"
 import { AddTaskDrawer } from "@/features/tasks/AddTaskDrawer"
 import { TasksCards } from "@/features/tasks/TasksCards"
 import { createTask, updateTaskStatus } from "@/features/tasks/tasks.api"
@@ -174,7 +174,7 @@ export default function PatientDetailPage() {
   ]
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="page-content">
       <div className="flex flex-row items-start justify-between gap-4 rtl:flex-row-reverse">
         <PatientPageHeader
           patient={patient}
@@ -182,6 +182,7 @@ export default function PatientDetailPage() {
           lastVisited={lastVisited}
           formatLastVisited={formatLastVisited}
           isNowInQueue={!!isNowInQueue}
+          lastVisitLabel={t.profile.lastVisitLabel}
         />
         <div className="shrink-0 sm:hidden">
           <MobileAddButton
@@ -236,9 +237,9 @@ export default function PatientDetailPage() {
                 setNotes(
                   list.map((n) => ({
                     id: n.id,
-                    patient_id: n.patientId,
+                    patient_id: n.patient_id,
                     note: n.note,
-                    created_at: n.createdAt,
+                    created_at: n.created_at,
                   }))
                 )
               }
@@ -287,15 +288,11 @@ export default function PatientDetailPage() {
             })
           if (inProgressTasks.length === 0) {
             return (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-xl border border-dashed border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30">
-                <RiTaskLine className="size-10 text-gray-400 dark:text-gray-500 shrink-0" aria-hidden />
-                <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  No in-progress tasks for this patient.
-                </p>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
-                  Completed tasks are shown in the History tab.
-                </p>
-              </div>
+              <PatientEmptyState
+                icon={RiTaskLine}
+                title={t.profile.noInProgressTasksPatient}
+                description={t.profile.completedTasksInHistoryDesc}
+              />
             )
           }
           return (
@@ -424,16 +421,12 @@ export default function PatientDetailPage() {
           />
         )}
         {activeTab === "history" && (
-          <Card>
-            <CardContent className="p-6">
-              <PatientHistoryTab
-                clinicId={patient.clinic_id || "clinic-001"}
-                patientId={patientId}
-                appointments={appointments}
-                tasks={tasks}
-              />
-            </CardContent>
-          </Card>
+          <PatientHistoryTab
+            clinicId={patient.clinic_id || "clinic-001"}
+            patientId={patientId}
+            appointments={appointments}
+            tasks={tasks}
+          />
         )}
       </div>
     </div>

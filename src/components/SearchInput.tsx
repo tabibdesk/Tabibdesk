@@ -25,8 +25,8 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div
         className={cx(
-          "group/search relative flex w-full items-center rounded-lg border border-gray-200 bg-gray-50/50 shadow-sm transition-all focus-within:border-primary-500 focus-within:bg-white dark:border-gray-700 dark:bg-gray-800/50 dark:focus-within:border-primary-500 dark:focus-within:bg-gray-900",
-          "h-9 rtl:flex-row-reverse",
+          "group/search relative flex w-full items-stretch rounded-lg border border-gray-200 bg-gray-50/50 shadow-sm transition-all focus-within:border-primary-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-inset dark:border-gray-700 dark:bg-gray-800/50 dark:focus-within:border-primary-500 dark:focus-within:bg-gray-900 dark:focus-within:ring-primary-500",
+          "h-9 overflow-hidden rtl:flex-row-reverse",
           className
         )}
       >
@@ -39,8 +39,10 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           type="text"
           className={cx(
             inputStyles(),
-            "min-w-0 flex-1 border-0 bg-transparent py-2 ps-2 pe-3 shadow-none focus:ring-0 focus-visible:ring-0",
-            "h-9 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500",
+            "min-w-0 flex-1 border-0 rounded-none py-0 ps-2 pe-3 shadow-none focus:ring-0 focus-visible:ring-0",
+            "h-full min-h-0 box-border",
+            "bg-gray-50/50 dark:bg-gray-800/50 group-focus-within/search:bg-white group-focus-within/search:dark:bg-gray-900",
+            "text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500",
             inputClassName
           )}
           onChange={handleChange}

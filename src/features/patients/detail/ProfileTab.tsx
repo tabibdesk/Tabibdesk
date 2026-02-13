@@ -209,6 +209,9 @@ export function ProfileTab({
               icon={RiCapsuleLine}
               title={t.profile.noPrescriptions}
               description={t.profile.addPrescriptionDesc}
+              actionLabel={onAddPrescription ? t.profile.addPrescription : undefined}
+              onAction={onAddPrescription}
+              variant="simple"
             />
           ) : (
             <div className="space-y-2">
@@ -274,52 +277,56 @@ export function ProfileTab({
         </CardContent>
       </Card>
 
-      {/* Progress (weight, labs, dosage, note-extracted) */}
-      <div className="space-y-4">
-        <div className="flex flex-row items-center justify-between">
+      {/* Past Notes */}
+      <NotesTab notes={notes} patient={patient} onNoteAdded={onNoteAdded} />
+
+      {/* Progress (weight, labs, dosage, note-extracted) - same style as prescriptions */}
+      <Card className="overflow-hidden shadow-sm">
+        <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-3 py-2 min-h-10 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <RiLineChartLine className="size-4 text-primary-500/70 dark:text-primary-400/70" />
+            <RiLineChartLine className="size-3.5 text-primary-500/70 dark:text-primary-400/70" />
             <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
               {t.profile.progress}
             </h3>
           </div>
           {onAddWeightLog && (
-            <Button variant="ghost" size="sm" onClick={onAddWeightLog} className="size-8 shrink-0 p-0" title={t.profile.addWeight}>
-              <RiAddLine className="size-4" />
+            <Button variant="ghost" size="sm" onClick={onAddWeightLog} className="size-7 shrink-0 p-0" title={t.profile.addWeight}>
+              <RiAddLine className="size-3.5" />
             </Button>
           )}
-        </div>
-        {chartableMetrics.length === 0 ? (
-          <Card className="overflow-hidden shadow-sm">
-            <CardContent className="p-4">
-              <PatientEmptyState
-                icon={RiLineChartLine}
-                title={t.profile.noProgressData}
-                description={t.profile.recordProgressDesc}
-              />
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {chartableMetrics.map((metric) => (
-              <Card key={metric.id} className="overflow-hidden shadow-sm">
-                <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12">
-                  <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                    {metric.label}
-                    {metric.unit && <span className="ms-1 font-normal text-gray-500">({metric.unit})</span>}
-                  </h3>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <ProgressChart metric={metric} />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Past Notes */}
-      <NotesTab notes={notes} patient={patient} onNoteAdded={onNoteAdded} />
+        </CardHeader>
+        <CardContent className="p-3">
+          {chartableMetrics.length === 0 ? (
+            <PatientEmptyState
+              icon={RiLineChartLine}
+              title={t.profile.noProgressData}
+              description={t.profile.recordProgressDesc}
+              actionLabel={onAddWeightLog ? t.profile.addWeight : undefined}
+              onAction={onAddWeightLog}
+              variant="simple"
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {chartableMetrics.map((metric) => (
+                <div
+                  key={metric.id}
+                  className="rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/40 dark:bg-gray-900/40 overflow-hidden"
+                >
+                  <div className="px-3 py-2 border-b border-gray-100/80 dark:border-gray-800/80">
+                    <h4 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                      {metric.label}
+                      {metric.unit && <span className="ms-1 font-normal text-gray-500">({metric.unit})</span>}
+                    </h4>
+                  </div>
+                  <div className="p-3">
+                    <ProgressChart metric={metric} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

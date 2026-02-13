@@ -207,16 +207,6 @@ export function ClinicalNotesMobile({
 
       {/* Main Content - full width, no horizontal padding */}
       <div className="flex-1 flex flex-col min-h-[320px] px-0 py-2 relative">
-        {(() => {
-          const uncheckedMetrics = metricsToRecord.filter((m) => !metricsChecklist[m.id])
-          return uncheckedMetrics.length > 0 ? (
-            <div className="shrink-0 px-4 py-2 bg-gray-50/50 dark:bg-gray-900/30 border-b border-gray-100 dark:border-gray-800">
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                Remember to record: {uncheckedMetrics.map((m) => m.label).join(", ")}
-              </p>
-            </div>
-          ) : null
-        })()}
         {/* Textarea */}
         <div className="relative flex-1 flex flex-col min-h-[280px] w-full">
           <textarea

@@ -18,6 +18,7 @@ import {
   RiMenuUnfoldLine,
 } from "@remixicon/react"
 import Link from "next/link"
+import { BrandName } from "@/components/shared/BrandName"
 import { usePathname } from "next/navigation"
 import { SidebarClinicSwitcher } from "./navigation/SidebarClinicSwitcher"
 import { SidebarUserProfile } from "./navigation/DropdownUserProfile"
@@ -53,14 +54,14 @@ export function Sidebar({ role }: SidebarProps) {
         <div
           className={cx(
             "flex h-16 items-center border-b border-gray-200 dark:border-gray-800",
-            isCollapsed ? "px-2 justify-center" : "px-4 justify-between gap-3"
+            isCollapsed ? "justify-center px-2" : "px-4 justify-between gap-3"
           )}
         >
           {!isCollapsed && (
             <Link
               href="/"
               className={cx(
-                "flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors flex-1 min-w-0",
+                "flex items-center gap-0.5 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors flex-1 min-w-0",
                 pathname === "/"
                   ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
                   : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-50",
@@ -68,10 +69,8 @@ export function Sidebar({ role }: SidebarProps) {
               )}
               aria-current={pathname === "/" ? "page" : undefined}
             >
-              <div className="flex size-6 shrink-0 items-center justify-center rounded bg-primary-600 dark:bg-primary-500" aria-hidden="true">
-                <span className="text-xs font-bold text-white">TD</span>
-              </div>
-              <span className="truncate">TabibDesk</span>
+              <img src="/logo.svg" alt="" className="size-[2rem] shrink-0 object-contain" aria-hidden />
+              <span className="truncate"><BrandName className="text-base font-medium" /></span>
             </Link>
           )}
           <button

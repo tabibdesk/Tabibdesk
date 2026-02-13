@@ -26,6 +26,7 @@ import {
 import { RiMenuLine, RiUser3Line, RiArrowDownSLine } from "@remixicon/react"
 import { DropdownUserProfile } from "./DropdownUserProfile"
 import { useUserClinic } from "@/contexts/user-clinic-context"
+import { BrandName } from "@/components/shared/BrandName"
 
 interface MobileSidebarProps {
   role: Role
@@ -72,7 +73,9 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
         </DrawerTrigger>
         <DrawerContent side={isRtl ? "right" : "left"} className="w-72">
           <DrawerHeader>
-            <DrawerTitle className="text-lg font-semibold">TabibDesk</DrawerTitle>
+            <DrawerTitle className="text-lg font-semibold">
+              <BrandName />
+            </DrawerTitle>
           </DrawerHeader>
           <DrawerBody className="flex flex-col gap-6">
             <nav

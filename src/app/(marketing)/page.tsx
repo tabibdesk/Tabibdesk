@@ -13,6 +13,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks"
 import { Pricing } from "@/components/landing/Pricing"
 import { FinalCTA } from "@/components/landing/FinalCTA"
 import { RiMenuLine, RiCloseLine } from "@remixicon/react"
+import { BrandName } from "@/components/shared/BrandName"
 
 function LandingPageContent() {
   const searchParams = useSearchParams()
@@ -30,13 +31,9 @@ function LandingPageContent() {
       <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/80">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="flex aspect-square size-7 items-center justify-center rounded bg-primary-600 text-xs font-bold text-white dark:bg-primary-500">
-                TD
-              </span>
-              <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-50">
-                TabibDesk
-              </span>
+            <Link href="/" className="flex items-center gap-0.5">
+              <img src="/logo.svg" alt="" className="size-[2rem] object-contain" aria-hidden />
+              <BrandName className="text-lg text-gray-900 dark:text-gray-50" />
             </Link>
 
             <nav className="hidden items-center gap-6 md:flex">
@@ -109,9 +106,15 @@ function LandingPageContent() {
       <footer className="border-t border-gray-200 bg-white py-8 dark:border-gray-800 dark:bg-gray-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            {lang === "ar"
-              ? "© 2024 TabibDesk. جميع الحقوق محفوظة."
-              : "© 2024 TabibDesk. All rights reserved."}
+            {lang === "ar" ? (
+              <>
+                © 2024 <BrandName className="text-sm font-bold" />. جميع الحقوق محفوظة.
+              </>
+            ) : (
+              <>
+                © 2024 <BrandName className="text-sm font-bold" />. All rights reserved.
+              </>
+            )}
           </p>
         </div>
       </footer>

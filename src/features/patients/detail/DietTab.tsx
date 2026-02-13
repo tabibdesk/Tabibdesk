@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import { RiRestaurantLine, RiHistoryLine } from "@remixicon/react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { PatientEmptyState } from "./PatientEmptyState"
 
 interface PatientDiet {

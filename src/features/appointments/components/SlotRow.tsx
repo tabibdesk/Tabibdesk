@@ -69,35 +69,41 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          {slot.patientId ? (
-            <Link
-              href={`/patients/${slot.patientId}`}
-              className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
-            >
-              {slot.patientName}
-            </Link>
-          ) : (
-            <span className="font-medium text-gray-900 dark:text-gray-100">{timeRange}</span>
-          )}
+          <span className="font-medium text-gray-900 dark:text-gray-100">{timeRange}</span>
           <Badge color="indigo" size="xs">
             Booked
           </Badge>
         </div>
-        <div className="mt-1 flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-          <span>{timeRange}</span>
-          {slot.appointmentType && slot.appointmentType !== "flexible" && (
-            <>
-              <span className="text-gray-300 dark:text-gray-600">·</span>
-              <span>{getAppointmentTypeLabel(slot.appointmentType, t.appointments)}</span>
-            </>
-          )}
-        </div>
-        {slot.patientPhone && (
-          <div className="mt-0.5 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
-            <RiPhoneLine className="size-4 shrink-0" aria-hidden />
-            <span>{slot.patientPhone}</span>
-          </div>
-        )}
+        {slot.patientId ? (
+          <>
+            <div className="mt-1">
+              <Link
+                href={`/patients/${slot.patientId}`}
+                className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
+              >
+                {slot.patientName}
+              </Link>
+            </div>
+            {(slot.appointmentType && slot.appointmentType !== "flexible") || slot.patientPhone ? (
+              <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                {slot.appointmentType && slot.appointmentType !== "flexible" && (
+                  <span>{getAppointmentTypeLabel(slot.appointmentType, t.appointments)}</span>
+                )}
+                {slot.patientPhone && (
+                  <>
+                    {slot.appointmentType && slot.appointmentType !== "flexible" && (
+                      <span className="text-gray-300 dark:text-gray-600">·</span>
+                    )}
+                    <span className="flex items-center gap-1.5">
+                      <RiPhoneLine className="size-3.5 shrink-0" aria-hidden />
+                      {slot.patientPhone}
+                    </span>
+                  </>
+                )}
+              </div>
+            ) : null}
+          </>
+        ) : null}
       </div>
       <div className="shrink-0 flex items-center gap-2">
         {onReschedule && slot.appointmentId && (

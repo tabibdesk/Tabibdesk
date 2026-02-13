@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Badge } from "@/components/Badge"
+import { Card, CardContent, CardHeader } from "@/components/Card"
+import { Select } from "@/components/Select"
 import { getBadgeColor } from "@/lib/badgeColors"
-import { RiCalendarLine, RiTimeLine, RiHistoryLine, RiTaskLine, RiCheckLine, RiFileList3Line } from "@remixicon/react"
+import { RiCalendarLine, RiTimeLine, RiHistoryLine, RiCheckLine } from "@remixicon/react"
 import { format } from "date-fns"
 import { cx } from "@/lib/utils"
 import { ListSkeleton } from "@/components/skeletons"
-import { EmptyState } from "@/components/EmptyState"
+import { PatientEmptyState } from "@/features/patients/detail/PatientEmptyState"
 import { getStatusBadgeVariant, getStatusLabel } from "@/features/appointments/appointments.utils"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 
 interface Appointment {
   id: string
@@ -148,54 +151,32 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
     return <ListSkeleton rows={3} showHeader />
   }
 
-  const FilterButton = ({ 
-    value, 
-    label, 
-    icon: Icon, 
-    count 
-  }: { 
-    value: FilterType
-    label: string
-    icon: React.ComponentType<{ className?: string }>
-    count: number
-  }) => (
-    <button
-      onClick={() => setFilter(value)}
-      className={cx(
-        "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
-        filter === value
-          ? "bg-primary-600 text-white dark:bg-primary-500"
-          : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-      )}
-    >
-      <Icon className="size-4" />
-      <span>{label}</span>
-      <span className={cx(
-        "inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold",
-        filter === value
-          ? "bg-white/20 text-white"
-          : "bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
-      )}>
-        {count}
-      </span>
-    </button>
-  )
-
   return (
-    <div className="space-y-4">
-      {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <FilterButton value="all" label="All" icon={RiFileList3Line} count={counts.all} />
-        <FilterButton value="appointments" label="Appointments" icon={RiCalendarLine} count={counts.appointments} />
-        <FilterButton value="tasks" label="Tasks" icon={RiCheckLine} count={counts.tasks} />
-        <FilterButton value="activity" label="Activity" icon={RiHistoryLine} count={counts.activity} />
-      </div>
-
+    <Card className="overflow-hidden shadow-sm">
+      <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12 flex flex-row items-center justify-between rtl:flex-row-reverse">
+        <div className="flex items-center gap-2">
+          <RiHistoryLine className="size-4 text-primary-500/70 dark:text-primary-400/70 shrink-0" />
+          <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+            {t.patients.history}
+          </h3>
+        </div>
+        <Select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value as FilterType)}
+          className="w-auto min-w-[180px]"
+        >
+          <option value="all">All ({counts.all})</option>
+          <option value="appointments">Appointments ({counts.appointments})</option>
+          <option value="tasks">Tasks ({counts.tasks})</option>
+          <option value="activity">Activity ({counts.activity})</option>
+        </Select>
+      </CardHeader>
+      <CardContent className="p-4">
       {filteredItems.length === 0 ? (
-        <EmptyState
-          variant="card"
+        <PatientEmptyState
           icon={RiHistoryLine}
           title={t.profile.noHistoryYet}
+          variant="simple"
         />
       ) : (
         <div className="relative space-y-4">
@@ -287,6 +268,7 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
           ))}
         </div>
       )}
-    </div>
+      </CardContent>
+    </Card>
   )
 }

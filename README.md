@@ -19,19 +19,19 @@ These colors are configured in `tailwind.config.ts` and available as:
 
 ## Getting Started
 
-1. Install the dependencies. We recommend using pnpm. If you want to use `npm`, just replace `pnpm` with `npm`.
-
 ```bash
-pnpm install
+npm install
+npm run dev
 ```
 
-2. Then, start the development server:
+Visit [http://localhost:3000](http://localhost:3000). Use **"Try Demo"** on the login page to explore without auth.
 
-```bash
-pnpm dev
-```
+### Local Development (Supabase)
 
-3. Visit [http://localhost:3000](http://localhost:3000) in your browser to view the application.
+1. Copy `.env.example` to `.env.local`
+2. Add from Supabase Dashboard → Settings → API: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+3. Run migrations in Supabase SQL Editor in order (`supabase/migrations/20260212_*`, then `20260213_*`)
+4. Seed first user: in SQL Editor, create a subscription and insert into `clinic_members` for your auth user UUID (role: manager/doctor/assistant)
 
 ## Project Structure
 
@@ -65,12 +65,12 @@ pnpm dev
 - Demo context with mock data for testing without a backend
 - Mock patients, appointments, and clinic data
 
-### Infrastructure (Ready for Supabase Integration)
-- Supabase client/server setup (commented, ready to uncomment)
-- API functions for patients and appointments
-- Auth helpers for user management
-- Database types and schemas
-- Validation schemas (ready for Zod)
+### Backend & Supabase
+- **Auto-clinic on signup** – Trigger creates subscription → clinic → clinic_member; new user becomes manager
+- **RLS policies** – All tables scoped by `clinic_id`; use `get_user_clinic_ids()` helper
+- **Multi-tenant** – Every query filters by clinic; patients, appointments, medical_records, etc.
+- **Storage buckets** – lab-results, payment-proofs, prescriptions, medical-records, attachments, clinic-documents (private, signed URLs)
+- **Realtime hooks** – `useTodayAppointments`, `useRealtimeCheckIn`, `useTaskAssignments`, `usePaymentMonitoring`
 
 ## Tech Stack
 
@@ -78,7 +78,8 @@ pnpm dev
 - [TypeScript](https://www.typescriptlang.org) - Type safety
 - [Tailwind CSS](https://tailwindcss.com) - Styling
 - [Radix UI](https://www.radix-ui.com) - UI primitives
-- [Recharts](https://recharts.org) - Charts and data visualization
+- [Tremor](https://www.tremor.so) - Charts, metrics, badges (prefer over custom dashboard UI)
+- [Supabase](https://supabase.com) - Auth, database, storage, realtime
 
 ## Project Rules & Guidelines
 
@@ -88,6 +89,7 @@ pnpm dev
 - **Supabase** is source of truth. All reads/writes must be scoped by `clinic_id` (multi-tenant) and RLS-friendly (no client-only filtering).
 - **Soft delete everywhere**: `deleted_at`; always read with `deleted_at IS NULL`.
 - **Feature flags per clinic**: `clinic_settings.flags` (jsonb). Hide/disable UI modules/tabs based on flags.
+- **Multi-location** (in progress): Migrations add `subscription_id` to patients, `location_ids` to clinic_members, `clinic_location_id` to appointments. Run migrations in `supabase/migrations/` order (20260212_* then 20260213_*).
 
 ### Code Quality & Organization
 
@@ -104,9 +106,12 @@ pnpm dev
   - Use flex/grid for layouts; avoid fixed heights
   - Use design system colors: `primary-*`, `secondary-*`, `accent-*`
 
+### UI Libraries
+
+- **Tremor**: Use for charts, metrics, badges, progress bars. Keep existing skeletons; only swap loaded content to Tremor. Theme tokens in `tailwind.config.ts`.
+
 ### Documentation
 
-- After a plan is executed, delete temporary planning `*.md` files
 - Update README with new features in very short simple English
 - Keep implementation notes concise and actionable
 
@@ -116,6 +121,11 @@ pnpm dev
 - Ensure `.gitignore` includes: `.next`, `out`, `dist`, `build`, `node_modules`, `coverage`, `.env`, `.env.local`, `.env.*`
 - Netlify builds from source (no committed build artifacts). Keep/maintain `netlify.toml` if present.
 - **Before finishing**: `npm run lint && npm run typecheck && npm run build`. Then list files changed + how to test.
+
+### Troubleshooting
+
+- **404 for _next/static/chunks**: Run `rm -rf .next && npm run build && npm run start`; hard refresh (`Cmd+Shift+R`) or incognito. Use `npm run dev` when developing, not production build.
+- **Add users to clinic**: Insert into `clinic_members` with role `doctor`, `assistant`, or `manager`.
 
 ## License
 

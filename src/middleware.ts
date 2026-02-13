@@ -35,6 +35,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Allow unauthenticated access when demo mode is active (user clicked "Try Demo Mode")
+  const demoModeCookie = request.cookies.get("demo-mode")?.value
+  if (demoModeCookie === "true") {
+    return NextResponse.next()
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,

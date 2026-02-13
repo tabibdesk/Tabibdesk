@@ -1,5 +1,7 @@
 "use client"
 
+import { BrandName } from "@/components/shared/BrandName"
+
 /**
  * Handles errors in the root layout. Must define its own <html> and <body>
  * because it replaces the root layout when active.
@@ -113,11 +115,10 @@ export default function GlobalError({
               display: "inline-block",
               marginTop: "3rem",
               fontSize: "0.75rem",
-              color: "#9ca3af",
               textDecoration: "none",
             }}
           >
-            TabibDesk
+            <BrandName className="text-xs" />
           </a>
         </div>
       </body>

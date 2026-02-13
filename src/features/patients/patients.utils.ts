@@ -1,5 +1,24 @@
 import type { Patient, PatientListItem } from "./patients.types"
 
+export function formatLastVisited(
+  dateString: string | null,
+  t: { common: { never: string; today: string; yesterday: string; daysAgo: string; weeksAgo: string; monthsAgo: string; yearsAgo: string } },
+): string {
+  if (!dateString) return t.common.never
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffDays = Math.floor(
+    Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+  )
+  if (diffDays === 0) return t.common.today
+  if (diffDays === 1) return t.common.yesterday
+  const ph = "{n}"
+  if (diffDays < 7) return t.common.daysAgo.replace(ph, String(diffDays))
+  if (diffDays < 30) return t.common.weeksAgo.replace(ph, String(Math.floor(diffDays / 7)))
+  if (diffDays < 365) return t.common.monthsAgo.replace(ph, String(Math.floor(diffDays / 30)))
+  return t.common.yearsAgo.replace(ph, String(Math.floor(diffDays / 365)))
+}
+
 export function calculateAge(dateOfBirth: string | null, ageFromDb: number | null): number | "N/A" {
   if (ageFromDb !== null && ageFromDb !== undefined) {
     return ageFromDb

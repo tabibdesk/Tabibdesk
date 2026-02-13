@@ -107,7 +107,7 @@
     @apply absolute left-0 top-0 bottom-0 w-1;
   }
 
-  /* Page Content Container - Unified spacing on mobile */
+  /* Page Content Container - Consistent spacing between page header/title and first component (matches dashboard) */
   .page-content {
     @apply space-y-6;
   }

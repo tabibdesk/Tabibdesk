@@ -7,7 +7,7 @@ import { UserClinicProvider } from "@/contexts/user-clinic-context"
 import { ToastProvider } from "@/hooks/useToast"
 import type { Metadata } from "next"
 import { ThemeProvider } from "next-themes"
-import { Inter, Noto_Sans_Arabic } from "next/font/google"
+import { Inter, Noto_Sans_Arabic, Poppins } from "next/font/google"
 import "./globals.css"
 import { siteConfig } from "./siteConfig"
 
@@ -21,6 +21,13 @@ const arabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-arabic",
+  display: "swap",
+})
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: "700",
+  variable: "--font-poppins",
   display: "swap",
 })
 
@@ -50,7 +57,8 @@ export const metadata: Metadata = {
     description: siteConfig.description,
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.svg",
+    apple: "/logo.svg",
   },
 }
 
@@ -60,7 +68,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" dir="ltr" className={`${inter.variable} ${arabic.variable}`} suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={`${inter.variable} ${arabic.variable} ${poppins.variable}`} suppressHydrationWarning>
       <body
         className={`overflow-y-scroll scroll-auto antialiased selection:bg-primary-100 selection:text-primary-700 dark:bg-gray-950`}
         suppressHydrationWarning

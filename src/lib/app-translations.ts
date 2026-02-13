@@ -557,6 +557,7 @@ export const appTranslations = {
       aiMedicalSummary: "الملخص الطبي بالذكاء الاصطناعي",
       aiGenerated: "منتج بالذكاء الاصطناعي",
       lastUpdated: "آخر تحديث",
+      lastVisitLabel: "آخر زيارة:",
       medicalConditions: "الحالات الطبية",
       prescriptions: "الروشتات",
       addPrescription: "إضافة روشتة",
@@ -643,6 +644,8 @@ export const appTranslations = {
       addLabResultsDesc: "سجل نتايج التحاليل يدويًا أو ارفع ملفات التحليل واستخدم الذكاء الاصطناعي عشان تستخرج البيانات تلقائيًا.",
       noDietPlanYet: "مفيش نظام غذائي مسجل لسه",
       addDietPlanDesc: "أنشئ نظام غذائي مخصص للمريض عشان يساعده يتابع تغذيته وأهدافه الصحية.",
+      noInProgressTasksPatient: "مفيش مهام قيد التنفيذ للمريض ده",
+      completedTasksInHistoryDesc: "المهام المكتملة بتظهر في تاب السجل.",
     },
     fileUpload: {
       uploadFiles: "رفع ملفات",
@@ -1386,6 +1389,7 @@ export const appTranslations = {
       aiMedicalSummary: "AI Medical Summary",
       aiGenerated: "AI Generated",
       lastUpdated: "Last updated",
+      lastVisitLabel: "Last visit:",
       medicalConditions: "Medical Conditions",
       prescriptions: "Prescriptions",
       addPrescription: "Add prescription",
@@ -1472,6 +1476,8 @@ export const appTranslations = {
       addLabResultsDesc: "Record lab results manually or upload files and use AI to extract data automatically.",
       noDietPlanYet: "No diet plan recorded yet",
       addDietPlanDesc: "Create a customized diet plan for the patient to help them track their nutrition and health goals.",
+      noInProgressTasksPatient: "No in-progress tasks for this patient",
+      completedTasksInHistoryDesc: "Completed tasks are shown in the History tab.",
     },
     fileUpload: {
       uploadFiles: "Upload files",

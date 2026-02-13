@@ -1,19 +1,16 @@
 import { Button } from "@/components/Button"
 import { RiArrowRightLine } from "@remixicon/react"
 import Link from "next/link"
+import { BrandName } from "@/components/shared/BrandName"
 import { siteConfig } from "./siteConfig"
 
 export default function NotFound() {
   return (
     <div className="flex h-screen flex-col items-center justify-center">
       <Link href={siteConfig.baseLinks.dashboard}>
-        <div className="mt-6 flex items-center gap-x-2.5">
-          <span className="flex aspect-square size-10 items-center justify-center rounded bg-primary-600 p-2 text-sm font-medium text-white dark:bg-primary-500">
-            TD
-          </span>
-          <span className="text-xl font-semibold text-gray-900 dark:text-gray-50">
-            TabibDesk
-          </span>
+        <div className="mt-6 flex items-center gap-x-0.5">
+          <img src="/logo.svg" alt="" className="size-[2rem] object-contain" aria-hidden />
+          <BrandName className="text-xl text-gray-900 dark:text-gray-50" />
         </div>
       </Link>
       <p className="mt-6 text-4xl font-semibold text-indigo-600 sm:text-5xl dark:text-indigo-500">

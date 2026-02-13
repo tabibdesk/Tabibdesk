@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { PageHeader } from "@/components/shared/PageHeader"
+import { PageLayout } from "@/components/shared/PageLayout"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { ConfirmationModal } from "@/components/ConfirmationModal"
 import { useUserClinic } from "@/contexts/user-clinic-context"
@@ -161,9 +161,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="page-content">
-      <PageHeader title={t.nav.dashboard} />
-
+    <PageLayout title={t.nav.dashboard}>
       {role === "doctor" ? (
         <div className="space-y-4">
           <NowQueueWidget
@@ -211,6 +209,7 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Modals - outside main content flow */}
       <ConfirmationModal
         isOpen={showNoShowModal}
         onClose={() => {
@@ -281,6 +280,6 @@ export default function DashboardPage() {
         variant="danger"
         isLoading={!!markingPaid}
       />
-    </div>
+    </PageLayout>
   )
 }
