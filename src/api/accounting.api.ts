@@ -187,6 +187,8 @@ export async function listPayments(
  * REFUNDS — invoice-scoped; in-memory store
  */
 
+const refundsStore: Refund[] = []
+
 export async function getInvoiceRefundSummary(invoiceId: string): Promise<InvoiceRefundSummary | null> {
   await delay(100)
   const { getInvoiceById } = await import("@/api/invoices.api")
