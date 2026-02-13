@@ -40,16 +40,18 @@ function toMockClinic(c: ClinicForUser): MockClinic {
   }
 }
 
-function authUserToMockUser(id: string, email: string): MockUser {
-  const part = email.split("@")[0] ?? "?"
+function authUserToMockUser(id: string, email: string, fullName?: string, role?: "doctor" | "assistant" | "manager"): MockUser {
+  const part = fullName || email.split("@")[0] || "?"
+  const firstName = part.split(" ")[0] || part
+  const initials = part.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() || "?"
   return {
     id,
     email,
     full_name: part,
-    first_name: part,
-    last_name: "",
-    role: "doctor",
-    avatar_initials: (part[0] ?? "?").toUpperCase(),
+    first_name: firstName,
+    last_name: part.split(" ").slice(1).join(" "),
+    role: role || "manager",
+    avatar_initials: initials,
   }
 }
 
@@ -66,7 +68,8 @@ export function UserClinicProvider({
   )
   const [backendType, setBackendType] = useState<"mock" | "supabase">("mock")
   const [supabaseClinics, setSupabaseClinics] = useState<ClinicForUser[]>([])
-  const [supabaseUser, setSupabaseUser] = useState<{ id: string; email: string } | null>(null)
+  const [supabaseUser, setSupabaseUser] = useState<{ id: string; email: string; full_name?: string } | null>(null)
+  const [userRole, setUserRole] = useState<"doctor" | "assistant" | "manager">("manager")
 
   useEffect(() => {
     setBackendType(getBackendType())
@@ -78,20 +81,44 @@ export function UserClinicProvider({
     async function load() {
       try {
         const { getAuthRepository } = await import("@/lib/api/repository-factory")
+        const { createClient } = await import("@/lib/supabase/client")
         const auth = await getAuthRepository()
         const user = await auth.getCurrentUser()
         if (cancelled || !user) return
-        setSupabaseUser({ id: user.id, email: user.email })
+        
+        // Get full user metadata from Supabase
+        const supabase = createClient()
+        const { data: { user: fullUser } } = await supabase.auth.getUser()
+        const fullName = fullUser?.user_metadata?.full_name || user.email.split("@")[0]
+        
+        setSupabaseUser({ id: user.id, email: user.email, full_name: fullName })
         const clinics = await getClinicsForUserSupabase(user.id)
         if (!cancelled) {
           setSupabaseClinics(clinics)
           const savedClinicId = localStorage.getItem("currentClinicId")
           const allowed = clinics.map((c) => c.id)
+          let targetClinicId = clinics.length > 0 ? clinics[0].id : null
+          
           if (savedClinicId && allowed.includes(savedClinicId)) {
+            targetClinicId = savedClinicId
             setCurrentClinicId(savedClinicId)
           } else if (clinics.length > 0) {
             setCurrentClinicId(clinics[0].id)
             localStorage.setItem("currentClinicId", clinics[0].id)
+          }
+          
+          // Fetch user role for the current clinic
+          if (targetClinicId) {
+            const { data: memberData } = await supabase
+              .from("clinic_members")
+              .select("role")
+              .eq("user_id", user.id)
+              .eq("clinic_id", targetClinicId)
+              .single()
+            
+            if (memberData?.role) {
+              setUserRole(memberData.role as "doctor" | "assistant" | "manager")
+            }
           }
         }
       } catch {
@@ -115,7 +142,7 @@ export function UserClinicProvider({
   )
 
   const currentUser = isSupabase && supabaseUser
-    ? authUserToMockUser(supabaseUser.id, supabaseUser.email)
+    ? authUserToMockUser(supabaseUser.id, supabaseUser.email, supabaseUser.full_name, userRole)
     : mockCurrentUser
   const allowedClinics = isSupabase
     ? supabaseClinics.map(toMockClinic)
