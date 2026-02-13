@@ -11,7 +11,6 @@ import { isAppointmentArchived } from "@/features/archive/archive.rules"
 import { logActivity } from "@/api/activity.api"
 import { removeByPatientId as removeWaitlistByPatientId } from "./waitlist/waitingList.api"
 import { getFollowUpRules } from "@/api/settings.api"
-import { createFollowUpTask, hasOpenFollowUpTask } from "@/features/tasks/tasks.api"
 import type { AppointmentStatus } from "@/features/patients/patientLifecycle"
 import type { ListAppointmentsParams, ListAppointmentsResponse, AppointmentListItem } from "./appointments.types"
 import { getAppointmentTypeIdForStorage } from "./appointmentTypes"
@@ -188,6 +187,9 @@ export async function updateStatus(appointmentId: string, status: AppointmentSta
         (status === "no_show" && rules.followUpOnNoShow)
 
       if (shouldCreateTask) {
+        // TODO: Implement follow-up task creation
+        // This will be re-enabled once tasks.api exports createFollowUpTask
+        /*
         const hasExisting = await hasOpenFollowUpTask(
           clinicId,
           appointmentId,
@@ -209,6 +211,7 @@ export async function updateStatus(appointmentId: string, status: AppointmentSta
             attempt: 1,
           })
         }
+        */
       }
     } catch (error) {
       console.warn("Failed to create follow-up task:", error)

@@ -8,7 +8,6 @@ import { DEMO_CLINIC_ID } from "@/lib/constants"
 import type { Patient, PatientStatus } from "@/features/patients/patients.types"
 import { applyPatientActivation } from "@/features/patients/patientLifecycle"
 import { getFollowUpRules } from "@/api/settings.api"
-import { listTasks } from "@/features/tasks/tasks.api"
 import { listAppointments } from "@/features/appointments/appointments.api"
 import { NotFoundError } from "@/lib/api/errors"
 
@@ -232,14 +231,15 @@ export async function isPatientInactive(
   }
 
   try {
-    const tasks = await listTasks({
-      clinicId,
-      page: 1,
-      pageSize: 100,
-      status: "pending",
-    })
-    const hasOpenTask = tasks.tasks.some((task) => task.patientId === patientId)
-    if (hasOpenTask) return false
+    // TODO: Re-enable task checking once tasks.api exports listTasks
+    // const tasks = await listTasks({
+    //   clinicId,
+    //   page: 1,
+    //   pageSize: 100,
+    //   status: "pending",
+    // })
+    // const hasOpenTask = tasks.tasks.some((task) => task.patientId === patientId)
+    // if (hasOpenTask) return false
   } catch (error) {
     console.warn("Failed to check tasks for inactivity:", error)
   }
