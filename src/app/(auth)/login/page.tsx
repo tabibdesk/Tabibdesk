@@ -105,8 +105,6 @@ function LoginPageContent() {
       setErrors({ general: "Unable to sign in with this provider. Please try again." })
     }
   }
-    }
-  }
 
   return (
     <div className="flex min-h-screen rtl:flex-row-reverse">
