@@ -72,19 +72,24 @@ function LoginPageContent() {
       if (error) {
         console.error("[v0] Sign in error:", error.message, error.status)
         setErrors({ general: "Unable to sign in. Please check your credentials and try again." })
+        setIsLoading(false)
         return
       }
+      // Success! Keep isLoading true so spinner stays visible during redirect
       router.push("/dashboard")
       router.refresh()
+      // Don't set isLoading(false) - let it stay true while redirecting
     } catch (err: unknown) {
       console.error("[v0] Sign in exception:", err)
       setErrors({ general: "Unable to sign in. Please check your credentials and try again." })
-    } finally {
       setIsLoading(false)
     }
   }
 
   const handleSocialLogin = async (provider: "google" | "azure") => {
+    setIsLoading(true)
+    setErrors({})
+    
     // Disable demo mode immediately
     disableDemoMode()
     
@@ -99,10 +104,13 @@ function LoginPageContent() {
       if (error) {
         console.error("[v0] OAuth sign in error:", error.message, error.status)
         setErrors({ general: "Unable to sign in with this provider. Please try again." })
+        setIsLoading(false)
       }
+      // Keep isLoading true during OAuth redirect
     } catch (err: unknown) {
       console.error("[v0] OAuth sign in exception:", err)
       setErrors({ general: "Unable to sign in with this provider. Please try again." })
+      setIsLoading(false)
     }
   }
 

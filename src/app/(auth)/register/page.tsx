@@ -123,7 +123,7 @@ function RegisterPageContent() {
       }
       // Redirect to success or dashboard depending on email confirmation setting
       if (data.session) {
-        // Immediate login - redirect to dashboard
+        // Immediate login - redirect to dashboard, keep spinner visible
         router.push("/dashboard")
         router.refresh()
       } else {
@@ -136,11 +136,11 @@ function RegisterPageContent() {
           password: "",
           confirmPassword: "",
         })
+        setIsLoading(false)
       }
     } catch (err: unknown) {
       console.error("[v0] Sign up exception:", err)
       setErrors({ general: "Unable to create account. Please try again." })
-    } finally {
       setIsLoading(false)
     }
   }
@@ -163,6 +163,9 @@ function RegisterPageContent() {
   }
 
   const handleSocialSignup = async (provider: "google" | "azure") => {
+    setIsLoading(true)
+    setErrors({})
+    
     // Disable demo mode immediately
     disableDemoMode()
     
@@ -177,12 +180,13 @@ function RegisterPageContent() {
       if (error) {
         console.error("[v0] OAuth sign up error:", error.message, error.status)
         setErrors({ general: "Unable to sign up with this provider. Please try again." })
+        setIsLoading(false)
       }
+      // Keep isLoading true during OAuth redirect
     } catch (err: unknown) {
       console.error("[v0] OAuth sign up exception:", err)
       setErrors({ general: "Unable to sign up with this provider. Please try again." })
-    }
-  }
+      setIsLoading(false)
     }
   }
 
