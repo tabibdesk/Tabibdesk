@@ -6,6 +6,15 @@
 import { mockData } from "@/data/mock/mock-data"
 import type { WaitlistEntry } from "../types"
 
+// Helper to check if in demo mode
+function isDemoMode(): boolean {
+  if (typeof window !== "undefined") {
+    const storedDemoMode = localStorage.getItem("demo-mode")
+    return storedDemoMode === "true" || storedDemoMode === null
+  }
+  return true // Server-side defaults to demo mode
+}
+
 export interface ListWaitlistParams {
   clinicId: string
   doctorId?: string
@@ -64,6 +73,17 @@ function initializeStore() {
  * List waiting list entries with filtering and pagination
  */
 export async function list(params: ListWaitlistParams): Promise<ListWaitlistResponse> {
+  // Return empty list if not in demo mode
+  if (!isDemoMode()) {
+    return {
+      entries: [],
+      total: 0,
+      page: params.page,
+      pageSize: params.pageSize,
+      hasMore: false,
+    }
+  }
+  
   initializeStore()
   const { page, pageSize, query, doctorId, type, status, priority, preferredTimeWindow } = params
 

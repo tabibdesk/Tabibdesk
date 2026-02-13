@@ -3,8 +3,30 @@ import { mockData } from "@/data/mock/mock-data"
 import type { AskInsightParams, InsightResponse } from "./insights.types"
 import { getTimeRangeDates, formatRecordCount } from "./insights.utils"
 import { listPayments } from "@/api/payments.api"
+import { useDemo } from "@/contexts/demo-context"
 
 export async function askInsight({ question, clinicId: _clinicId, timeRange }: AskInsightParams): Promise<InsightResponse> {
+  // Check if in demo mode - if not, return zero metrics
+  let isDemoMode = true
+  if (typeof window !== "undefined") {
+    const storedDemoMode = localStorage.getItem("demo-mode")
+    isDemoMode = storedDemoMode === "true" || storedDemoMode === null
+  }
+  
+  if (!isDemoMode) {
+    // Return empty metrics for non-demo mode
+    return {
+      summary: "No data available yet. Start adding appointments and patients to see insights.",
+      metrics: [
+        { label: "Appointments", value: 0 },
+        { label: "Patients", value: 0 },
+        { label: "Revenue", value: "0 EGP" },
+      ],
+      actions: [],
+      basedOn: formatRecordCount(0),
+    }
+  }
+  
   const { start, end } = getTimeRangeDates(timeRange)
   
   const delay = Math.random() * 300 + 600

@@ -47,8 +47,10 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
   
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-        <p className="text-sm text-red-600 dark:text-red-400">Error loading slots: {error.message}</p>
+      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-950">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          No availability set. Please add your availability in settings to enable scheduling.
+        </p>
       </div>
     )
   }
