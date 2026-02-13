@@ -52,6 +52,12 @@ function LoginPageContent() {
     router.push("/dashboard")
   }
 
+  const isSupabaseConfigured = !!(
+    typeof process !== "undefined" &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  )
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -62,6 +68,12 @@ function LoginPageContent() {
     
     // Disable demo mode immediately to prevent showing mock data
     disableDemoMode()
+
+    if (!isSupabaseConfigured) {
+      setErrors({ general: t.auth.supabaseNotConfigured })
+      setIsLoading(false)
+      return
+    }
 
     try {
       const supabase = createClient()
@@ -92,6 +104,12 @@ function LoginPageContent() {
     
     // Disable demo mode immediately
     disableDemoMode()
+
+    if (!isSupabaseConfigured) {
+      setErrors({ general: t.auth.supabaseNotConfigured })
+      setIsLoading(false)
+      return
+    }
     
     try {
       const supabase = createClient()

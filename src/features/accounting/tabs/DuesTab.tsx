@@ -12,6 +12,7 @@ import { InvoiceDrawer } from "../components/InvoiceDrawer"
 import { mockData } from "@/data/mock/mock-data"
 import { RiPhoneLine, RiWhatsappLine, RiMoneyDollarCircleLine, RiCheckLine } from "@remixicon/react"
 import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
+import { EmptyState } from "@/components/EmptyState"
 import { startOfToday, startOfMonth } from "date-fns"
 import Link from "next/link"
 import type { Invoice } from "@/types/invoice"
@@ -144,14 +145,11 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
           </CardContent>
         </Card>
       ) : invoices.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RiMoneyDollarCircleLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              {searchQuery ? "No unpaid invoices found matching your search." : "No unpaid invoices"}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RiMoneyDollarCircleLine}
+          title={searchQuery ? t.accounting.noDuesMatch : t.accounting.noDuesYet}
+          description={!searchQuery ? t.accounting.duesDescription : undefined}
+        />
       ) : (
         <>
           {/* Desktop Table */}

@@ -6,6 +6,7 @@ import { useAppTranslations } from "@/lib/useAppTranslations"
 import { getAppointmentTypeLabel } from "../appointmentTypes"
 import { Button } from "@/components/Button"
 import { SearchInput } from "@/components/SearchInput"
+import { EmptyState } from "@/components/EmptyState"
 import { useWaitlist } from "../hooks/useWaitlist"
 import { RiAddLine, RiPhoneLine, RiCalendarLine, RiUserLine } from "@remixicon/react"
 import { ListSkeleton } from "@/components/skeletons"
@@ -22,11 +23,13 @@ function WaitlistTable({
   entries,
   loading,
   onBook,
+  onAddToWaitlist,
   t,
 }: {
   entries: WaitlistEntry[]
   loading: boolean
   onBook: (entry: WaitlistEntry) => void
+  onAddToWaitlist?: () => void
   t: ReturnType<typeof useAppTranslations>
 }) {
   if (loading) {
@@ -39,9 +42,13 @@ function WaitlistTable({
 
   if (entries.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white py-12 text-center dark:border-gray-800 dark:bg-gray-950">
-        <p className="text-sm text-gray-500 dark:text-gray-400">No patients in waiting list</p>
-      </div>
+      <EmptyState
+        icon={RiUserLine}
+        title={t.appointments.noWaitlist}
+        description={t.appointments.waitlistDescription}
+        actionLabel={onAddToWaitlist ? t.appointments.addToWaitlist : undefined}
+        onAction={onAddToWaitlist}
+      />
     )
   }
 
@@ -147,6 +154,7 @@ export function WaitlistTab({ clinicId, doctorId, onBook, onAddToWaitlist }: Wai
         entries={entries} 
         loading={loading} 
         onBook={handleBook}
+        onAddToWaitlist={onAddToWaitlist}
         t={t}
       />
     </div>

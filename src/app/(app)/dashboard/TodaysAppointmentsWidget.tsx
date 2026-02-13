@@ -7,6 +7,7 @@ import { useAppTranslations } from "@/lib/useAppTranslations"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { RiArrowRightLine, RiCalendarLine, RiCheckboxCircleLine, RiCloseLine, RiMenuLine, RiMoneyDollarCircleLine } from "@remixicon/react"
 import { WidgetSkeleton } from "@/components/skeletons"
+import { EmptyState } from "@/components/EmptyState"
 import type { DashboardAppointment } from "./dashboard.types"
 import { getTimeDisplay, getIconColorClass, getIconBackgroundClass } from "./useQueueActions"
 
@@ -220,10 +221,12 @@ export function TodaysAppointmentsWidget({
             })}
           </div>
         ) : (
-          <div className="py-12 text-center text-gray-600 dark:text-gray-400">
-            <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-2 text-sm">{t.dashboard.noAppointmentsScheduledToday}</p>
-          </div>
+          <EmptyState
+            variant="card"
+            icon={RiCalendarLine}
+            title={t.dashboard.noAppointmentsScheduledToday}
+            description={t.dashboard.todayAppointmentsDescription}
+          />
         )}
       </div>
     </div>

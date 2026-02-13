@@ -13,6 +13,8 @@ import { formatCurrency } from "../accounting.utils"
 import { detectMissingPayments, detectPendingApprovals, generateMissingPaymentTaskTitle, generateMissingPaymentTaskDescription } from "../accounting.rules"
 import { createTask } from "@/features/tasks/tasks.api"
 import { SummarySkeleton } from "@/components/skeletons"
+import { EmptyState } from "@/components/EmptyState"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import {
   RiSparklingLine,
   RiArrowRightLine,
@@ -23,6 +25,7 @@ import {
 } from "@remixicon/react"
 
 export function AiSummaryTab() {
+  const t = useAppTranslations()
   const { currentClinic, currentUser } = useUserClinic()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -148,9 +151,11 @@ export function AiSummaryTab() {
 
   if (!summary) {
     return (
-      <Card className="p-8 text-center">
-        <p className="text-gray-600 dark:text-gray-400">No summary data available</p>
-      </Card>
+      <EmptyState
+        icon={RiRobot2Line}
+        title={t.accounting.noAiSummaryYet}
+        description={t.accounting.aiSummaryDescription}
+      />
     )
   }
 

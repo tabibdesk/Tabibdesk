@@ -1,6 +1,9 @@
 "use client"
 
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { LineChart } from "@/components/LineChart"
+import { EmptyState } from "@/components/EmptyState"
+import { RiLineChartLine } from "@remixicon/react"
 import type { ProgressMetric } from "@/types/progress"
 
 interface ProgressChartProps {
@@ -8,6 +11,7 @@ interface ProgressChartProps {
 }
 
 export function ProgressChart({ metric }: ProgressChartProps) {
+  const t = useAppTranslations()
   const { label, unit, points } = metric
   const sorted = [...points].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
@@ -23,9 +27,12 @@ export function ProgressChart({ metric }: ProgressChartProps) {
 
   if (chartData.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center text-gray-600 dark:text-gray-400">
-        <p className="text-sm">No data available</p>
-      </div>
+      <EmptyState
+        variant="card"
+        icon={RiLineChartLine}
+        title={t.profile.noProgressData}
+        description={t.profile.recordProgressDesc}
+      />
     )
   }
 

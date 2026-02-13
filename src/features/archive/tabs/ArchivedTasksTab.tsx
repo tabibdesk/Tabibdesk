@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
 import { RiTaskLine } from "@remixicon/react"
+import { EmptyState } from "@/components/EmptyState"
 import { useDebounce } from "@/lib/useDebounce"
 import { listArchivedTasks } from "@/api/archive.api"
 import { ArchiveTasksTable } from "../components/ArchiveTasksTable"
@@ -147,14 +148,11 @@ export function ArchivedTasksTab({
 
       {/* Empty State */}
       {!loading && tasks.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RiTaskLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              No completed tasks.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RiTaskLine}
+          title={t.archive.noCompletedTasks}
+          description={t.archive.archivedTasksDescription}
+        />
       ) : (
         <>
           {/* Desktop Table View */}

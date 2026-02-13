@@ -119,8 +119,8 @@ export function LabResultsTab({ labResults }: LabResultsTabProps) {
       {labResults.length === 0 ? (
         <PatientEmptyState
           icon={RiFlaskLine}
-          title="No lab results yet"
-          description="Upload lab reports or add entries to get started."
+          title={t.profile.noLabResultsYet}
+          description={t.profile.addLabResultsDesc}
         />
       ) : (
         <div className="space-y-3">

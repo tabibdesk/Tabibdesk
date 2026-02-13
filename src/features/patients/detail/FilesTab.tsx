@@ -15,6 +15,7 @@ import {
 } from "@/components/Dropdown"
 import { Input } from "@/components/Input"
 import { cx } from "@/lib/utils"
+import { EmptyState } from "@/components/EmptyState"
 import {
   RiFlaskLine,
   RiAddLine,
@@ -388,14 +389,14 @@ export function FilesTab({
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center dark:border-gray-800 dark:bg-gray-900/30">
-                  <RiQuillPenAiLine className="size-10 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
-                  <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">No lab results extracted yet</p>
-                  <p className="mt-1 text-xs text-gray-500">Extract lab results from this file with AI to get started.</p>
-                  <Button variant="primary" size="sm" onClick={() => setExtractConfirm({ type: "lab", attachmentId: id, fileName: attachment.file_name })} className="mt-4 gap-1.5">
-                    <RiQuillPenAiLine className="size-4" /> Extract with AI
-                  </Button>
-                </div>
+                <EmptyState
+                  variant="card"
+                  icon={RiQuillPenAiLine}
+                  title={t.profile.noLabExtracted}
+                  description={t.profile.extractLabDesc}
+                  actionLabel={t.profile.extractWithAi}
+                  onAction={() => setExtractConfirm({ type: "lab", attachmentId: id, fileName: attachment.file_name })}
+                />
               )}
             </div>
           )}
@@ -494,14 +495,14 @@ export function FilesTab({
                   <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{displayScanText}</p>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center dark:border-gray-800 dark:bg-gray-900/30">
-                  <RiQuillPenAiLine className="size-10 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
-                  <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">No AI note yet</p>
-                  <p className="mt-1 text-xs text-gray-500">Extract findings from this scan with AI to get started.</p>
-                  <Button variant="primary" size="sm" onClick={() => setExtractConfirm({ type: isEcg ? "ecg" : "scan", attachmentId: id, fileName: attachment.file_name })} className="mt-4 gap-1.5">
-                    <RiQuillPenAiLine className="size-4" /> Extract with AI
-                  </Button>
-                </div>
+                <EmptyState
+                  variant="card"
+                  icon={RiQuillPenAiLine}
+                  title={t.profile.noAiNoteYet}
+                  description={t.profile.extractAiNoteDesc}
+                  actionLabel={t.profile.extractWithAi}
+                  onAction={() => setExtractConfirm({ type: isEcg ? "ecg" : "scan", attachmentId: id, fileName: attachment.file_name })}
+                />
               )
             ) : (
               displayDocumentText ? (
@@ -510,14 +511,14 @@ export function FilesTab({
                   <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{displayDocumentText}</p>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-10 text-center dark:border-gray-800 dark:bg-gray-900/30">
-                  <RiQuillPenAiLine className="size-10 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
-                  <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">No AI summary yet</p>
-                  <p className="mt-1 text-xs text-gray-500">Extract a summary from this document with AI to get started.</p>
-                  <Button variant="primary" size="sm" onClick={() => setExtractConfirm({ type: "document", attachmentId: id, fileName: attachment.file_name })} className="mt-4 gap-1.5">
-                    <RiQuillPenAiLine className="size-4" /> Extract with AI
-                  </Button>
-                </div>
+                <EmptyState
+                  variant="card"
+                  icon={RiQuillPenAiLine}
+                  title={t.profile.noAiNoteYet}
+                  description={t.profile.extractAiNoteDesc}
+                  actionLabel={t.profile.extractWithAi}
+                  onAction={() => setExtractConfirm({ type: "document", attachmentId: id, fileName: attachment.file_name })}
+                />
               )
             )}
           </div>
@@ -532,11 +533,12 @@ export function FilesTab({
   return (
     <div className="space-y-4">
       {!hasFiles ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 px-4 py-12 dark:border-gray-800 dark:bg-gray-900/30">
-          <RiFlaskLine className="size-10 shrink-0 text-gray-400 dark:text-gray-500" aria-hidden />
-          <p className="mt-3 text-sm font-medium text-gray-600 dark:text-gray-400">No files yet</p>
-          <p className="mt-1 text-xs text-gray-500">Upload lab reports, scans, or documents to get started.</p>
-        </div>
+        <EmptyState
+          variant="card"
+          icon={RiFlaskLine}
+          title={t.profile.noFilesYet}
+          description={t.profile.addFilesDesc}
+        />
       ) : (
         <div className="space-y-2">
           {visibleFiles.map(renderCard)}

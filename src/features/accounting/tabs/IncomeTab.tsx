@@ -13,6 +13,7 @@ import { startOfToday } from "date-fns"
 import Link from "next/link"
 import { Button } from "@/components/Button"
 import { RiAddLine, RiFileLine, RiMoneyDollarCircleLine, RiEyeLine } from "@remixicon/react"
+import { EmptyState } from "@/components/EmptyState"
 import { mockData } from "@/data/mock/mock-data"
 import { ProofViewerModal } from "../components/ProofViewerModal"
 import type { Payment } from "@/types/payment"
@@ -241,14 +242,13 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
           </CardContent>
         </Card>
       ) : entries.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RiMoneyDollarCircleLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              {searchQuery ? "No income entries found matching your search." : "No income entries found"}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RiMoneyDollarCircleLine}
+          title={searchQuery ? t.accounting.noIncomeMatch : t.accounting.noIncomeYet}
+          description={!searchQuery ? t.accounting.incomeDescription : undefined}
+          actionLabel={!searchQuery ? t.accounting.capture : undefined}
+          onAction={!searchQuery ? () => setShowCaptureDrawer(true) : undefined}
+        />
       ) : (
         <>
           {/* Desktop Table */}

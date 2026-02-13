@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
 import { RiCalendarLine } from "@remixicon/react"
+import { EmptyState } from "@/components/EmptyState"
 import { useDebounce } from "@/lib/useDebounce"
 import { listArchivedAppointments } from "@/api/archive.api"
 import { ArchiveAppointmentsTable } from "../components/ArchiveAppointmentsTable"
@@ -148,14 +149,11 @@ export function ArchivedAppointmentsTab({
 
       {/* Empty State */}
       {!loading && appointments.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              {t.archive.noArchivedAppointments}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RiCalendarLine}
+          title={t.archive.noArchivedAppointments}
+          description={t.archive.archivedAppointmentsDescription}
+        />
       ) : (
         <>
           {/* Desktop Table View */}

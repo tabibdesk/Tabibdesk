@@ -7,6 +7,7 @@ import { RiCalendarLine, RiTimeLine, RiHistoryLine, RiTaskLine, RiCheckLine, RiF
 import { format } from "date-fns"
 import { cx } from "@/lib/utils"
 import { ListSkeleton } from "@/components/skeletons"
+import { EmptyState } from "@/components/EmptyState"
 import { getStatusBadgeVariant, getStatusLabel } from "@/features/appointments/appointments.utils"
 
 interface Appointment {
@@ -48,6 +49,7 @@ type HistoryItem = {
 type FilterType = "all" | "appointments" | "tasks" | "activity"
 
 export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [] }: PatientHistoryTabProps) {
+  const t = useAppTranslations()
   const [activityEvents, setActivityEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<FilterType>("all")
@@ -190,15 +192,11 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
       </div>
 
       {filteredItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center bg-gray-50 dark:bg-gray-900/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-800">
-          <RiHistoryLine className="size-8 text-gray-300" />
-          <p className="mt-2 text-xs text-gray-500">
-            {filter === "all" 
-              ? "No history recorded for this patient."
-              : `No ${filter} history for this patient.`
-            }
-          </p>
-        </div>
+        <EmptyState
+          variant="card"
+          icon={RiHistoryLine}
+          title={t.profile.noHistoryYet}
+        />
       ) : (
         <div className="relative space-y-4">
           {/* Vertical line */}

@@ -22,7 +22,16 @@ export class SupabaseAuthRepository implements IAuthRepository {
         data: { user },
         error,
       } = await supabase.auth.getUser()
-      if (error) throw error
+      if (error) {
+        const msg = error.message?.toLowerCase() ?? ""
+        if (
+          msg.includes("session") &&
+          (msg.includes("missing") || msg.includes("not found") || msg.includes("expired"))
+        ) {
+          return null
+        }
+        throw error
+      }
       return user ? toAuthUser({ id: user.id, email: user.email }) : null
     } catch (error) {
       throw translateError(error)

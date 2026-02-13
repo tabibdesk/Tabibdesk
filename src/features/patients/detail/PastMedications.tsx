@@ -18,6 +18,7 @@ const INITIAL_VISIBLE_COUNT = 5
 const LOAD_MORE_INCREMENT = 5
 
 export function PastMedications({ medications, onAddMedication }: PastMedicationsProps) {
+  const t = useAppTranslations()
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT)
 
   const sortedMedications = [...medications].sort(
@@ -54,11 +55,10 @@ export function PastMedications({ medications, onAddMedication }: PastMedication
         {sortedMedications.length === 0 ? (
           <PatientEmptyState
             icon={RiCapsuleLine}
-            title="No past medications yet"
-            description="Add past medications to see them here."
-            actionLabel={onAddMedication ? "Add medication" : undefined}
+            title={t.profile.noMedicationsAdded}
+            description={t.profile.addMedicationDesc}
+            actionLabel={onAddMedication ? t.profile.addFirstMedication : undefined}
             onAction={onAddMedication}
-            actionIcon={RiAddLine}
           />
         ) : (
           <div className="space-y-4">

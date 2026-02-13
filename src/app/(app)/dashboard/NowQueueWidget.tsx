@@ -6,6 +6,7 @@ import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { WidgetSkeleton } from "@/components/skeletons"
+import { EmptyState } from "@/components/EmptyState"
 import { RiArrowRightLine, RiCalendarLine, RiCheckLine, RiUserLine } from "@remixicon/react"
 import type { DashboardAppointment } from "./dashboard.types"
 import { getTimeDisplay, getIconColorClass, getIconBackgroundClass } from "./useQueueActions"
@@ -118,10 +119,12 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
             })}
           </div>
         ) : (
-          <div className="py-12 text-center text-gray-600 dark:text-gray-400">
-            <RiCalendarLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-2 text-sm">{t.dashboard.noAppointmentsInQueue}</p>
-          </div>
+          <EmptyState
+            variant="card"
+            icon={RiCalendarLine}
+            title={t.dashboard.noAppointmentsInQueue}
+            description={t.dashboard.nowQueueDescription}
+          />
         )}
       </div>
     </div>

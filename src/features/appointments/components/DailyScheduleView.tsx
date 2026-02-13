@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useImperativeHandle, forwardRef, Fragment } from "react"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import { DayNavigation } from "./DayNavigation"
 import { SlotRow } from "./SlotRow"
 import { EmptySlotRow } from "./EmptySlotRow"
@@ -10,6 +11,9 @@ import { useDailySlots } from "../hooks/useDailySlots"
 import { calculateBufferTime } from "../utils/slotFormatters"
 import { DEMO_DOCTOR_ID } from "@/lib/constants"
 import { ListSkeleton } from "@/components/skeletons"
+import { EmptyState } from "@/components/EmptyState"
+import { RiCalendarLine, RiSettings4Line } from "@remixicon/react"
+import { useRouter } from "next/navigation"
 import type { Slot } from "../types"
 
 interface DailyScheduleViewProps {
@@ -25,6 +29,8 @@ export interface DailyScheduleViewRef {
 
 export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleViewProps>(
   function DailyScheduleView({ clinicId, doctorId, onFillSlot, onReschedule }, ref) {
+  const t = useAppTranslations()
+  const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
   
   // Ensure we have a valid doctorId - use DEMO_DOCTOR_ID if not provided
@@ -47,10 +53,16 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
   
   if (error) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-gray-950">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          No availability set. Please add your availability in settings to enable scheduling.
-        </p>
+      <div className="space-y-4">
+        <DayNavigation currentDate={currentDate} onDateChange={setCurrentDate} />
+        <EmptyState
+          variant="card"
+          icon={RiSettings4Line}
+          title={t.appointments.noAvailability}
+          description={t.appointments.noAvailabilityDesc}
+          actionLabel={t.nav.settings}
+          onAction={() => router.push("/settings")}
+        />
       </div>
     )
   }
@@ -66,9 +78,12 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
       ) : (
         <div className="space-y-1">
           {slots.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-white py-12 text-center dark:border-gray-800 dark:bg-gray-950">
-              <p className="text-sm text-gray-500 dark:text-gray-400">No slots available for this day</p>
-            </div>
+            <EmptyState
+              variant="card"
+              icon={RiCalendarLine}
+              title={t.appointments.noSlotsAvailable}
+              description={t.appointments.noSlotsAvailableDesc}
+            />
           ) : (
             slots.map((slot, index) => {
               const nextSlot = slots[index + 1]

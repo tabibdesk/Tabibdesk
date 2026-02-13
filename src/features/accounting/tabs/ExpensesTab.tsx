@@ -10,6 +10,7 @@ import { useUserClinic } from "@/contexts/user-clinic-context"
 import { AccountingToolbar, type DateRangePreset } from "../components/AccountingToolbar"
 import { startOfMonth, startOfToday } from "date-fns"
 import { RiAddLine, RiEyeLine, RiFileLine, RiShoppingBagLine } from "@remixicon/react"
+import { EmptyState } from "@/components/EmptyState"
 import { AddExpenseDrawer } from "../components/AddExpenseDrawer"
 import { ViewExpenseDrawer } from "../components/ViewExpenseDrawer"
 import { ProofViewerModal } from "../components/ProofViewerModal"
@@ -187,14 +188,13 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
           </CardContent>
         </Card>
       ) : expenses.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RiShoppingBagLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              {searchQuery ? t.expense.noExpensesMatch : t.expense.noExpensesFound}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RiShoppingBagLine}
+          title={searchQuery ? t.expense.noExpensesMatch : t.expense.noExpensesFound}
+          description={!searchQuery ? t.expense.expensesDescription : undefined}
+          actionLabel={!searchQuery ? t.expense.addExpense : undefined}
+          onAction={!searchQuery ? () => setShowAddModal(true) : undefined}
+        />
       ) : (
         <>
           {/* Desktop Table */}

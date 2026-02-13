@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
 import { RiHistoryLine, RiTimeLine } from "@remixicon/react"
+import { EmptyState } from "@/components/EmptyState"
 import { listActivities } from "@/api/activity.api"
 import { ActivityEvent, ActivityEntityType } from "@/types/activity"
 import { format } from "date-fns"
@@ -132,12 +133,11 @@ export function ArchivedActivityTab({
 
       {/* Activity List */}
       {events.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <RiHistoryLine className="size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">{t.archive.noActivityInRange}</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RiHistoryLine}
+          title={t.archive.noActivityInRange}
+          description={t.archive.archivedActivityDescription}
+        />
       ) : (
         <>
           <div className="relative">

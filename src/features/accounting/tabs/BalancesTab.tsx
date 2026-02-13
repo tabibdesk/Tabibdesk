@@ -10,6 +10,8 @@ import { getPatientBalances } from "@/api/accounting.api"
 import type { PatientBalance } from "../accounting.types"
 import { formatCurrency } from "../accounting.utils"
 import { ListSkeleton } from "@/components/skeletons"
+import { EmptyState } from "@/components/EmptyState"
+import { RiMoneyDollarCircleLine } from "@remixicon/react"
 // Simple debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
@@ -76,9 +78,11 @@ export function BalancesTab() {
 
       {/* Results */}
       {!loading && balances.length === 0 && (
-        <Card className="p-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">No patient balances found</p>
-        </Card>
+        <EmptyState
+          icon={RiMoneyDollarCircleLine}
+          title={query ? t.accounting.noBalancesMatch : t.accounting.noBalancesYet}
+          description={!query ? t.accounting.balancesDescription : undefined}
+        />
       )}
 
       {!loading && balances.length > 0 && (

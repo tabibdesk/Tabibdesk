@@ -22,6 +22,7 @@ interface DietTabProps {
 }
 
 export function DietTab({ diets, onEditDiet: _onEditDiet }: DietTabProps) {
+  const t = useAppTranslations()
   // Get active diet
   const activeDiet = diets.find((d) => d.is_active)
 
@@ -89,8 +90,8 @@ export function DietTab({ diets, onEditDiet: _onEditDiet }: DietTabProps) {
       {!activeDiet ? (
         <PatientEmptyState
           icon={RiRestaurantLine}
-          title="No diet plan yet"
-          description="Create a diet plan to see it here."
+          title={t.profile.noDietPlanYet}
+          description={t.profile.addDietPlanDesc}
         />
       ) : (
         <>

@@ -6,8 +6,9 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
-import { RiTaskLine, RiAddLine } from "@remixicon/react"
+import { RiTaskLine } from "@remixicon/react"
 import { useDebounce } from "@/lib/useDebounce"
+import { EmptyState } from "@/components/EmptyState"
 import { TasksToolbar } from "./TasksToolbar"
 import { TasksCards } from "./TasksCards"
 import { AddTaskDrawer } from "./AddTaskDrawer"
@@ -190,14 +191,13 @@ export function TasksPage({
           ))}
         </div>
       ) : tasks.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <RiTaskLine className="mx-auto size-12 text-gray-400" />
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              {searchQuery ? "No tasks found matching your filters." : "No tasks yet."}
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RiTaskLine}
+          title={searchQuery ? t.tasks.noTasksMatch : t.tasks.noTasksYet}
+          description={!searchQuery ? t.tasks.tasksDescription : undefined}
+          actionLabel={!searchQuery ? t.tasks.addFirstTask : undefined}
+          onAction={!searchQuery ? () => setShowNewTaskModal(true) : undefined}
+        />
       ) : (
         <>
           <TasksCards

@@ -77,8 +77,8 @@ export function TranscriptionsTab({ transcriptions }: TranscriptionsTabProps) {
       {sortedTranscriptions.length === 0 ? (
         <PatientEmptyState
           icon={RiVoiceprintLine}
-          title="No transcriptions yet"
-          description="Record or upload audio to get started."
+          title={t.profile.noTranscriptionsYet}
+          description={t.profile.addTranscriptionsDesc}
         />
       ) : (
         <div className="space-y-4">

@@ -182,6 +182,8 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
                 icon={RiFileTextLine}
                 title={t.profile.noClinicalNotesYet}
                 description={t.profile.addClinicalNotesDesc}
+                actionLabel={patient?.id ? t.profile.addNote : undefined}
+                onAction={patient?.id ? handleAddNote : undefined}
               />
             </div>
           ) : (

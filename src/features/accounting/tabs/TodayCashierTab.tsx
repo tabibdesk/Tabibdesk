@@ -12,8 +12,12 @@ import { CollectPaymentModal } from "../components/CollectPaymentModal"
 import { PaymentProofModal } from "../components/PaymentProofModal"
 import { formatCurrency } from "../accounting.utils"
 import { ListSkeleton } from "@/components/skeletons"
+import { EmptyState } from "@/components/EmptyState"
+import { useAppTranslations } from "@/lib/useAppTranslations"
+import { RiMoneyDollarCircleLine } from "@remixicon/react"
 
 export function TodayCashierTab() {
+  const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const { showToast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -118,9 +122,11 @@ export function TodayCashierTab() {
 
       {/* Empty State */}
       {!loading && rows.length === 0 && (
-        <Card className="p-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">No appointments today</p>
-        </Card>
+        <EmptyState
+          icon={RiMoneyDollarCircleLine}
+          title={t.accounting.noTodayCashier}
+          description={t.accounting.todayCashierDescription}
+        />
       )}
 
       {/* Data */}

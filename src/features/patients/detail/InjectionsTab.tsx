@@ -24,6 +24,7 @@ interface InjectionsTabProps {
 }
 
 export function InjectionsTab({ injections, onAddInjection }: InjectionsTabProps) {
+  const t = useAppTranslations()
   // Sort injections by date (newest first)
   const sortedInjections = [...injections].sort(
     (a, b) => new Date(b.injection_date).getTime() - new Date(a.injection_date).getTime()
@@ -47,11 +48,10 @@ export function InjectionsTab({ injections, onAddInjection }: InjectionsTabProps
       {sortedInjections.length === 0 ? (
         <PatientEmptyState
           icon={RiSyringeLine}
-          title="No injections yet"
-          description="Add injection records to see them here."
-          actionLabel={onAddInjection ? "Add injection" : undefined}
+          title={t.profile.noInjectionsYet}
+          description={t.profile.addInjectionsDesc}
+          actionLabel={onAddInjection ? t.profile.addFirstInjection : undefined}
           onAction={onAddInjection}
-          actionIcon={RiAddLine}
         />
       ) : (
         <div className="space-y-4">
