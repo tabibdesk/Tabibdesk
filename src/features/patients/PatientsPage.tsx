@@ -60,7 +60,15 @@ export function PatientsPage() {
       setTotal(response.total)
       setPage(pageNum)
     } catch (error) {
-      showToast("Failed to load patients", "error")
+      // For initial load (page 1), treat errors as empty results (common for new accounts)
+      // For subsequent pages, show error toast
+      if (pageNum === 1) {
+        setPatients([])
+        setHasMore(false)
+        setTotal(0)
+      } else {
+        showToast("Failed to load more patients", "error")
+      }
     } finally {
       setLoading(false)
     }
