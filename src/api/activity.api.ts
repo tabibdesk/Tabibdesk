@@ -3,6 +3,15 @@ import { ActivityEvent, ListActivityParams, ListActivityResponse } from "@/types
 // In-memory store for activities (demo mode)
 let activitiesStore: ActivityEvent[] = [];
 
+// Helper to check if in demo mode
+function isDemoMode(): boolean {
+  if (typeof window !== "undefined") {
+    const storedDemoMode = localStorage.getItem("demo-mode")
+    return storedDemoMode === "true" || storedDemoMode === null
+  }
+  return true // Server-side defaults to demo mode
+}
+
 // Seed some initial activities for demo
 const seedActivities = () => {
   if (activitiesStore.length > 0) return;
@@ -85,6 +94,16 @@ export async function listActivities(params: ListActivityParams): Promise<ListAc
     page = 1, 
     pageSize = 20 
   } = params;
+
+  // Return empty results if not in demo mode
+  if (!isDemoMode()) {
+    return {
+      events: [],
+      total: 0,
+      page,
+      pageSize,
+    }
+  }
 
   let filtered = activitiesStore.filter(a => a.clinicId === clinicId);
 
