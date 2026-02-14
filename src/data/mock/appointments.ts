@@ -860,15 +860,12 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     endTime: "17:00",
     slotDuration: 30,
     appointmentTypeDurations: {
-      "new": 60,
-      "Consultation": 60,
-      "followup": 30,
-      "Follow-up": 30,
-      "Followup": 30,
-      "online": 45,
-      "Check-up": 60,
-      "Checkup": 60,
-      "Procedure": 45,
+      consultation: 60,
+      followup: 30,
+      checkup: 60,
+      procedure: 45,
+      new: 60,
+      online: 45,
     },
     breaks: [
       { startTime: "12:00", endTime: "13:00" },
@@ -886,11 +883,10 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     endTime: "13:00",
     slotDuration: 30,
     appointmentTypeDurations: {
-      "new": 60,
-      "Consultation": 60,
-      "followup": 30,
-      "Follow-up": 30,
-      "Followup": 30,
+      consultation: 60,
+      followup: 30,
+      checkup: 60,
+      procedure: 45,
     },
     breaks: [],
     createdAt: new Date().toISOString(),
@@ -906,11 +902,10 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     endTime: "15:00",
     slotDuration: 30,
     appointmentTypeDurations: {
-      "new": 60,
-      "Consultation": 60,
-      "followup": 30,
-      "Follow-up": 30,
-      "Followup": 30,
+      consultation: 60,
+      followup: 30,
+      checkup: 60,
+      procedure: 45,
     },
     breaks: [
       { startTime: "12:00", endTime: "13:00" },
@@ -928,11 +923,10 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     endTime: "16:00",
     slotDuration: 30,
     appointmentTypeDurations: {
-      "new": 60,
-      "Consultation": 60,
-      "followup": 30,
-      "Follow-up": 30,
-      "Followup": 30,
+      consultation: 60,
+      followup: 30,
+      checkup: 60,
+      procedure: 45,
     },
     breaks: [
       { startTime: "12:00", endTime: "13:00" },
@@ -940,7 +934,7 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
-  
+
   // ========== DOCTOR user-002 (فاطمة علي) ==========
   // Clinic-001 (المعادي) - Weekdays
   {
@@ -952,11 +946,10 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     endTime: "16:00",
     slotDuration: 30,
     appointmentTypeDurations: {
-      "new": 45,
-      "Consultation": 45,
-      "followup": 30,
-      "Follow-up": 30,
-      "Followup": 30,
+      consultation: 45,
+      followup: 30,
+      checkup: 45,
+      procedure: 45,
     },
     breaks: [
       { startTime: "13:00", endTime: "14:00" },
@@ -974,11 +967,10 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     endTime: "15:00",
     slotDuration: 30,
     appointmentTypeDurations: {
-      "new": 45,
-      "Consultation": 45,
-      "followup": 30,
-      "Follow-up": 30,
-      "Followup": 30,
+      consultation: 45,
+      followup: 30,
+      checkup: 45,
+      procedure: 45,
     },
     breaks: [
       { startTime: "12:00", endTime: "13:00" },
@@ -996,11 +988,10 @@ export const mockDoctorAvailability: DoctorAvailability[] = [
     endTime: "16:00",
     slotDuration: 30,
     appointmentTypeDurations: {
-      "new": 45,
-      "Consultation": 45,
-      "followup": 30,
-      "Follow-up": 30,
-      "Followup": 30,
+      consultation: 45,
+      followup: 30,
+      checkup: 45,
+      procedure: 45,
     },
     breaks: [
       { startTime: "12:00", endTime: "13:00" },

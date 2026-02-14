@@ -35,13 +35,33 @@ import {
   RiScan2Line,
   RiRefreshLine,
   RiUserHeartLine,
+  RiTeamLine,
+  RiMapPinLine,
+  RiAddLine,
+  RiEditLine,
+  RiArrowDownSLine,
+  RiArrowUpSLine,
+  RiDeleteBinLine,
 } from "@remixicon/react"
 import { FollowUpRulesTab } from "./FollowUpRulesTab"
+import {
+  ClinicSettingsDrawer,
+  type BranchFormValues,
+} from "./ClinicSettingsDrawer"
+import { AvailabilityDrawer, type AvailabilityRecordPayload } from "./AvailabilityDrawer"
+import { getClinicAppointmentTypes, setClinicAppointmentTypes } from "@/api/pricing.api"
+import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
+import * as availabilityApi from "@/features/appointments/availability.api"
+import type { DoctorAvailability } from "@/features/appointments/types"
+import { TeamMemberAccessDrawer } from "./TeamMemberAccessDrawer"
 import { getBasicMetrics, getSpecialtyMetrics } from "@/types/progress"
+import { getClinicMembersByUserId } from "@/data/mock/users-clinics"
+import { getBackendType } from "@/lib/api/repository-factory"
+import type { ClinicMembership } from "./TeamMemberAccessDrawer"
 
-type TabId = "profile" | "clinic-team" | "modules" | "preferences" | "followup" | "patient"
+type TabId = "account" | "clinic" | "team" | "appointments" | "patient" | "followup" | "modules"
 
-const TAB_IDS: TabId[] = ["profile", "clinic-team", "modules", "preferences", "followup", "patient"]
+const TAB_IDS: TabId[] = ["account", "clinic", "team", "appointments", "patient", "followup", "modules"]
 
 function isValidTabId(value: string | null): value is TabId {
   return value !== null && TAB_IDS.includes(value as TabId)
@@ -51,7 +71,7 @@ function SettingsPageContent() {
   const searchParams = useSearchParams()
   const tabFromUrl = searchParams.get("tab")
   const [activeTab, setActiveTab] = useState<TabId>(() =>
-    isValidTabId(tabFromUrl) ? tabFromUrl : "modules"
+    isValidTabId(tabFromUrl) ? tabFromUrl : "account"
   )
   const { currentUser } = useUserClinic()
   const t = useAppTranslations()
@@ -64,12 +84,13 @@ function SettingsPageContent() {
   }, [tabFromUrl])
 
   const tabs = [
-    { id: "profile" as const, label: t.settings.profile, labelShort: t.settings.profile, icon: RiUserLine },
-    { id: "clinic-team" as const, label: t.settings.clinicTeam, labelShort: t.common.clinic.split(" ")[0], icon: RiBuildingLine },
-    { id: "modules" as const, label: t.settings.modules, labelShort: t.settings.modules, icon: RiPuzzleLine },
-    { id: "followup" as const, label: t.settings.followUpRules, labelShort: t.settings.followUpRules.split(" ")[0], icon: RiRefreshLine },
+    { id: "account" as const, label: t.settings.account, labelShort: t.settings.account, icon: RiUserLine },
+    { id: "clinic" as const, label: t.settings.clinic, labelShort: t.settings.clinic, icon: RiBuildingLine },
+    { id: "team" as const, label: t.settings.team, labelShort: t.settings.team, icon: RiTeamLine },
+    { id: "appointments" as const, label: t.settings.appointments, labelShort: t.settings.appointments, icon: RiCalendarLine },
     { id: "patient" as const, label: t.settings.patient, labelShort: t.settings.patient, icon: RiUserHeartLine },
-    { id: "preferences" as const, label: t.settings.appointments, labelShort: t.settings.appointments, icon: RiCalendarLine },
+    { id: "followup" as const, label: t.settings.followUpRules, labelShort: t.settings.followUpRules.split(" ")[0], icon: RiRefreshLine },
+    { id: "modules" as const, label: t.settings.modules, labelShort: t.settings.modules, icon: RiPuzzleLine },
   ]
 
   // Check permissions
@@ -115,19 +136,20 @@ function SettingsPageContent() {
 
       {/* Tab Content - Responsive */}
       <div className="mt-4 sm:mt-6">
-        {activeTab === "profile" && <ProfileTab />}
-        {activeTab === "clinic-team" && <ClinicTeamTab />}
-        {activeTab === "modules" && <ModulesTab canEdit={canEditModules} />}
-        {activeTab === "followup" && <FollowUpRulesTab />}
+        {activeTab === "account" && <AccountTab />}
+        {activeTab === "clinic" && <ClinicTab />}
+        {activeTab === "team" && <TeamTab />}
+        {activeTab === "appointments" && <AppointmentsTab />}
         {activeTab === "patient" && <PatientTab />}
-        {activeTab === "preferences" && <PreferencesTab />}
+        {activeTab === "followup" && <FollowUpRulesTab />}
+        {activeTab === "modules" && <ModulesTab canEdit={canEditModules} />}
       </div>
     </div>
   )
 }
 
-// Profile Tab
-function ProfileTab() {
+// Account Tab (first tab: profile + app preferences)
+function AccountTab() {
   const { currentUser } = useUserClinic()
   const t = useAppTranslations()
 
@@ -136,7 +158,6 @@ function ProfileTab() {
       <Card>
         <CardHeader>
           <CardTitle>{t.settings.profileSettings}</CardTitle>
-          <CardDescription>{t.settings.updatePersonalInfo}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-6 sm:grid-cols-2">
@@ -173,7 +194,6 @@ function ProfileTab() {
       <Card>
         <CardHeader>
           <CardTitle>{t.settings.appPreferences}</CardTitle>
-          <CardDescription>{t.settings.customizeExperience}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -231,110 +251,604 @@ function LanguageSelect() {
   )
 }
 
-// Clinic & Team Tab (Merged)
-function ClinicTeamTab() {
+const DEFAULT_BRANCH_TIMEZONE = "Africa/Cairo"
+const DEFAULT_BRANCH_APPOINTMENT_MIN = 30
+
+// Clinic Tab: branches card first; each branch shows full settings; Add/Edit open drawer
+function ClinicTab() {
   const t = useAppTranslations()
-  const { currentClinic, allClinics, setCurrentClinic, allUsers } = useUserClinic()
-  const [clinicSettings, setClinicSettings] = useState(currentClinic)
+  const { allClinics } = useUserClinic()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerMode, setDrawerMode] = useState<"add" | "edit">("add")
+  const [editingBranchId, setEditingBranchId] = useState<string | null>(null)
+  const [branchOverrides, setBranchOverrides] = useState<
+    Record<string, Partial<BranchFormValues>>
+  >({})
+  const [localBranches, setLocalBranches] = useState<
+    Array<{ id: string } & BranchFormValues>
+  >([])
+
+  const displayBranches: Array<{
+    id: string
+    name: string
+    address: string
+    timezone: string
+    defaultAppointmentMin: number
+    isLocal: boolean
+  }> = [
+    ...allClinics.map((c) => {
+      const o = branchOverrides[c.id]
+      return {
+        id: c.id,
+        name: o?.name ?? c.name,
+        address: o?.address ?? c.address ?? "",
+        timezone: o?.timezone ?? DEFAULT_BRANCH_TIMEZONE,
+        defaultAppointmentMin: o?.defaultAppointmentMin ?? DEFAULT_BRANCH_APPOINTMENT_MIN,
+        isLocal: false,
+      }
+    }),
+    ...localBranches.map((b) => ({
+      id: b.id,
+      name: b.name,
+      address: b.address,
+      timezone: b.timezone,
+      defaultAppointmentMin: b.defaultAppointmentMin,
+      isLocal: true,
+    })),
+  ]
+
+  const openAddDrawer = () => {
+    setDrawerMode("add")
+    setEditingBranchId(null)
+    setDrawerOpen(true)
+  }
+
+  const openEditDrawer = (branchId: string) => {
+    setDrawerMode("edit")
+    setEditingBranchId(branchId)
+    setDrawerOpen(true)
+  }
+
+  const getInitialValuesForEdit = (): BranchFormValues | null => {
+    if (!editingBranchId) return null
+    const local = localBranches.find((b) => b.id === editingBranchId)
+    if (local)
+      return {
+        name: local.name,
+        address: local.address,
+        timezone: local.timezone,
+        defaultAppointmentMin: local.defaultAppointmentMin,
+      }
+    const fromContext = allClinics.find((c) => c.id === editingBranchId)
+    if (fromContext) {
+      const o = branchOverrides[editingBranchId]
+      return {
+        name: o?.name ?? fromContext.name,
+        address: o?.address ?? fromContext.address ?? "",
+        timezone: o?.timezone ?? DEFAULT_BRANCH_TIMEZONE,
+        defaultAppointmentMin: o?.defaultAppointmentMin ?? DEFAULT_BRANCH_APPOINTMENT_MIN,
+      }
+    }
+    return null
+  }
+
+  const handleSaveBranch = (values: BranchFormValues) => {
+    if (drawerMode === "add") {
+      setLocalBranches((prev) => [
+        ...prev,
+        { id: `local-${Date.now()}`, ...values },
+      ])
+    } else if (editingBranchId) {
+      const isLocal = localBranches.some((b) => b.id === editingBranchId)
+      if (isLocal) {
+        setLocalBranches((prev) =>
+          prev.map((b) =>
+            b.id === editingBranchId ? { ...b, ...values } : b
+          )
+        )
+      } else {
+        setBranchOverrides((prev) => ({
+          ...prev,
+          [editingBranchId]: values,
+        }))
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* Clinic Settings */}
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <CardTitle>{t.settings.clinicBranches}</CardTitle>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 shrink-0"
+            onClick={openAddDrawer}
+            title={t.settings.addBranch}
+          >
+            <RiAddLine className="size-4" />
+            <span className="hidden sm:inline">{t.settings.addBranch}</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {displayBranches.map((branch) => (
+            <BranchCard
+              key={branch.id}
+              branch={branch}
+              onEdit={() => openEditDrawer(branch.id)}
+              editLabel={t.common.edit}
+              t={t}
+            />
+          ))}
+        </CardContent>
+      </Card>
+
+      <ClinicSettingsDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        mode={drawerMode}
+        initialValues={drawerMode === "edit" ? getInitialValuesForEdit() : null}
+        onSave={handleSaveBranch}
+      />
+    </div>
+  )
+}
+
+function BranchCard({
+  branch,
+  onEdit,
+  editLabel,
+  t,
+}: {
+  branch: {
+    id: string
+    name: string
+    address: string
+    timezone: string
+    defaultAppointmentMin: number
+    isLocal: boolean
+  }
+  onEdit: () => void
+  editLabel: string
+  t: ReturnType<typeof useAppTranslations>
+}) {
+  return (
+    <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex items-center gap-2">
+            <RiMapPinLine className="size-4 shrink-0 text-gray-500 dark:text-gray-400" />
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+              {branch.name}
+            </span>
+          </div>
+          {branch.address && (
+            <p className="text-sm text-gray-600 dark:text-gray-400">{branch.address}</p>
+          )}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+            <span>{t.settings.timezone}: {branch.timezone}</span>
+            <span>
+              {t.settings.defaultAppointmentMin}: {branch.defaultAppointmentMin} {t.settings.minutes}
+            </span>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="shrink-0"
+          onClick={onEdit}
+          aria-label={editLabel}
+        >
+          <RiEditLine className="size-4" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// Pending invite (mock, persisted in localStorage per subscription)
+type PendingInviteRole = "doctor" | "assistant" | "manager"
+interface PendingInvite {
+  id: string
+  email: string
+  role: PendingInviteRole
+  clinicIds: string[]
+  invitedAt: string
+}
+
+const PENDING_INVITES_KEY_PREFIX = "tabibdesk_pending_invites_"
+
+function getPendingInvitesStorageKey(subscriptionId: string): string {
+  return `${PENDING_INVITES_KEY_PREFIX}${subscriptionId || "default"}`
+}
+
+function loadPendingInvites(subscriptionId: string): PendingInvite[] {
+  if (typeof window === "undefined") return []
+  try {
+    const raw = localStorage.getItem(getPendingInvitesStorageKey(subscriptionId))
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(
+      (item): item is PendingInvite =>
+        typeof item?.id === "string" &&
+        typeof item?.email === "string" &&
+        (item?.role === "doctor" || item?.role === "assistant" || item?.role === "manager") &&
+        Array.isArray(item?.clinicIds) &&
+        typeof item?.invitedAt === "string"
+    )
+  } catch {
+    return []
+  }
+}
+
+function savePendingInvites(subscriptionId: string, invites: PendingInvite[]): void {
+  if (typeof window === "undefined") return
+  try {
+    localStorage.setItem(getPendingInvitesStorageKey(subscriptionId), JSON.stringify(invites))
+  } catch {
+    // ignore
+  }
+}
+
+// Team Tab: invite members, assign roles, grant access to clinic or more
+function TeamTab() {
+  const t = useAppTranslations()
+  const { allUsers, allClinics, currentClinic } = useUserClinic()
+  const subscriptionId = currentClinic.subscription_id || "default"
+
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>(() =>
+    loadPendingInvites(subscriptionId)
+  )
+  const [inviteFormOpen, setInviteFormOpen] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [inviteRole, setInviteRole] = useState<PendingInviteRole>("assistant")
+  const [inviteClinicIds, setInviteClinicIds] = useState<string[]>(() =>
+    allClinics.length > 0 ? [allClinics[0].id] : []
+  )
+  const [inviteMessage, setInviteMessage] = useState<"sent" | "resent" | "cancelled" | null>(null)
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
+  const [memberAccessOverride, setMemberAccessOverride] = useState<Record<string, ClinicMembership[]>>({})
+
+  const getMemberMemberships = (userId: string): ClinicMembership[] => {
+    if (memberAccessOverride[userId] !== undefined) return memberAccessOverride[userId]
+    if (getBackendType() === "mock") {
+      try {
+        return getClinicMembersByUserId(userId).map((m) => ({
+          clinicId: m.clinic_id,
+          role: m.role as ClinicMembership["role"],
+        }))
+      } catch {
+        return allClinics.map((c) => ({ clinicId: c.id, role: "assistant" as const }))
+      }
+    }
+    return allClinics.map((c) => ({ clinicId: c.id, role: "assistant" as const }))
+  }
+
+  const formatMembershipsDisplay = (memberships: ClinicMembership[]): string => {
+    return memberships
+      .map((m) => {
+        const name = allClinics.find((c) => c.id === m.clinicId)?.name ?? m.clinicId
+        const roleLabel =
+          m.role === "doctor" ? t.common.doctor : m.role === "assistant" ? t.common.assistant : t.common.manager
+        return `${name} (${roleLabel})`
+      })
+      .join(", ")
+  }
+
+  const handleSaveMemberAccess = (userId: string, memberships: ClinicMembership[]) => {
+    setMemberAccessOverride((prev) => ({ ...prev, [userId]: memberships }))
+    setEditingMemberId(null)
+  }
+
+  // Keep pending invites in sync with localStorage when subscription changes
+  useEffect(() => {
+    setPendingInvites(loadPendingInvites(subscriptionId))
+  }, [subscriptionId])
+
+  // Default selected clinic when allClinics changes (e.g. single clinic)
+  useEffect(() => {
+    if (allClinics.length > 0 && inviteClinicIds.length === 0) {
+      setInviteClinicIds([allClinics[0].id])
+    }
+  }, [allClinics])
+
+  const persistPendingInvites = (next: PendingInvite[]) => {
+    setPendingInvites(next)
+    savePendingInvites(subscriptionId, next)
+  }
+
+  const handleSendInvitation = (e: React.FormEvent) => {
+    e.preventDefault()
+    const email = inviteEmail.trim()
+    if (!email) return
+    const clinicIds = allClinics.length > 1 ? inviteClinicIds : allClinics.map((c) => c.id)
+    if (allClinics.length > 1 && clinicIds.length === 0) return
+
+    const next: PendingInvite = {
+      id: `invite-${Date.now()}`,
+      email,
+      role: inviteRole,
+      clinicIds,
+      invitedAt: new Date().toISOString(),
+    }
+    persistPendingInvites([...pendingInvites, next])
+    setInviteEmail("")
+    setInviteRole("assistant")
+    setInviteClinicIds(allClinics.length > 0 ? [allClinics[0].id] : [])
+    setInviteMessage("sent")
+    setTimeout(() => setInviteMessage(null), 3000)
+  }
+
+  const handleResend = (id: string) => {
+    const next = pendingInvites.map((inv) =>
+      inv.id === id ? { ...inv, invitedAt: new Date().toISOString() } : inv
+    )
+    persistPendingInvites(next)
+    setInviteMessage("resent")
+    setTimeout(() => setInviteMessage(null), 3000)
+  }
+
+  const handleCancelInvite = (id: string) => {
+    persistPendingInvites(pendingInvites.filter((inv) => inv.id !== id))
+    setInviteMessage("cancelled")
+    setTimeout(() => setInviteMessage(null), 3000)
+  }
+
+  const toggleClinic = (clinicId: string) => {
+    setInviteClinicIds((prev) =>
+      prev.includes(clinicId) ? prev.filter((c) => c !== clinicId) : [...prev, clinicId]
+    )
+  }
+
+  const formatInvitedDate = (iso: string) => {
+    try {
+      const d = new Date(iso)
+      return d.toLocaleDateString(undefined, { dateStyle: "short" })
+    } catch {
+      return iso
+    }
+  }
+
+  return (
+    <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>{t.settings.clinicSettings}</CardTitle>
-          <CardDescription>{t.settings.manageClinicInfo}</CardDescription>
+          <CardTitle>{t.settings.teamMembers}</CardTitle>
+          <CardDescription>{t.settings.inviteTeamMemberDesc}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {allClinics.length > 1 && (
-            <div className="space-y-2">
-              <Label htmlFor="clinic-selector">{t.settings.selectedClinic}</Label>
-              <select
-                id="clinic-selector"
-                value={currentClinic.id}
-                onChange={(e) => setCurrentClinic(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
+        <CardContent className="space-y-4">
+          {/* Inline expandable invite form */}
+          <div className="rounded-lg border border-gray-200 dark:border-gray-800">
+            <button
+              type="button"
+              onClick={() => setInviteFormOpen((o) => !o)}
+              className="flex w-full items-center justify-between gap-2 px-4 py-3 text-start text-sm font-medium text-gray-900 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              aria-expanded={inviteFormOpen}
+              aria-controls="invite-form-content"
+              id="invite-form-toggle"
+            >
+              <span>{t.settings.inviteTeamMember}</span>
+              {inviteFormOpen ? (
+                <RiArrowUpSLine className="size-4 shrink-0 rtl:rotate-180" aria-hidden />
+              ) : (
+                <RiArrowDownSLine className="size-4 shrink-0 rtl:rotate-180" aria-hidden />
+              )}
+            </button>
+            {inviteFormOpen && (
+              <div
+                id="invite-form-content"
+                role="region"
+                aria-labelledby="invite-form-toggle"
+                className="border-t border-gray-200 px-4 py-4 dark:border-gray-800"
               >
-                {allClinics.map((clinic) => (
-                  <option key={clinic.id} value={clinic.id}>
-                    {clinic.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <form onSubmit={handleSendInvitation} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="invite-email" className="text-sm">
+                      {t.settings.inviteEmailPlaceholder}
+                    </Label>
+                    <Input
+                      id="invite-email"
+                      type="email"
+                      placeholder={t.settings.inviteEmailPlaceholder}
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="invite-role" className="text-sm">
+                      {t.settings.inviteRoleLabel}
+                    </Label>
+                    <select
+                      id="invite-role"
+                      value={inviteRole}
+                      onChange={(e) => setInviteRole(e.target.value as PendingInviteRole)}
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
+                    >
+                      <option value="doctor">{t.common.doctor}</option>
+                      <option value="assistant">{t.common.assistant}</option>
+                      <option value="manager">{t.common.manager}</option>
+                    </select>
+                  </div>
+                  {allClinics.length > 1 && (
+                    <div className="space-y-2">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                        {t.settings.inviteClinicsLabel}
+                      </span>
+                      <div className="flex flex-wrap gap-3 pt-1">
+                        {allClinics.map((c) => (
+                          <label
+                            key={c.id}
+                            className="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={inviteClinicIds.includes(c.id)}
+                              onChange={() => toggleClinic(c.id)}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            {c.name}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button type="submit" variant="primary" className="gap-2 text-sm">
+                      <RiAddLine className="size-4" />
+                      {t.settings.sendInvitation}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+
+          {inviteMessage === "sent" && (
+            <p className="text-sm text-green-600 dark:text-green-400" role="status">
+              {t.settings.invitationSent}
+            </p>
+          )}
+          {inviteMessage === "resent" && (
+            <p className="text-sm text-green-600 dark:text-green-400" role="status">
+              {t.settings.invitationResent}
+            </p>
+          )}
+          {inviteMessage === "cancelled" && (
+            <p className="text-sm text-gray-600 dark:text-gray-400" role="status">
+              {t.settings.invitationCancelled}
+            </p>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="clinic-name">{t.settings.clinicName}</Label>
-            <Input
-              id="clinic-name"
-              value={clinicSettings.name}
-              onChange={(e) => setClinicSettings({ ...clinicSettings, name: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="clinic-address">Address</Label>
-            <Input
-              id="clinic-address"
-              value={clinicSettings.address}
-              onChange={(e) => setClinicSettings({ ...clinicSettings, address: e.target.value })}
-            />
-          </div>
-
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="timezone">{t.settings.timezone}</Label>
-              <select
-                id="timezone"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
-              >
-                <option>Africa/Cairo (GMT+2)</option>
-                <option>Asia/Dubai (GMT+4)</option>
-                <option>Europe/London (GMT+0)</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="appointment-duration">{t.settings.defaultAppointmentMin}</Label>
-              <Input id="appointment-duration" type="number" defaultValue={30} />
-            </div>
-          </div>
-
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" className="w-full sm:w-auto">Cancel</Button>
-            <Button variant="primary" className="w-full sm:w-auto">Save Changes</Button>
+          {/* Current team members */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+              {t.settings.teamMembers}
+            </h3>
+            {allUsers.map((user) => {
+              const memberships = getMemberMemberships(user.id)
+              const membershipsDisplay = formatMembershipsDisplay(memberships)
+              return (
+                <div
+                  key={user.id}
+                  className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-medium text-primary-700 dark:bg-primary-900/20 dark:text-primary-400">
+                      {user.avatar_initials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-gray-900 dark:text-gray-50">{user.full_name}</p>
+                      <p className="truncate text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
+                      {membershipsDisplay && (
+                        <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                          {membershipsDisplay}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {allClinics.length > 1 && memberships.length > 0 && (
+                      <Badge color="gray" size="xs">
+                        {memberships.some((m) => m.role === "manager")
+                          ? t.common.manager
+                          : memberships.some((m) => m.role === "doctor")
+                            ? t.common.doctor
+                            : t.common.assistant}
+                      </Badge>
+                    )}
+                    {allClinics.length > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => setEditingMemberId(user.id)}
+                        aria-label={t.common.edit}
+                      >
+                        <RiEditLine className="size-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </CardContent>
       </Card>
 
-      {/* Team Members */}
+      {editingMemberId && (() => {
+        const user = allUsers.find((u) => u.id === editingMemberId)
+        if (!user) return null
+        return (
+          <TeamMemberAccessDrawer
+            open={!!editingMemberId}
+            onOpenChange={(open) => !open && setEditingMemberId(null)}
+            memberName={user.full_name}
+            memberEmail={user.email}
+            initialMemberships={getMemberMemberships(user.id)}
+            clinics={allClinics}
+            onSave={(memberships) => handleSaveMemberAccess(user.id, memberships)}
+          />
+        )
+      })()}
+
+      {/* Pending invitations */}
       <Card>
         <CardHeader>
-          <CardTitle>Team Members</CardTitle>
-          <CardDescription>Manage users and roles</CardDescription>
+          <CardTitle className="text-lg">{t.settings.pendingInvitations}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {allUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-medium text-primary-700 dark:bg-primary-900/20 dark:text-primary-400">
-                    {user.avatar_initials}
-                  </div>
+          {pendingInvites.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t.settings.noPendingInvitations}</p>
+          ) : (
+            <div className="space-y-3">
+              {pendingInvites.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="flex flex-col gap-3 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-800"
+                >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-gray-900 dark:text-gray-50">{user.full_name}</p>
-                    <p className="truncate text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
+                    <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-50">{inv.email}</p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <Badge color="gray" size="xs">
+                        {inv.role === "doctor" ? t.common.doctor : inv.role === "assistant" ? t.common.assistant : t.common.manager}
+                      </Badge>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {inv.clinicIds
+                          .map((id) => allClinics.find((c) => c.id === id)?.name ?? id)
+                          .join(", ")}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                      {t.settings.invitedOn} {formatInvitedDate(inv.invitedAt)}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-sm"
+                      onClick={() => handleResend(inv.id)}
+                    >
+                      {t.settings.resendInvitation}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-sm"
+                      onClick={() => handleCancelInvite(inv.id)}
+                    >
+                      {t.settings.cancelInvitation}
+                    </Button>
                   </div>
                 </div>
-                <Badge color="gray" size="xs">
-                  {user.role === "doctor" ? t.common.doctor : user.role === "assistant" ? t.common.assistant : t.common.manager}
-                </Badge>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -587,40 +1101,312 @@ function PatientTab() {
   )
 }
 
-// Appointments Tab
-function PreferencesTab() {
+const BOOKABLE_TYPE_IDS = ["consultation", "followup", "checkup", "procedure"] as const
+
+function normalizeCustomTypeId(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\p{L}\p{N}_-]/gu, "")
+}
+
+function formatTypeDisplayLabel(typeId: string, t: ReturnType<typeof useAppTranslations>): string {
+  const label = getAppointmentTypeLabel(typeId, t.appointments)
+  if (label !== typeId) return label
+  return typeId
+    .split(/[-_]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
+function formatDaysSummary(daysOfWeek: string[], t: ReturnType<typeof useAppTranslations>): string {
+  const dayLabels: Record<string, string> = {
+    monday: t.settings.dayMonday,
+    tuesday: t.settings.dayTuesday,
+    wednesday: t.settings.dayWednesday,
+    thursday: t.settings.dayThursday,
+    friday: t.settings.dayFriday,
+    saturday: t.settings.daySaturday,
+    sunday: t.settings.daySunday,
+  }
+  return daysOfWeek.map((d) => dayLabels[d] ?? d).join(", ")
+}
+
+// Appointments Tab: appointment types, availability per doctor/clinic, buffer
+function AppointmentsTab() {
   const t = useAppTranslations()
-  const { currentClinic } = useUserClinic()
+  const { currentClinic, allClinics, allUsers } = useUserClinic()
   const [bufferMinutes, setBufferMinutes] = useState(5)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isSavingBuffer, setIsSavingBuffer] = useState(false)
+  const [clinicTypes, setClinicTypes] = useState<string[]>([])
+  const [availabilityList, setAvailabilityList] = useState<DoctorAvailability[]>([])
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerMode, setDrawerMode] = useState<"add" | "edit">("add")
+  const [editingAvailability, setEditingAvailability] = useState<DoctorAvailability | null>(null)
+  const [addTypeOpen, setAddTypeOpen] = useState(false)
+  const [customTypeInput, setCustomTypeInput] = useState("")
+
+  const doctors = allUsers.filter((u) => u.role === "doctor")
 
   useEffect(() => {
-    // Load current clinic settings
     settingsApi.getClinicSettings(currentClinic.id).then((settings) => {
-      setBufferMinutes(settings.bufferMinutes || 5)
+      setBufferMinutes(settings.bufferMinutes ?? 5)
     })
   }, [currentClinic.id])
 
-  const handleSaveAppointmentSettings = async () => {
-    setIsSaving(true)
+  useEffect(() => {
+    getClinicAppointmentTypes(currentClinic.id).then(setClinicTypes)
+  }, [currentClinic.id])
+
+  const refetchAvailability = () => {
+    const clinicId = currentClinic.id
+    Promise.all(doctors.map((d) => availabilityApi.listByDoctor(d.id, clinicId)))
+      .then((arrays) => setAvailabilityList(arrays.flat()))
+  }
+
+  useEffect(() => {
+    refetchAvailability()
+  }, [currentClinic.id, doctors.length])
+
+  const handleSaveBuffer = async () => {
+    setIsSavingBuffer(true)
     try {
-      await settingsApi.updateClinicSettings(currentClinic.id, {
-        bufferMinutes,
-      })
+      await settingsApi.updateClinicSettings(currentClinic.id, { bufferMinutes })
     } catch (error) {
       console.error("Failed to save settings:", error)
     } finally {
-      setIsSaving(false)
+      setIsSavingBuffer(false)
     }
   }
 
+  const handleRemoveType = (typeId: string) => {
+    setClinicTypes((prev) => {
+      const next = prev.filter((id) => id !== typeId)
+      setClinicAppointmentTypes(currentClinic.id, next)
+      return next
+    })
+  }
+
+  const handleAddType = (typeId: string) => {
+    setClinicTypes((prev) => {
+      if (prev.includes(typeId)) return prev
+      const next = [...prev, typeId]
+      setClinicAppointmentTypes(currentClinic.id, next)
+      return next
+    })
+    setAddTypeOpen(false)
+  }
+
+  const handleAddCustomType = () => {
+    const id = normalizeCustomTypeId(customTypeInput)
+    if (!id) return
+    setClinicTypes((prev) => {
+      if (prev.includes(id)) return prev
+      const next = [...prev, id]
+      setClinicAppointmentTypes(currentClinic.id, next)
+      return next
+    })
+    setCustomTypeInput("")
+  }
+
+  const openAddAvailability = () => {
+    setDrawerMode("add")
+    setEditingAvailability(null)
+    setDrawerOpen(true)
+  }
+
+  const openEditAvailability = (av: DoctorAvailability) => {
+    setDrawerMode("edit")
+    setEditingAvailability(av)
+    setDrawerOpen(true)
+  }
+
+  const handleSaveAvailabilityDrawer = (records: AvailabilityRecordPayload[]) => {
+    const run = async () => {
+      if (drawerMode === "edit" && editingAvailability) {
+        await availabilityApi.deleteAvailability(editingAvailability.id)
+        setEditingAvailability(null)
+      }
+      for (const r of records) {
+        await availabilityApi.create({
+          doctorId: r.doctorId,
+          clinicId: r.clinicId,
+          daysOfWeek: r.daysOfWeek,
+          startTime: r.startTime,
+          endTime: r.endTime,
+          slotDuration: r.slotDuration,
+        })
+      }
+      refetchAvailability()
+      setDrawerOpen(false)
+    }
+    run()
+  }
+
+  const handleDeleteAvailability = (id: string) => {
+    if (!window.confirm(t.settings.confirmDeleteAvailability)) return
+    availabilityApi.deleteAvailability(id).then(refetchAvailability)
+  }
+
+  const availableToAdd = BOOKABLE_TYPE_IDS.filter((id) => !clinicTypes.includes(id))
+  const getDoctorName = (id: string) => allUsers.find((u) => u.id === id)?.full_name ?? id
+  const getClinicName = (id: string) => allClinics.find((c) => c.id === id)?.name ?? id
+
   return (
     <div className="space-y-6">
-      {/* Appointment Settings */}
+      {/* Card 1: Appointment Types */}
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+          <CardTitle>{t.settings.appointmentTypes}</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 shrink-0"
+            onClick={() => setAddTypeOpen((o) => !o)}
+          >
+            <RiAddLine className="size-4" />
+            <span className="hidden sm:inline">{t.settings.addAppointmentType}</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {addTypeOpen && (
+            <div className="space-y-3 rounded-lg border border-gray-200 p-3 dark:border-gray-800">
+              {availableToAdd.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {availableToAdd.map((id) => (
+                    <Button
+                      key={id}
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleAddType(id)}
+                    >
+                      {getAppointmentTypeLabel(id, t.appointments)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder={t.settings.customTypePlaceholder}
+                  value={customTypeInput}
+                  onChange={(e) => setCustomTypeInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddCustomType())}
+                  className="min-w-[12rem] flex-1"
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddCustomType}
+                  disabled={!normalizeCustomTypeId(customTypeInput) || clinicTypes.includes(normalizeCustomTypeId(customTypeInput))}
+                >
+                  {t.settings.addCustomType}
+                </Button>
+              </div>
+            </div>
+          )}
+          {clinicTypes.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t.settings.noAppointmentTypes}</p>
+          ) : (
+            <div className="rounded-lg border border-gray-200 divide-y divide-gray-200 dark:border-gray-800 dark:divide-gray-800">
+              {clinicTypes.map((typeId) => (
+                <div
+                  key={typeId}
+                  className="flex items-center justify-between px-4 py-3"
+                >
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                    {formatTypeDisplayLabel(typeId, t)}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-500 hover:text-destructive"
+                    onClick={() => handleRemoveType(typeId)}
+                    title={t.settings.removeAppointmentType}
+                    aria-label={t.settings.removeAppointmentType}
+                  >
+                    <RiDeleteBinLine className="size-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Card 2: Availability */}
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+          <CardTitle>{t.settings.availability}</CardTitle>
+          <Button variant="outline" size="sm" className="gap-2 shrink-0" onClick={openAddAvailability}>
+            <RiAddLine className="size-4" />
+            <span className="hidden sm:inline">{t.settings.addAvailability}</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {availabilityList.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t.settings.noAvailability}</p>
+          ) : (
+            <div className="rounded-lg border border-gray-200 divide-y divide-gray-200 dark:border-gray-800 dark:divide-gray-800">
+              {availabilityList.map((av) => (
+                <div
+                  key={av.id}
+                  className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0 flex-1 text-sm">
+                    <span className="font-medium text-gray-900 dark:text-gray-50">{getDoctorName(av.doctorId)}</span>
+                    {allClinics.length > 1 && (
+                      <span className="ms-2 text-gray-600 dark:text-gray-400">{getClinicName(av.clinicId)}</span>
+                    )}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {formatDaysSummary(av.daysOfWeek ?? [], t)} · {av.startTime}–{av.endTime}
+                      {av.slotDuration ? ` · ${av.slotDuration} ${t.settings.minutes}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditAvailability(av)}
+                      title={t.common.edit}
+                      aria-label={t.common.edit}
+                    >
+                      <RiEditLine className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-500 hover:text-destructive"
+                      onClick={() => handleDeleteAvailability(av.id)}
+                      title={t.settings.deleteAvailability}
+                      aria-label={t.settings.deleteAvailability}
+                    >
+                      <RiDeleteBinLine className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AvailabilityDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        mode={drawerMode}
+        initialValues={editingAvailability}
+        defaultClinicId={currentClinic.id}
+        doctors={doctors}
+        clinics={allClinics}
+        onSave={handleSaveAvailabilityDrawer}
+      />
+
+      {/* Card 3: Buffer */}
       <Card>
         <CardHeader>
           <CardTitle>{t.settings.appointmentSettings}</CardTitle>
-          <CardDescription>{t.settings.configureAppointment}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -629,25 +1415,19 @@ function PreferencesTab() {
               <Input
                 id="buffer-minutes"
                 type="number"
-                min="0"
-                max="60"
+                min={0}
+                max={60}
                 value={bufferMinutes}
                 onChange={(e) => setBufferMinutes(Number(e.target.value))}
                 className="w-24"
               />
               <span className="text-sm text-gray-600 dark:text-gray-400">{t.settings.minutes}</span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t.settings.bufferTimeHint}
-            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t.settings.bufferTimeHint}</p>
           </div>
-
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button variant="secondary" onClick={() => setBufferMinutes(5)} className="w-full sm:w-auto">
-              {t.settings.reset}
-            </Button>
-            <Button variant="primary" onClick={handleSaveAppointmentSettings} disabled={isSaving} className="w-full sm:w-auto">
-              {isSaving ? t.settings.saving : t.settings.saveChanges}
+          <div className="flex justify-end">
+            <Button variant="primary" onClick={handleSaveBuffer} disabled={isSavingBuffer} className="w-full sm:w-auto">
+              {isSavingBuffer ? t.settings.saving : t.settings.saveChanges}
             </Button>
           </div>
         </CardContent>
