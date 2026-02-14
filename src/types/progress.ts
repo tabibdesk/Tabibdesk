@@ -3,6 +3,17 @@
  * Each metric has an id/label and an array of date/value points.
  */
 
+/** Single progress record (row) as stored in DB / used by repository. */
+export interface Progress {
+  id: string
+  patient_id: string
+  metric: string
+  value: string | number
+  unit?: string
+  notes?: string
+  created_at: string
+}
+
 export interface ProgressPoint {
   date: string // ISO date
   value: number

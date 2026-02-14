@@ -128,10 +128,10 @@ export function MetricCards() {
               </div>
               {metric.change !== 0 && (
                 <Badge
-                  color={getBadgeColor(metric.changeType)}
+                  color={getBadgeColor(metric.changeType as "positive" | "negative" | "neutral")}
                   className="text-xs"
                 >
-                  {metric.changeType === "positive" ? "+" : metric.changeType === "negative" ? "-" : ""}
+                  {(metric.changeType as string) === "positive" ? "+" : (metric.changeType as string) === "negative" ? "-" : ""}
                   {metric.change}%
                 </Badge>
               )}

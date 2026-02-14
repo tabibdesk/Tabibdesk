@@ -33,6 +33,11 @@ Visit [http://localhost:3000](http://localhost:3000). Use **"Try Demo"** on the 
 3. Run migrations in Supabase SQL Editor in order (`supabase/migrations/20260212_*`, then `20260213_*`)
 4. Seed first user: in SQL Editor, create a subscription and insert into `clinic_members` for your auth user UUID (role: manager/doctor/assistant)
 
+### Deploying to Netlify
+
+- **Build**: Uses `netlify.toml` (build: `npm run test && npm run build`, publish: `.next`, Node 20).
+- **Env**: In Netlify → Site settings → Environment variables, add the keys from `.env.example` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). For demo-only deploys you can omit them and use "Try Demo" on the login page.
+
 ## Project Structure
 
 - `/app/(auth)` - Authentication pages (login, register)

@@ -8,17 +8,15 @@ const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-function mapRowToPrescription(row: any): Prescription {
+function mapRowToPrescription(row: Record<string, unknown>): Prescription {
   return {
-    id: row.id,
-    patient_id: row.patient_id,
-    doctor_id: row.doctor_id,
-    medication: row.medication,
-    dosage: row.dosage,
-    frequency: row.frequency,
-    duration: row.duration,
-    notes: row.notes,
-    created_at: row.created_at,
+    id: String(row.id),
+    clinicId: String(row.clinic_id ?? ""),
+    patientId: String(row.patient_id),
+    doctorId: row.doctor_id != null ? String(row.doctor_id) : undefined,
+    createdAt: String(row.created_at),
+    diagnosisText: String(row.diagnosis_text ?? row.medication ?? ""),
+    items: Array.isArray(row.items) ? (row.items as any[]) : [{ id: "1", name: String(row.medication ?? ""), sig: String(row.dosage ?? "") }],
   }
 }
 
@@ -42,17 +40,18 @@ export class SupabasePrescriptionsRepository implements IPrescriptionsRepository
   }
 
   async create(payload: CreatePrescriptionPayload): Promise<Prescription> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      patient_id: payload.patient_id,
+      doctor_id: payload.doctor_id,
+      medication: payload.medication,
+      dosage: payload.dosage,
+      frequency: payload.frequency,
+      duration: payload.duration,
+      notes: payload.notes,
+    }
+    const { data, error } = await (supabase as any)
       .from("prescriptions")
-      .insert({
-        patient_id: payload.patient_id,
-        doctor_id: payload.doctor_id,
-        medication: payload.medication,
-        dosage: payload.dosage,
-        frequency: payload.frequency,
-        duration: payload.duration,
-        notes: payload.notes,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
@@ -61,7 +60,7 @@ export class SupabasePrescriptionsRepository implements IPrescriptionsRepository
   }
 
   async update(id: string, updates: Partial<Prescription>): Promise<Prescription> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("prescriptions")
       .update(updates)
       .eq("id", id)

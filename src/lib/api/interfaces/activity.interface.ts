@@ -1,4 +1,4 @@
-import type { Activity } from "@/types/activity"
+import type { ActivityEvent } from "@/types/activity"
 
 export interface CreateActivityPayload {
   clinic_id: string
@@ -6,11 +6,11 @@ export interface CreateActivityPayload {
   action: string
   resource_type: string
   resource_id: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface IActivityRepository {
-  list(clinicId: string, limit?: number): Promise<Activity[]>
-  create(payload: CreateActivityPayload): Promise<Activity>
-  getByResource(resourceType: string, resourceId: string): Promise<Activity[]>
+  list(clinicId: string, limit?: number): Promise<ActivityEvent[]>
+  create(payload: CreateActivityPayload): Promise<ActivityEvent>
+  getByResource(resourceType: string, resourceId: string): Promise<ActivityEvent[]>
 }

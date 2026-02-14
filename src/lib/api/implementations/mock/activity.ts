@@ -1,22 +1,12 @@
-import { mockData } from "@/data/mock/mock-data"
 import type { IActivityRepository, CreateActivityPayload } from "../../interfaces/activity.interface"
-import type { Activity } from "@/types/activity"
+import type { ActivityEvent } from "@/types/activity"
 
-let activityStore: Activity[] = []
+let activityStore: ActivityEvent[] = []
 let initialized = false
 
 function initStore() {
   if (!initialized) {
-    activityStore = mockData.activities?.map((a) => ({
-      id: a.id,
-      clinic_id: a.clinic_id,
-      user_id: a.user_id,
-      action: a.action,
-      resource_type: a.resource_type,
-      resource_id: a.resource_id,
-      metadata: a.metadata,
-      created_at: a.created_at,
-    })) || []
+    activityStore = []
     initialized = true
   }
 }
@@ -26,32 +16,34 @@ function generateId(): string {
 }
 
 export class MockActivityRepository implements IActivityRepository {
-  async list(clinicId: string, limit: number = 50): Promise<Activity[]> {
+  async list(clinicId: string, limit: number = 50): Promise<ActivityEvent[]> {
     initStore()
     return activityStore
-      .filter((a) => a.clinic_id === clinicId)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .filter((a) => a.clinicId === clinicId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, limit)
   }
 
-  async create(payload: CreateActivityPayload): Promise<Activity> {
+  async create(payload: CreateActivityPayload): Promise<ActivityEvent> {
     initStore()
-    const activity: Activity = {
+    const activity: ActivityEvent = {
       id: generateId(),
-      clinic_id: payload.clinic_id,
-      user_id: payload.user_id,
-      action: payload.action,
-      resource_type: payload.resource_type,
-      resource_id: payload.resource_id,
-      metadata: payload.metadata,
-      created_at: new Date().toISOString(),
+      clinicId: payload.clinic_id,
+      actorUserId: payload.user_id,
+      actorName: "User",
+      action: payload.action as ActivityEvent["action"],
+      entityType: payload.resource_type as ActivityEvent["entityType"],
+      entityId: payload.resource_id,
+      message: payload.action,
+      createdAt: new Date().toISOString(),
+      meta: payload.metadata,
     }
     activityStore.push(activity)
     return activity
   }
 
-  async getByResource(resourceType: string, resourceId: string): Promise<Activity[]> {
+  async getByResource(resourceType: string, resourceId: string): Promise<ActivityEvent[]> {
     initStore()
-    return activityStore.filter((a) => a.resource_type === resourceType && a.resource_id === resourceId)
+    return activityStore.filter((a) => a.entityType === resourceType && a.entityId === resourceId)
   }
 }

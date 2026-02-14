@@ -1,4 +1,3 @@
-import { mockData } from "@/data/mock/mock-data"
 import type { IVendorsRepository, CreateVendorPayload } from "../../interfaces/vendors.interface"
 import type { Vendor } from "@/types/vendor"
 
@@ -7,16 +6,7 @@ let initialized = false
 
 function initStore() {
   if (!initialized) {
-    vendorsStore = mockData.vendors.map((v) => ({
-      id: v.id,
-      clinic_id: v.clinic_id,
-      name: v.name,
-      email: v.email,
-      phone: v.phone,
-      address: v.address,
-      category: v.category,
-      created_at: v.created_at,
-    }))
+    vendorsStore = []
     initialized = true
   }
 }
@@ -28,7 +18,7 @@ function generateId(): string {
 export class MockVendorsRepository implements IVendorsRepository {
   async list(clinicId: string): Promise<Vendor[]> {
     initStore()
-    return vendorsStore.filter((v) => v.clinic_id === clinicId)
+    return vendorsStore.filter((v) => v.clinicId === clinicId)
   }
 
   async getById(id: string): Promise<Vendor | null> {
@@ -38,15 +28,14 @@ export class MockVendorsRepository implements IVendorsRepository {
 
   async create(payload: CreateVendorPayload): Promise<Vendor> {
     initStore()
+    const now = new Date().toISOString()
     const vendor: Vendor = {
       id: generateId(),
-      clinic_id: payload.clinic_id,
+      clinicId: payload.clinic_id,
       name: payload.name,
-      email: payload.email,
+      normalizedName: payload.name.toLowerCase().trim(),
       phone: payload.phone,
-      address: payload.address,
-      category: payload.category,
-      created_at: new Date().toISOString(),
+      createdAt: now,
     }
     vendorsStore.push(vendor)
     return vendor

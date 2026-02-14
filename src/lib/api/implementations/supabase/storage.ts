@@ -5,7 +5,7 @@ import {
   deleteFile,
   StorageBucket,
 } from '@/lib/storage'
-import { IStorageRepository } from '../interfaces/storage.interface'
+import { IStorageRepository } from '../../interfaces/storage.interface'
 import { createClient } from '@/lib/supabase/server'
 
 export class SupabaseStorageRepository implements IStorageRepository {

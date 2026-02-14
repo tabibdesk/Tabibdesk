@@ -8,18 +8,11 @@ const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-function mapRowToSettings(row: any): ClinicSettings {
+function mapRowToSettings(row: Record<string, unknown>): ClinicSettings {
   return {
-    clinic_id: row.clinic_id,
-    clinic_name: row.clinic_name,
-    email: row.email,
-    phone: row.phone,
-    address: row.address,
-    city: row.city,
-    state: row.state,
-    zip_code: row.zip_code,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    clinicId: String(row.clinic_id),
+    name: String(row.clinic_name ?? row.name ?? "Clinic"),
+    address: row.address != null ? String(row.address) : undefined,
   }
 }
 
@@ -36,7 +29,7 @@ export class SupabaseSettingsRepository implements ISettingsRepository {
   }
 
   async update(clinicId: string, updates: Partial<ClinicSettings>): Promise<ClinicSettings> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("clinic_settings")
       .update(updates)
       .eq("clinic_id", clinicId)

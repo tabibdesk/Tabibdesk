@@ -1,12 +1,11 @@
-import { mockData } from "@/data/mock/mock-data"
 import type { IWaitlistRepository } from "../../interfaces/waitlist.interface"
 
-let waitlistStore: any[] = []
+let waitlistStore: { id: string; patient_id: string; appointment_type: string; status: string; created_at: string }[] = []
 let initialized = false
 
 function initStore() {
   if (!initialized) {
-    waitlistStore = mockData.waitlist || []
+    waitlistStore = []
     initialized = true
   }
 }

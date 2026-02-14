@@ -73,8 +73,14 @@ export interface CreateTaskPayload {
   type: TaskType
   priority?: TaskPriority
   dueDate?: string
+  /** Alias for dueDate used by follow-up task creation */
+  dueAt?: string
   assignedToUserId?: string
   patientId?: string
+  appointmentId?: string
+  /** Follow-up kind when type is follow_up */
+  kind?: "cancelled" | "no_show" | "inactive"
+  attempt?: number
   clinicId: string
   createdByUserId: string
 }

@@ -8,16 +8,14 @@ const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-function mapRowToVendor(row: any): Vendor {
+function mapRowToVendor(row: Record<string, unknown>): Vendor {
   return {
-    id: row.id,
-    clinic_id: row.clinic_id,
-    name: row.name,
-    email: row.email,
-    phone: row.phone,
-    address: row.address,
-    category: row.category,
-    created_at: row.created_at,
+    id: String(row.id),
+    clinicId: String(row.clinic_id),
+    name: String(row.name),
+    normalizedName: String(row.name).toLowerCase().trim(),
+    phone: row.phone != null ? String(row.phone) : undefined,
+    createdAt: String(row.created_at),
   }
 }
 
@@ -41,16 +39,17 @@ export class SupabaseVendorsRepository implements IVendorsRepository {
   }
 
   async create(payload: CreateVendorPayload): Promise<Vendor> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      clinic_id: payload.clinic_id,
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      address: payload.address,
+      category: payload.category,
+    }
+    const { data, error } = await (supabase as any)
       .from("vendors")
-      .insert({
-        clinic_id: payload.clinic_id,
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone,
-        address: payload.address,
-        category: payload.category,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
@@ -59,7 +58,7 @@ export class SupabaseVendorsRepository implements IVendorsRepository {
   }
 
   async update(id: string, updates: Partial<Vendor>): Promise<Vendor> {
-    const { data, error } = await supabase.from("vendors").update(updates).eq("id", id).select().single()
+    const { data, error } = await (supabase as any).from("vendors").update(updates).eq("id", id).select().single()
 
     if (error) throw new Error(`Failed to update vendor: ${error.message}`)
     return mapRowToVendor(data)

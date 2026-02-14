@@ -17,15 +17,16 @@ export class MockAttachmentsRepository implements IAttachmentsRepository {
   }
 
   async create(payload: CreateAttachmentPayload): Promise<Attachment> {
+    const now = new Date().toISOString()
     const attachment: Attachment = {
       id: generateId(),
       patient_id: payload.patient_id,
       file_name: payload.file_name,
       file_type: payload.file_type,
       file_size: payload.file_size,
-      file_path: payload.file_path,
+      file_url: payload.file_path,
+      uploaded_at: now,
       uploaded_by: payload.uploaded_by,
-      created_at: new Date().toISOString(),
     }
     attachmentsStore.push(attachment)
     return attachment

@@ -126,20 +126,21 @@ export class SupabaseTasksRepository implements ITasksRepository {
   }
 
   async create(payload: CreateTaskPayload): Promise<Task> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      title: payload.title,
+      description: payload.description,
+      type: payload.type,
+      priority: payload.priority || "normal",
+      due_date: payload.dueDate,
+      assigned_to_user_id: payload.assignedToUserId,
+      patient_id: payload.patientId,
+      clinic_id: payload.clinicId,
+      created_by_user_id: payload.createdByUserId,
+      source: "manual",
+    }
+    const { data, error } = await (supabase as any)
       .from("tasks")
-      .insert({
-        title: payload.title,
-        description: payload.description,
-        type: payload.type,
-        priority: payload.priority || "normal",
-        due_date: payload.dueDate,
-        assigned_to_user_id: payload.assignedToUserId,
-        patient_id: payload.patientId,
-        clinic_id: payload.clinicId,
-        created_by_user_id: payload.createdByUserId,
-        source: "manual",
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
@@ -148,7 +149,7 @@ export class SupabaseTasksRepository implements ITasksRepository {
   }
 
   async updateStatus(payload: UpdateTaskStatusPayload): Promise<Task> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("tasks")
       .update({ status: payload.status })
       .eq("id", payload.id)
@@ -160,7 +161,7 @@ export class SupabaseTasksRepository implements ITasksRepository {
   }
 
   async assign(payload: AssignTaskPayload): Promise<Task> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("tasks")
       .update({ assigned_to_user_id: payload.assignedToUserId })
       .eq("id", payload.id)
@@ -172,7 +173,7 @@ export class SupabaseTasksRepository implements ITasksRepository {
   }
 
   async snooze(id: string, until: string): Promise<Task> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("tasks")
       .update({ snoozed_until: until })
       .eq("id", id)
@@ -184,7 +185,7 @@ export class SupabaseTasksRepository implements ITasksRepository {
   }
 
   async markDone(id: string): Promise<Task> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("tasks")
       .update({ status: "done" })
       .eq("id", id)
@@ -196,7 +197,7 @@ export class SupabaseTasksRepository implements ITasksRepository {
   }
 
   async cancel(id: string): Promise<Task> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("tasks")
       .update({ status: "cancelled" })
       .eq("id", id)

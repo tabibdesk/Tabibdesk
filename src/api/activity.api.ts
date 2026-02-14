@@ -100,8 +100,7 @@ export async function listActivities(params: ListActivityParams): Promise<ListAc
     return {
       events: [],
       total: 0,
-      page,
-      pageSize,
+      hasMore: false,
     }
   }
 

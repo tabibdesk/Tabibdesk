@@ -8,15 +8,17 @@ const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-function mapRowToPayment(row: any): PaymentRecord {
+function mapRowToPayment(row: Record<string, unknown>): PaymentRecord {
   return {
-    id: row.id,
-    invoice_id: row.invoice_id,
-    patient_id: row.patient_id,
-    amount: row.amount,
-    method: row.method,
-    reference: row.reference,
-    created_at: row.created_at,
+    id: String(row.id),
+    clinicId: String(row.clinic_id ?? ""),
+    invoiceId: String(row.invoice_id),
+    patientId: String(row.patient_id),
+    appointmentId: String(row.appointment_id ?? ""),
+    amount: Number(row.amount),
+    method: String(row.method) as PaymentRecord["method"],
+    createdByUserId: String(row.created_by_user_id ?? ""),
+    createdAt: String(row.created_at),
   }
 }
 
@@ -39,15 +41,16 @@ export class SupabasePaymentsRepository implements IPaymentsRepository {
   }
 
   async create(payload: CreatePaymentPayload): Promise<PaymentRecord> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      invoice_id: payload.invoice_id,
+      patient_id: payload.patient_id,
+      amount: payload.amount,
+      method: payload.method,
+      reference: payload.reference,
+    }
+    const { data, error } = await (supabase as any)
       .from("payments")
-      .insert({
-        invoice_id: payload.invoice_id,
-        patient_id: payload.patient_id,
-        amount: payload.amount,
-        method: payload.method,
-        reference: payload.reference,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 

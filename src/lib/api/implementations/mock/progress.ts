@@ -1,4 +1,3 @@
-import { mockData } from "@/data/mock/mock-data"
 import type { IProgressRepository, CreateProgressPayload } from "../../interfaces/progress.interface"
 import type { Progress } from "@/types/progress"
 
@@ -7,7 +6,7 @@ let initialized = false
 
 function initStore() {
   if (!initialized) {
-    progressStore = mockData.progress || []
+    progressStore = []
     initialized = true
   }
 }

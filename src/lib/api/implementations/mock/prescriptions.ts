@@ -1,23 +1,12 @@
-import { mockData } from "@/data/mock/mock-data"
 import type { IPrescriptionsRepository, CreatePrescriptionPayload } from "../../interfaces/prescriptions.interface"
-import type { Prescription } from "@/features/prescriptions/prescriptions.types"
+import type { Prescription, PrescriptionItem } from "@/features/prescriptions/prescriptions.types"
 
 let prescriptionsStore: Prescription[] = []
 let initialized = false
 
 function initStore() {
   if (!initialized) {
-    prescriptionsStore = mockData.prescriptions.map((p) => ({
-      id: p.id,
-      patient_id: p.patient_id,
-      doctor_id: p.doctor_id,
-      medication: p.medication,
-      dosage: p.dosage,
-      frequency: p.frequency,
-      duration: p.duration,
-      notes: p.notes,
-      created_at: p.created_at,
-    }))
+    prescriptionsStore = []
     initialized = true
   }
 }
@@ -29,7 +18,7 @@ function generateId(): string {
 export class MockPrescriptionsRepository implements IPrescriptionsRepository {
   async list(patientId: string): Promise<Prescription[]> {
     initStore()
-    return prescriptionsStore.filter((p) => p.patient_id === patientId)
+    return prescriptionsStore.filter((p) => p.patientId === patientId)
   }
 
   async getById(id: string): Promise<Prescription | null> {
@@ -39,16 +28,23 @@ export class MockPrescriptionsRepository implements IPrescriptionsRepository {
 
   async create(payload: CreatePrescriptionPayload): Promise<Prescription> {
     initStore()
-    const prescription: Prescription = {
+    const now = new Date().toISOString()
+    const item: PrescriptionItem = {
       id: generateId(),
-      patient_id: payload.patient_id,
-      doctor_id: payload.doctor_id,
-      medication: payload.medication,
-      dosage: payload.dosage,
-      frequency: payload.frequency,
+      name: payload.medication,
+      strength: payload.dosage,
+      sig: `${payload.frequency}, ${payload.duration}`,
       duration: payload.duration,
       notes: payload.notes,
-      created_at: new Date().toISOString(),
+    }
+    const prescription: Prescription = {
+      id: generateId(),
+      clinicId: "",
+      patientId: payload.patient_id,
+      doctorId: payload.doctor_id,
+      createdAt: now,
+      diagnosisText: "",
+      items: [item],
     }
     prescriptionsStore.push(prescription)
     return prescription

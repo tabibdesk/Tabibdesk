@@ -8,16 +8,17 @@ const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-function mapRowToExpense(row: any): Expense {
+function mapRowToExpense(row: Record<string, unknown>): Expense {
   return {
-    id: row.id,
-    clinic_id: row.clinic_id,
-    vendor_id: row.vendor_id,
-    amount: row.amount,
-    description: row.description,
-    category: row.category,
-    date: row.date,
-    created_at: row.created_at,
+    id: String(row.id),
+    clinicId: String(row.clinic_id),
+    amount: Number(row.amount),
+    category: String(row.category) as Expense["category"],
+    method: "cash",
+    vendorName: row.vendor_id != null ? String(row.vendor_id) : undefined,
+    note: row.description != null ? String(row.description) : undefined,
+    createdByUserId: "",
+    createdAt: String(row.created_at ?? row.date),
   }
 }
 
@@ -47,16 +48,17 @@ export class SupabaseExpensesRepository implements IExpensesRepository {
   }
 
   async create(payload: CreateExpensePayload): Promise<Expense> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      clinic_id: payload.clinic_id,
+      vendor_id: payload.vendor_id,
+      amount: payload.amount,
+      description: payload.description,
+      category: payload.category,
+      date: payload.date,
+    }
+    const { data, error } = await (supabase as any)
       .from("expenses")
-      .insert({
-        clinic_id: payload.clinic_id,
-        vendor_id: payload.vendor_id,
-        amount: payload.amount,
-        description: payload.description,
-        category: payload.category,
-        date: payload.date,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
@@ -65,7 +67,7 @@ export class SupabaseExpensesRepository implements IExpensesRepository {
   }
 
   async update(id: string, updates: Partial<Expense>): Promise<Expense> {
-    const { data, error } = await supabase.from("expenses").update(updates).eq("id", id).select().single()
+    const { data, error } = await (supabase as any).from("expenses").update(updates).eq("id", id).select().single()
 
     if (error) throw new Error(`Failed to update expense: ${error.message}`)
     return mapRowToExpense(data)

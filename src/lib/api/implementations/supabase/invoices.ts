@@ -71,17 +71,18 @@ export class SupabaseInvoicesRepository implements IInvoicesRepository {
   }
 
   async create(payload: CreateInvoicePayload): Promise<Invoice> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      clinic_id: payload.clinic_id,
+      doctor_id: payload.doctor_id,
+      patient_id: payload.patient_id,
+      appointment_id: payload.appointment_id,
+      appointment_type: payload.appointment_type,
+      amount: payload.amount,
+      line_items: payload.line_items,
+    }
+    const { data, error } = await (supabase as any)
       .from("invoices")
-      .insert({
-        clinic_id: payload.clinic_id,
-        doctor_id: payload.doctor_id,
-        patient_id: payload.patient_id,
-        appointment_id: payload.appointment_id,
-        appointment_type: payload.appointment_type,
-        amount: payload.amount,
-        line_items: payload.line_items,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
@@ -92,7 +93,7 @@ export class SupabaseInvoicesRepository implements IInvoicesRepository {
   async updateLineItems(id: string, lineItems: any[]): Promise<Invoice> {
     const amount = lineItems.reduce((sum, item) => sum + item.amount, 0)
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("invoices")
       .update({ line_items: lineItems, amount })
       .eq("id", id)
@@ -104,7 +105,7 @@ export class SupabaseInvoicesRepository implements IInvoicesRepository {
   }
 
   async updateStatus(id: string, status: InvoiceStatus): Promise<Invoice> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("invoices")
       .update({ status })
       .eq("id", id)

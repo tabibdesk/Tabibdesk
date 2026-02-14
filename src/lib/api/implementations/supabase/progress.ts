@@ -33,15 +33,16 @@ export class SupabaseProgressRepository implements IProgressRepository {
   }
 
   async create(payload: CreateProgressPayload): Promise<Progress> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      patient_id: payload.patient_id,
+      metric: payload.metric,
+      value: payload.value,
+      unit: payload.unit,
+      notes: payload.notes,
+    }
+    const { data, error } = await (supabase as any)
       .from("progress")
-      .insert({
-        patient_id: payload.patient_id,
-        metric: payload.metric,
-        value: payload.value,
-        unit: payload.unit,
-        notes: payload.notes,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 

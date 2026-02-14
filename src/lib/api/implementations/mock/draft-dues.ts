@@ -1,5 +1,5 @@
 import type { IDraftDuesRepository, CreateDraftDuePayload } from "../../interfaces/draft-dues.interface"
-import type { DraftDue } from "@/types/draft-due"
+import type { DraftDue, ChargeLineItem } from "@/types/draft-due"
 
 let draftDuesStore: DraftDue[] = []
 
@@ -9,18 +9,23 @@ function generateId(): string {
 
 export class MockDraftDuesRepository implements IDraftDuesRepository {
   async list(clinicId: string): Promise<DraftDue[]> {
-    return draftDuesStore.filter((d) => d.clinic_id === clinicId)
+    return draftDuesStore.filter((d) => d.clinicId === clinicId)
   }
 
   async create(payload: CreateDraftDuePayload): Promise<DraftDue> {
+    const now = new Date().toISOString()
+    const lineItems: ChargeLineItem[] = [{ id: "1", type: "consultation", label: "Consultation", amount: payload.amount }]
     const draftDue: DraftDue = {
       id: generateId(),
-      clinic_id: payload.clinic_id,
-      patient_id: payload.patient_id,
-      amount: payload.amount,
-      reason: payload.reason,
-      due_date: payload.due_date,
-      created_at: new Date().toISOString(),
+      clinicId: payload.clinic_id,
+      patientId: payload.patient_id,
+      doctorId: "",
+      appointmentId: null,
+      status: "draft",
+      lineItems,
+      total: payload.amount,
+      createdAt: now,
+      updatedAt: now,
     }
     draftDuesStore.push(draftDue)
     return draftDue

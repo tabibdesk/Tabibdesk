@@ -1108,7 +1108,7 @@ function normalizeCustomTypeId(value: string): string {
     .trim()
     .toLowerCase()
     .replace(/\s+/g, "-")
-    .replace(/[^\p{L}\p{N}_-]/gu, "")
+    .replace(/[^\w\u0600-\u06FF_-]/g, "")
 }
 
 function formatTypeDisplayLabel(typeId: string, t: ReturnType<typeof useAppTranslations>): string {

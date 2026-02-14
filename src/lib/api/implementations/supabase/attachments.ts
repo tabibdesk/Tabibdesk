@@ -8,16 +8,16 @@ const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-function mapRowToAttachment(row: any): Attachment {
+function mapRowToAttachment(row: Record<string, unknown>): Attachment {
   return {
-    id: row.id,
-    patient_id: row.patient_id,
-    file_name: row.file_name,
-    file_type: row.file_type,
-    file_size: row.file_size,
-    file_path: row.file_path,
-    uploaded_by: row.uploaded_by,
-    created_at: row.created_at,
+    id: String(row.id),
+    patient_id: String(row.patient_id),
+    file_name: String(row.file_name),
+    file_type: String(row.file_type),
+    file_size: Number(row.file_size),
+    file_url: String(row.file_path ?? row.file_url),
+    uploaded_at: String(row.created_at ?? row.uploaded_at),
+    uploaded_by: String(row.uploaded_by),
   }
 }
 
@@ -41,16 +41,17 @@ export class SupabaseAttachmentsRepository implements IAttachmentsRepository {
   }
 
   async create(payload: CreateAttachmentPayload): Promise<Attachment> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      patient_id: payload.patient_id,
+      file_name: payload.file_name,
+      file_type: payload.file_type,
+      file_size: payload.file_size,
+      file_path: payload.file_path,
+      uploaded_by: payload.uploaded_by,
+    }
+    const { data, error } = await (supabase as any)
       .from("attachments")
-      .insert({
-        patient_id: payload.patient_id,
-        file_name: payload.file_name,
-        file_type: payload.file_type,
-        file_size: payload.file_size,
-        file_path: payload.file_path,
-        uploaded_by: payload.uploaded_by,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 

@@ -25,12 +25,9 @@ function mapRowToVisitNote(row: any): VisitNote {
 
 export class SupabaseNotesRepository implements INotesRepository {
   async create(payload: CreateNotePayload): Promise<VisitNote> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("notes")
-      .insert({
-        patient_id: payload.patient_id,
-        note: payload.note,
-      })
+      .insert({ patient_id: payload.patient_id, note: payload.note })
       .select()
       .single()
 
@@ -46,7 +43,7 @@ export class SupabaseNotesRepository implements INotesRepository {
   }
 
   async update(id: string, note: string): Promise<VisitNote> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("notes")
       .update({ note })
       .eq("id", id)

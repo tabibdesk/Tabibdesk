@@ -20,7 +20,7 @@ export class SupabaseWaitlistRepository implements IWaitlistRepository {
   }
 
   async create(patientId: string, appointmentTypeId: string): Promise<any> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("waitlist")
       .insert({ patient_id: patientId, appointment_type: appointmentTypeId, status: "pending" })
       .select()
@@ -31,7 +31,7 @@ export class SupabaseWaitlistRepository implements IWaitlistRepository {
   }
 
   async approve(id: string): Promise<any> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("waitlist")
       .update({ status: "approved" })
       .eq("id", id)
@@ -43,7 +43,7 @@ export class SupabaseWaitlistRepository implements IWaitlistRepository {
   }
 
   async reject(id: string): Promise<any> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("waitlist")
       .update({ status: "rejected" })
       .eq("id", id)

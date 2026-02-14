@@ -20,7 +20,7 @@ export class SupabaseAvailabilityRepository implements IAvailabilityRepository {
   }
 
   async create(doctorId: string, date: string, slots: any[]): Promise<any> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("availability_slots")
       .insert(slots.map((slot) => ({ doctor_id: doctorId, date, ...slot })))
       .select()
@@ -30,9 +30,9 @@ export class SupabaseAvailabilityRepository implements IAvailabilityRepository {
   }
 
   async update(doctorId: string, date: string, slots: any[]): Promise<any> {
-    await supabase.from("availability_slots").delete().eq("doctor_id", doctorId).eq("date", date)
+    await (supabase as any).from("availability_slots").delete().eq("doctor_id", doctorId).eq("date", date)
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("availability_slots")
       .insert(slots.map((slot) => ({ doctor_id: doctorId, date, ...slot })))
       .select()

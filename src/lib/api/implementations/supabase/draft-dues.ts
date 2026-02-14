@@ -8,15 +8,19 @@ const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 )
 
-function mapRowToDraftDue(row: any): DraftDue {
+function mapRowToDraftDue(row: Record<string, unknown>): DraftDue {
+  const now = new Date().toISOString()
   return {
-    id: row.id,
-    clinic_id: row.clinic_id,
-    patient_id: row.patient_id,
-    amount: row.amount,
-    reason: row.reason,
-    due_date: row.due_date,
-    created_at: row.created_at,
+    id: String(row.id),
+    clinicId: String(row.clinic_id),
+    patientId: String(row.patient_id),
+    doctorId: "",
+    appointmentId: null,
+    status: "draft",
+    lineItems: [{ id: "1", type: "consultation", label: "Consultation", amount: Number(row.amount) }],
+    total: Number(row.amount),
+    createdAt: String(row.created_at ?? now),
+    updatedAt: String(row.updated_at ?? now),
   }
 }
 
@@ -33,15 +37,16 @@ export class SupabaseDraftDuesRepository implements IDraftDuesRepository {
   }
 
   async create(payload: CreateDraftDuePayload): Promise<DraftDue> {
-    const { data, error } = await supabase
+    const insertPayload = {
+      clinic_id: payload.clinic_id,
+      patient_id: payload.patient_id,
+      amount: payload.amount,
+      reason: payload.reason,
+      due_date: payload.due_date,
+    }
+    const { data, error } = await (supabase as any)
       .from("draft_dues")
-      .insert({
-        clinic_id: payload.clinic_id,
-        patient_id: payload.patient_id,
-        amount: payload.amount,
-        reason: payload.reason,
-        due_date: payload.due_date,
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
@@ -50,7 +55,7 @@ export class SupabaseDraftDuesRepository implements IDraftDuesRepository {
   }
 
   async update(id: string, updates: Partial<DraftDue>): Promise<DraftDue> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("draft_dues")
       .update(updates)
       .eq("id", id)

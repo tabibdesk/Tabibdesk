@@ -24,6 +24,9 @@ export type ActivityAction =
   | "export"
   | "delete";
 
+/** Single activity event (alias used by API layer). */
+export type Activity = ActivityEvent
+
 export interface ActivityEvent {
   id: string;
   clinicId: string;

@@ -25,7 +25,7 @@ export class SupabasePricingRepository implements IPricingRepository {
       .single()
 
     if (error && error.code !== "PGRST116") throw error
-    if (data) return data.price
+    if (data) return (data as { price: number }).price
 
     return DEFAULT_PRICES[appointmentType] || 300
   }
@@ -36,7 +36,7 @@ export class SupabasePricingRepository implements IPricingRepository {
     appointmentType: string,
     price: number,
   ): Promise<void> {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("pricing")
       .upsert({
         clinic_id: clinicId,

@@ -138,6 +138,7 @@ export class MockTasksRepository implements ITasksRepository {
     const task: Task = {
       id: generateId(),
       ...payload,
+      priority: payload.priority ?? "normal",
       createdAt: now,
       status: "pending",
       source: "manual",

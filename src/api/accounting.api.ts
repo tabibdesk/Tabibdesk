@@ -66,6 +66,10 @@ function mapToAccountingPayment(p: InvoicePayment): Payment {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/** In-memory stores for accounting settings/integrations (demo/mock). */
+const settingsStore: Record<string, import("@/features/accounting/accounting.types").ClinicAccountingSettings> = {}
+const integrationStore: Record<string, AccountingIntegration> = {}
+
 /**
  * PAYMENTS — read/write via single source (invoices.api + payments.api)
  */
@@ -318,16 +322,27 @@ export async function createExpense(input: CreateExpenseInput): Promise<Expense>
     const { getExpensesRepository } = await import("@/lib/api/repository-factory")
     const expensesRepo = await getExpensesRepository()
     
-    const expense = await expensesRepo.create({
+    const created = await expensesRepo.create({
       clinic_id: input.clinicId,
-      vendor_id: input.vendorId || undefined,
+      vendor_id: input.vendor ?? "",
       amount: input.amount,
-      description: input.description,
+      description: input.description ?? "",
       category: input.category,
       date: input.date,
     })
-    
-    return expense
+    return {
+      id: created.id,
+      clinicId: created.clinicId,
+      category: created.category as Expense["category"],
+      amount: created.amount,
+      vendor: created.vendorName ?? input.vendor,
+      description: created.note ?? input.description,
+      paymentMethod: (created.method ?? "cash") as Expense["paymentMethod"],
+      date: created.createdAt?.slice(0, 10) ?? input.date,
+      receiptUrl: undefined,
+      createdAt: created.createdAt,
+      createdByUserId: created.createdByUserId,
+    }
   } catch (error) {
     console.error("[v0] Failed to create expense:", error)
     throw new Error("Unable to create expense. Please try again.")
@@ -344,34 +359,46 @@ export async function listExpenses(
     const { getExpensesRepository } = await import("@/lib/api/repository-factory")
     const expensesRepo = await getExpensesRepository()
     
-    const expenses = await expensesRepo.list({
+    const rawExpenses = await expensesRepo.list({
       clinic_id: params.clinicId,
       from: params.dateFrom,
       to: params.dateTo,
     })
     
     // Apply category filter if provided
-    let filtered = expenses
+    let filtered = rawExpenses
     if (params.category) {
-      filtered = expenses.filter((e) => e.category === params.category)
+      filtered = rawExpenses.filter((e) => e.category === params.category)
     }
     
-    // Apply pagination
+    // Apply pagination and map to accounting.types.Expense
     const page = params.page || 1
     const pageSize = params.pageSize || 50
     const start = (page - 1) * pageSize
     const end = start + pageSize
-    const paginatedExpenses = filtered.slice(start, end)
+    const paginated = filtered.slice(start, end)
+    const expenses: Expense[] = paginated.map((e) => ({
+      id: e.id,
+      clinicId: e.clinicId,
+      category: e.category as Expense["category"],
+      amount: e.amount,
+      vendor: e.vendorName,
+      description: e.note,
+      paymentMethod: (e.method ?? "cash") as Expense["paymentMethod"],
+      date: e.createdAt?.slice(0, 10) ?? e.createdAt,
+      receiptUrl: undefined,
+      createdAt: e.createdAt,
+      createdByUserId: e.createdByUserId,
+    }))
 
     return {
-      expenses: paginatedExpenses,
+      expenses,
       total: filtered.length,
       page,
       pageSize,
     }
   } catch (error) {
     console.error("[v0] Failed to list expenses:", error)
-    // Fallback to empty results on error
     return {
       expenses: [],
       total: 0,

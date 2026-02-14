@@ -1,4 +1,3 @@
-import { mockData } from "@/data/mock/mock-data"
 import type { ISettingsRepository } from "../../interfaces/settings.interface"
 import type { ClinicSettings } from "@/features/settings/settings.types"
 
@@ -8,16 +7,8 @@ export class MockSettingsRepository implements ISettingsRepository {
   async getByClinicId(clinicId: string): Promise<ClinicSettings | null> {
     if (!settingsStore.has(clinicId)) {
       const defaultSettings: ClinicSettings = {
-        clinic_id: clinicId,
-        clinic_name: mockData.clinics.find((c) => c.id === clinicId)?.name || "Clinic",
-        email: "",
-        phone: "",
-        address: "",
-        city: "",
-        state: "",
-        zip_code: "",
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        clinicId,
+        name: "Clinic",
       }
       settingsStore.set(clinicId, defaultSettings)
     }
@@ -31,8 +22,7 @@ export class MockSettingsRepository implements ISettingsRepository {
     const updated: ClinicSettings = {
       ...current,
       ...updates,
-      clinic_id: clinicId,
-      updated_at: new Date().toISOString(),
+      clinicId,
     }
     settingsStore.set(clinicId, updated)
     return updated

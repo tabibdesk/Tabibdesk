@@ -140,12 +140,16 @@ export function TasksPage({
 
       // Create new follow-up task with incremented attempt
       await createFollowUpTask({
+        title: "Follow-up",
+        type: "follow_up",
         clinicId,
         patientId: task.patientId,
         appointmentId: task.entity_id,
         kind: task.follow_up_kind as "cancelled" | "no_show",
+        dueDate: dueDate.toISOString(),
         dueAt: dueDate.toISOString(),
         attempt: nextAttempt,
+        createdByUserId: currentUserId,
       })
 
       // Mark current task as done

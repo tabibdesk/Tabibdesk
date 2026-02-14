@@ -1,5 +1,8 @@
 export type PaymentMethod = "cash" | "visa" | "instapay";
 
+/** Alias used by API layer. */
+export type PaymentRecord = Payment
+
 export interface Payment {
   id: string
   clinicId: string
