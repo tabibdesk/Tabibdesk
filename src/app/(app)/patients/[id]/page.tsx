@@ -17,10 +17,19 @@ import { InvoicesTab } from "@/features/patients/detail/InvoicesTab"
 import { PatientEmptyState } from "@/features/patients/detail/PatientEmptyState"
 import { AddTaskDrawer } from "@/features/tasks/AddTaskDrawer"
 import { TasksCards } from "@/features/tasks/TasksCards"
-import { createTask, updateTaskStatus } from "@/features/tasks/tasks.api"
+import { AssignModal } from "@/features/tasks/TaskModals"
+import {
+  createTask,
+  updateTaskStatus,
+  assignTask,
+  snoozeTask,
+  createFollowUpTask,
+} from "@/features/tasks/tasks.api"
 import { isOverdue } from "@/features/tasks/tasks.utils"
 import type { CreateTaskPayload } from "@/features/tasks/tasks.types"
 import { getByPatientId as getNotesByPatientId } from "@/api/notes.api"
+import { getReactivationRules } from "@/api/settings.api"
+import { markPatientCold } from "@/api/patients.api"
 import { getProgressByPatientId } from "@/api/progress.api"
 import { useToast } from "@/hooks/useToast"
 import { AddPrescriptionDrawer } from "@/features/prescriptions/AddPrescriptionDrawer"
@@ -37,6 +46,7 @@ import {
   RiHistoryLine,
   RiStethoscopeLine,
   RiMoneyDollarCircleLine,
+  RiCalendarLine,
 } from "@remixicon/react"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { usePatientPageData, orderProgressMetricsByTracked } from "./usePatientPageData"
@@ -58,6 +68,7 @@ export default function PatientDetailPage() {
   const [showUploadFileDrawer, setShowUploadFileDrawer] = useState(false)
   const [showInvoiceDrawer, setShowInvoiceDrawer] = useState(false)
   const [invoicesRefreshTrigger, setInvoicesRefreshTrigger] = useState(0)
+  const [assignTaskData, setAssignTaskData] = useState<import("@/features/tasks/tasks.types").TaskListItem | null>(null)
 
   const data = usePatientPageData(
     patientId,
@@ -71,6 +82,8 @@ export default function PatientDetailPage() {
     progressMetrics,
     setProgressMetrics,
     metricsToRecord,
+    checklistItems,
+    enabledMedicalConditions,
     prescriptions,
     labResults,
     appointments,
@@ -90,6 +103,7 @@ export default function PatientDetailPage() {
     getLastVisited,
     formatLastVisited,
     fetchDueTotal,
+    fetchPatientData,
     fetchTasks,
     handleUpdatePatient,
   } = data
@@ -107,29 +121,86 @@ export default function PatientDetailPage() {
     }
   }
 
-  const handleToggleTaskStatus = async (taskId: string) => {
+  const handleMarkDone = async (task: import("@/features/tasks/tasks.types").TaskListItem) => {
     if (isDemoMode) {
       setTasks(
-        tasks.map((t) => {
-          if (t.id === taskId) {
-            const isDone = t.status === "done"
-            return { ...t, status: isDone ? "pending" : "done" }
-          }
-          return t
-        })
+        tasks.map((t) => (t.id === task.id ? { ...t, status: "done" } : t))
       )
       return
     }
     try {
-      const task = tasks.find((t) => t.id === taskId)
-      if (!task) return
-      const isDone = task.status === "done"
-      const newStatus = isDone ? "pending" : "done"
-      await updateTaskStatus({ id: taskId, status: newStatus })
+      await updateTaskStatus({ id: task.id, status: "done" })
       await fetchTasks()
     } catch (error) {
       console.error("Failed to toggle task status:", error)
       showToast("Failed to update task status", "error")
+    }
+  }
+
+  const handleAssign = async (result: { assignedToUserId?: string; assignedToPatientId?: string }) => {
+    if (!assignTaskData) return
+    try {
+      await assignTask({
+        id: assignTaskData.id,
+        assignedToUserId: result.assignedToUserId,
+        assignedToPatientId: result.assignedToPatientId,
+      })
+      await fetchTasks()
+      setAssignTaskData(null)
+      showToast("Task assigned successfully", "success")
+    } catch (error) {
+      console.error("Failed to assign task:", error)
+      showToast("Failed to assign task", "error")
+      throw error
+    }
+  }
+
+  const handleSnooze = async (task: import("@/features/tasks/tasks.types").TaskListItem, days: number) => {
+    try {
+      const snoozeDate = new Date()
+      snoozeDate.setDate(snoozeDate.getDate() + days)
+      await snoozeTask(task.id, snoozeDate.toISOString())
+      await fetchTasks()
+    } catch (error) {
+      console.error("Failed to snooze task:", error)
+      showToast("Failed to snooze task", "error")
+    }
+  }
+
+  const handleNextAttempt = async (task: import("@/features/tasks/tasks.types").TaskListItem) => {
+    if (!task.follow_up_kind || !task.entity_id || !task.patientId) return
+    const clinicId = currentClinic?.id || "clinic-001"
+    const currentUserId = currentUser?.id || "user-001"
+    try {
+      const rules = await getReactivationRules(clinicId)
+      const nextAttempt = (task.attempt || 1) + 1
+      if (nextAttempt > rules.maxAttempts) {
+        if (rules.markColdAfterMaxAttempts) {
+          await markPatientCold(task.patientId)
+        }
+        await updateTaskStatus({ id: task.id, status: "done" })
+        await fetchTasks()
+        return
+      }
+      const dueDate = new Date()
+      dueDate.setDate(dueDate.getDate() + rules.daysBetweenAttempts)
+      await createFollowUpTask({
+        title: "Follow-up",
+        type: "follow_up",
+        clinicId,
+        patientId: task.patientId,
+        appointmentId: task.entity_id,
+        kind: task.follow_up_kind as "cancelled" | "no_show",
+        dueDate: dueDate.toISOString(),
+        dueAt: dueDate.toISOString(),
+        attempt: nextAttempt,
+        createdByUserId: currentUserId,
+      })
+      await updateTaskStatus({ id: task.id, status: "done" })
+      await fetchTasks()
+    } catch (error) {
+      console.error("Failed to create next attempt:", error)
+      showToast("Failed to create next attempt", "error")
     }
   }
 
@@ -175,30 +246,24 @@ export default function PatientDetailPage() {
 
   return (
     <div className="page-content">
-      <div className="flex flex-row items-start justify-between gap-4 rtl:flex-row-reverse">
-        <PatientPageHeader
-          patient={patient}
-          totalDue={totalDue}
-          lastVisited={lastVisited}
-          formatLastVisited={formatLastVisited}
-          isNowInQueue={!!isNowInQueue}
-          lastVisitLabel={t.profile.lastVisitLabel}
-        />
-        <div className="shrink-0 sm:hidden">
-          <MobileAddButton
-            onAddNote={() => setActiveTab("note")}
-            onAddMedication={() => setShowAddPrescriptionDrawer(true)}
-            onAddTask={() => setShowAddTaskDrawer(true)}
-            onAddFile={() => {
-              setActiveTab("files")
-              setShowUploadFileDrawer(true)
-            }}
-            onAddCharge={() => setShowInvoiceDrawer(true)}
-          />
+      <div className="!mt-0 space-y-0">
+        <div className="flex flex-row items-start justify-between gap-4 pt-3 rtl:flex-row-reverse">
+          <PatientPageHeader patient={patient} isNowInQueue={!!isNowInQueue} />
+          <div className="shrink-0 sm:hidden">
+            <MobileAddButton
+              onAddNote={() => setActiveTab("note")}
+              onAddMedication={() => setShowAddPrescriptionDrawer(true)}
+              onAddTask={() => setShowAddTaskDrawer(true)}
+              onAddFile={() => {
+                setActiveTab("files")
+                setShowUploadFileDrawer(true)
+              }}
+              onAddCharge={() => setShowInvoiceDrawer(true)}
+            />
+          </div>
         </div>
-      </div>
 
-      <HorizontalTabNav
+        <HorizontalTabNav
         activeTab={activeTab}
         onTabChange={setActiveTab}
         tabs={tabs}
@@ -210,19 +275,42 @@ export default function PatientDetailPage() {
           setShowUploadFileDrawer(true)
         }}
         onAddCharge={() => setShowInvoiceDrawer(true)}
-      />
+        />
+      </div>
+
+      {activeTab === "profile" && (lastVisited || totalDue > 0) && (
+        <div className="mt-3 mb-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs">
+          {lastVisited && (
+            <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+              <RiCalendarLine className="size-3.5 shrink-0" />
+              {t.profile.lastVisitLabel} {formatLastVisited(lastVisited)}
+            </span>
+          )}
+          {totalDue > 0 && (
+            <span className="flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 font-semibold text-red-700 dark:bg-red-900/20 dark:text-red-400">
+              <RiMoneyDollarCircleLine className="size-3.5" />
+              Due: {totalDue.toFixed(2)} EGP
+            </span>
+          )}
+        </div>
+      )}
 
       <div>
         {activeTab === "note" && (
           <ClinicalNotesTab
+            checklistItems={checklistItems}
             metricsToRecord={metricsToRecord}
             onSaveNote={(_note) => {}}
+            patient={patient}
+            onUpdatePatient={handleUpdatePatientWithToast}
+            enabledMedicalConditions={enabledMedicalConditions}
           />
         )}
         {activeTab === "profile" && (
           <ProfileTab
             patient={patient}
             notes={notes}
+            enabledMedicalConditions={enabledMedicalConditions}
             progressMetrics={orderProgressMetricsByTracked(progressMetrics, [])}
             pastMedications={pastMedications}
             prescriptions={prescriptions}
@@ -245,6 +333,7 @@ export default function PatientDetailPage() {
               }
             }}
             onUpdatePatient={handleUpdatePatientWithToast}
+            onRefreshAiSummary={fetchPatientData}
           />
         )}
         {activeTab === "files" && (
@@ -298,8 +387,10 @@ export default function PatientDetailPage() {
           return (
             <TasksCards
               tasks={inProgressTasks}
-              onMarkDone={(task) => handleToggleTaskStatus(task.id)}
-              onAssign={() => {}}
+              onMarkDone={handleMarkDone}
+              onAssign={(task) => setAssignTaskData(task)}
+              onSnooze={handleSnooze}
+              onNextAttempt={handleNextAttempt}
               role={role}
             />
           )
@@ -311,6 +402,12 @@ export default function PatientDetailPage() {
           defaultPatientId={patientId}
           currentUserId={currentUser?.id || "user-001"}
           clinicId={currentClinic?.id || "clinic-001"}
+        />
+        <AssignModal
+          isOpen={!!assignTaskData}
+          onClose={() => setAssignTaskData(null)}
+          onSubmit={handleAssign}
+          task={assignTaskData}
         />
         <AddPrescriptionDrawer
           open={showAddPrescriptionDrawer}

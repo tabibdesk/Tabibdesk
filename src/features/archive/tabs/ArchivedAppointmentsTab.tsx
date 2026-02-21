@@ -77,7 +77,7 @@ export function ArchivedAppointmentsTab({
         page,
         pageSize,
       })
-      setAppointments(response.items)
+      setAppointments((prev) => (page === 1 ? response.items : [...prev, ...response.items]))
       setTotal(response.total)
       setHasMore(response.hasMore)
     } catch (error) {
@@ -173,14 +173,21 @@ export function ArchivedAppointmentsTab({
 
           {/* Pagination */}
           {hasMore && (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-4">
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={loading}
-                isLoading={loading}
+                className="min-w-[140px]"
               >
-                {t.archive.loadMore}
+                {loading && page > 1 ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {t.archive.loadMore}
+                  </span>
+                ) : (
+                  t.archive.loadMore
+                )}
               </Button>
             </div>
           )}

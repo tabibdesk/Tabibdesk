@@ -79,7 +79,7 @@ export function ArchivePage({ clinicId }: ArchivePageProps) {
       />
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-800">
+      <div className="!mt-0 border-b border-gray-200 dark:border-gray-800">
         <nav className="-mb-px flex gap-4 overflow-x-auto pb-px sm:gap-8" aria-label="Archive tabs">
           <button
             onClick={() => handleTabChange("appointments")}

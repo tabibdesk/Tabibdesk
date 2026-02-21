@@ -1,10 +1,8 @@
 "use client"
 
-import { Button } from "@/components/Button"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { SearchInput } from "@/components/SearchInput"
 import { RiAddLine } from "@remixicon/react"
-import type { TaskSource, TaskStatus } from "./tasks.types"
 
 interface TasksToolbarProps {
   searchQuery: string
@@ -32,10 +30,10 @@ export function TasksToolbar({
         </div>
 
         {/* New Task Button */}
-        <Button variant="secondary" onClick={onNewTask} className="flex-shrink-0 md:h-9 md:py-1.5 md:text-sm gap-2">
-          <RiAddLine className="size-4 shrink-0" />
+        <button type="button" onClick={onNewTask} className="btn-search-action rtl:flex-row-reverse">
+          <RiAddLine className="size-5 shrink-0" />
           <span className="hidden sm:inline">{t.tasks.newTask}</span>
-        </Button>
+        </button>
       </div>
     </div>
   )

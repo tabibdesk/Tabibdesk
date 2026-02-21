@@ -12,6 +12,10 @@ import type {
   FeatureKey,
   AppointmentSettings,
   ClinicFollowUpRules,
+  ClinicReactivationRules,
+  PatientCommunicationRules,
+  QueueWaitlistRules,
+  FinancialAdminRules,
 } from "@/features/settings/settings.types"
 import { mockClinics, getSubscriptionForClinic } from "@/data/mock/users-clinics"
 
@@ -310,11 +314,6 @@ function getDefaultFollowUpRules(): ClinicFollowUpRules {
     followUpOnNoShow: true,
     cancelFollowUpDelayHours: 24,
     noShowFollowUpDelayHours: 2,
-    maxAttempts: 3,
-    daysBetweenAttempts: 2,
-    markColdAfterMaxAttempts: true,
-    inactivityDaysThreshold: 14,
-    quietHours: { start: "22:00", end: "10:00" },
     autoAssignRole: "assistant",
     snoozePresetsDays: [0, 1, 3],
   }
@@ -358,6 +357,195 @@ export async function updateFollowUpRules(
   })
 
   return updatedRules
+}
+
+/**
+ * Get default reactivation rules
+ */
+function getDefaultReactivationRules(): ClinicReactivationRules {
+  return {
+    inactivityDaysThreshold: 180,
+    maxAttempts: 3,
+    daysBetweenAttempts: 2,
+    markColdAfterMaxAttempts: true,
+    quietHours: { start: "22:00", end: "10:00" },
+    reactivationSequenceEnabled: false,
+    reactivationWorkingHours: { start: "12:00", end: "21:00" },
+    sequenceMessages: {},
+  }
+}
+
+function getDefaultPatientCommunicationRules(): PatientCommunicationRules {
+  return {
+    appointmentConfirmations: { enabled: false, template: "" },
+    smartReminders: {
+      enabled: false,
+      hoursBefore: 24,
+      template: "",
+      includePrepNotes: false,
+      prepNotesContent: "",
+    },
+    rescheduleNotification: { enabled: false, template: "" },
+    followUpTriggers: { enabled: false, hoursAfterProcedure: 24, template: "" },
+    noShowRecovery: { enabled: false, minutesAfter: 30, template: "" },
+  }
+}
+
+function getDefaultQueueWaitlistRules(): QueueWaitlistRules {
+  return {
+    virtualQueueUpdates: { enabled: false, notifyNextN: 3, template: "" },
+    delayNotifications: { enabled: false, minutesLateThreshold: 30, template: "" },
+    autoFillWaitlist: { enabled: false, template: "" },
+  }
+}
+
+function getDefaultFinancialAdminRules(): FinancialAdminRules {
+  return {
+    autoInvoicing: { enabled: false, template: "" },
+    insuranceApprovals: { enabled: false, pendingHoursThreshold: 48 },
+    dailySummary: { enabled: false, recipientWhatsappNumbers: [] },
+  }
+}
+
+/**
+ * Get reactivation rules for a clinic
+ * Migrates from old followUpRules if reactivation rules are empty (backward compatibility)
+ */
+export async function getReactivationRules(clinicId: string): Promise<ClinicReactivationRules> {
+  await new Promise((resolve) => setTimeout(resolve, 100))
+
+  const clinicSettings = await getClinicSettings(clinicId)
+  const defaults = getDefaultReactivationRules()
+
+  if (clinicSettings.reactivationRules) {
+    return { ...defaults, ...clinicSettings.reactivationRules }
+  }
+
+  // Migration: copy from followUpRules if it has the old fields
+  const followUp = clinicSettings.followUpRules as ClinicFollowUpRules & {
+    maxAttempts?: number
+    daysBetweenAttempts?: number
+    markColdAfterMaxAttempts?: boolean
+    inactivityDaysThreshold?: number
+    quietHours?: { start: string; end: string }
+  }
+
+  if (
+    followUp &&
+    (followUp.maxAttempts != null ||
+      followUp.daysBetweenAttempts != null ||
+      followUp.markColdAfterMaxAttempts != null ||
+      followUp.inactivityDaysThreshold != null ||
+      followUp.quietHours)
+  ) {
+    const migrated: ClinicReactivationRules = {
+      ...defaults,
+      inactivityDaysThreshold: followUp.inactivityDaysThreshold ?? defaults.inactivityDaysThreshold,
+      maxAttempts: followUp.maxAttempts ?? defaults.maxAttempts,
+      daysBetweenAttempts: followUp.daysBetweenAttempts ?? defaults.daysBetweenAttempts,
+      markColdAfterMaxAttempts: followUp.markColdAfterMaxAttempts ?? defaults.markColdAfterMaxAttempts,
+      quietHours: followUp.quietHours ?? defaults.quietHours,
+    }
+    // Persist migrated rules
+    await updateClinicSettings(clinicId, { reactivationRules: migrated })
+    return migrated
+  }
+
+  return defaults
+}
+
+/**
+ * Update reactivation rules for a clinic
+ */
+export async function updateReactivationRules(
+  clinicId: string,
+  patch: Partial<ClinicReactivationRules>
+): Promise<ClinicReactivationRules> {
+  await new Promise((resolve) => setTimeout(resolve, 150))
+
+  const currentRules = await getReactivationRules(clinicId)
+  const updatedRules: ClinicReactivationRules = {
+    ...currentRules,
+    ...patch,
+  }
+
+  await updateClinicSettings(clinicId, {
+    reactivationRules: updatedRules,
+  })
+
+  return updatedRules
+}
+
+/**
+ * Get patient communication rules
+ */
+export async function getPatientCommunicationRules(clinicId: string): Promise<PatientCommunicationRules> {
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  const clinicSettings = await getClinicSettings(clinicId)
+  const defaults = getDefaultPatientCommunicationRules()
+  return clinicSettings.patientCommunicationRules ? { ...defaults, ...clinicSettings.patientCommunicationRules } : defaults
+}
+
+/**
+ * Update patient communication rules
+ */
+export async function updatePatientCommunicationRules(
+  clinicId: string,
+  patch: Partial<PatientCommunicationRules>
+): Promise<PatientCommunicationRules> {
+  await new Promise((resolve) => setTimeout(resolve, 150))
+  const current = await getPatientCommunicationRules(clinicId)
+  const updated = { ...current, ...patch }
+  await updateClinicSettings(clinicId, { patientCommunicationRules: updated })
+  return updated
+}
+
+/**
+ * Get queue & waitlist rules
+ */
+export async function getQueueWaitlistRules(clinicId: string): Promise<QueueWaitlistRules> {
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  const clinicSettings = await getClinicSettings(clinicId)
+  const defaults = getDefaultQueueWaitlistRules()
+  return clinicSettings.queueWaitlistRules ? { ...defaults, ...clinicSettings.queueWaitlistRules } : defaults
+}
+
+/**
+ * Update queue & waitlist rules
+ */
+export async function updateQueueWaitlistRules(
+  clinicId: string,
+  patch: Partial<QueueWaitlistRules>
+): Promise<QueueWaitlistRules> {
+  await new Promise((resolve) => setTimeout(resolve, 150))
+  const current = await getQueueWaitlistRules(clinicId)
+  const updated = { ...current, ...patch }
+  await updateClinicSettings(clinicId, { queueWaitlistRules: updated })
+  return updated
+}
+
+/**
+ * Get financial & admin rules
+ */
+export async function getFinancialAdminRules(clinicId: string): Promise<FinancialAdminRules> {
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  const clinicSettings = await getClinicSettings(clinicId)
+  const defaults = getDefaultFinancialAdminRules()
+  return clinicSettings.financialAdminRules ? { ...defaults, ...clinicSettings.financialAdminRules } : defaults
+}
+
+/**
+ * Update financial & admin rules
+ */
+export async function updateFinancialAdminRules(
+  clinicId: string,
+  patch: Partial<FinancialAdminRules>
+): Promise<FinancialAdminRules> {
+  await new Promise((resolve) => setTimeout(resolve, 150))
+  const current = await getFinancialAdminRules(clinicId)
+  const updated = { ...current, ...patch }
+  await updateClinicSettings(clinicId, { financialAdminRules: updated })
+  return updated
 }
 
 /**

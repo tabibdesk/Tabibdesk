@@ -6,7 +6,6 @@
 .pnp.js
 .yarn/install-state.gz
 .pnpm-store/
-# package-lock.json is NOT ignored - required for Netlify reproducible builds
 pnpm-lock.yaml
 yarn.lock
 

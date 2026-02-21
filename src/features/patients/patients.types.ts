@@ -22,6 +22,29 @@ export interface Patient {
   last_visit_at: string | null
   last_activity_at?: string | null
   is_cold?: boolean
+  /** Lead lifecycle: active, cold, lapsed, recovered */
+  lead_status?: "active" | "cold" | "lapsed" | "recovered" | null
+  /** Last meaningful touchpoint */
+  last_interaction_date?: string | null
+  /** Reason lead was lost (e.g. Price, Distance, No Response) */
+  lost_reason?: string | null
+  /** Excluded from automated reactivation messages */
+  opt_out_reactivation?: boolean | null
+  /** Medical conditions (configurable in Settings > Patient) */
+  is_diabetic?: boolean | null
+  is_hypertensive?: boolean | null
+  has_pancreatitis?: boolean | null
+  has_gerd?: boolean | null
+  has_gastritis?: boolean | null
+  has_hepatic?: boolean | null
+  has_anaemia?: boolean | null
+  has_bronchial_asthma?: boolean | null
+  has_rheumatoid?: boolean | null
+  has_ihd?: boolean | null
+  has_heart_failure?: boolean | null
+  is_pregnant?: boolean | null
+  is_breastfeeding?: boolean | null
+  glp1a_previous_exposure?: boolean | null
   created_at: string
   updated_at: string
 }
@@ -36,6 +59,9 @@ export interface ListPatientsParams {
   pageSize: number
   query?: string
   status?: PatientStatus
+  /** Filter by first_visit_at in range (for leads / new patients) */
+  firstVisitFrom?: string
+  firstVisitTo?: string
 }
 
 export interface ListPatientsResponse {

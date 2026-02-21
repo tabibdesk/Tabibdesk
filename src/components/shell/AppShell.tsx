@@ -5,6 +5,7 @@ import { SidebarProvider, useSidebar } from "@/contexts/sidebar-context"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { Sidebar } from "./Sidebar"
 import { Topbar } from "./Topbar"
+import { FloatingBotWidget } from "@/features/insights/FloatingBotWidget"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -18,7 +19,7 @@ function AppShellContent({ children, role: propRole }: AppShellProps) {
   const role = propRole || currentUser.role
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen w-full flex-col bg-white dark:bg-gray-900">
       {/* Sidebar */}
       <Sidebar role={role} />
 
@@ -33,11 +34,14 @@ function AppShellContent({ children, role: propRole }: AppShellProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto w-full">
-          <div className="w-full p-4 sm:p-6 lg:p-8">
+          <div className="w-full pt-3 px-4 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Floating bot widget - available on all app pages */}
+      <FloatingBotWidget />
     </div>
   )
 }

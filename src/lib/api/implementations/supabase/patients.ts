@@ -13,6 +13,7 @@ import type {
 import { NotFoundError, translateError } from "../../errors"
 
 function rowToPatientRow(row: Record<string, unknown>): PatientRow {
+  const bool = (v: unknown) => (v === true || v === false ? v : null)
   return {
     id: row.id as string,
     clinic_id: row.clinic_id as string,
@@ -36,8 +37,27 @@ function rowToPatientRow(row: Record<string, unknown>): PatientRow {
     last_visit_at: (row.last_visit_at as string | null) ?? null,
     last_activity_at: (row.last_activity_at as string | null) ?? undefined,
     is_cold: (row.is_cold as boolean | null) ?? undefined,
+    lead_status: (row.lead_status as PatientRow["lead_status"]) ?? undefined,
+    last_interaction_date: (row.last_interaction_date as string | null) ?? undefined,
+    lost_reason: (row.lost_reason as string | null) ?? undefined,
+    opt_out_reactivation: (row.opt_out_reactivation as boolean | null) ?? undefined,
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
+    // Medical conditions (from Settings > Patient)
+    is_diabetic: bool(row.is_diabetic),
+    is_hypertensive: bool(row.is_hypertensive),
+    has_pancreatitis: bool(row.has_pancreatitis),
+    has_gerd: bool(row.has_gerd),
+    has_gastritis: bool(row.has_gastritis),
+    has_hepatic: bool(row.has_hepatic),
+    has_anaemia: bool(row.has_anaemia),
+    has_bronchial_asthma: bool(row.has_bronchial_asthma),
+    has_rheumatoid: bool(row.has_rheumatoid),
+    has_ihd: bool(row.has_ihd),
+    has_heart_failure: bool(row.has_heart_failure),
+    is_pregnant: bool(row.is_pregnant),
+    is_breastfeeding: bool(row.is_breastfeeding),
+    glp1a_previous_exposure: bool(row.glp1a_previous_exposure),
   }
 }
 

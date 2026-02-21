@@ -33,7 +33,6 @@ import {
   RiRobotLine,
   RiVoiceprintLine,
   RiScan2Line,
-  RiRefreshLine,
   RiUserHeartLine,
   RiTeamLine,
   RiMapPinLine,
@@ -43,7 +42,8 @@ import {
   RiArrowUpSLine,
   RiDeleteBinLine,
 } from "@remixicon/react"
-import { FollowUpRulesTab } from "./FollowUpRulesTab"
+import { PageSkeleton } from "@/components/skeletons"
+import { ReactivationRulesTab } from "./ReactivationRulesTab"
 import {
   ClinicSettingsDrawer,
   type BranchFormValues,
@@ -55,13 +55,22 @@ import * as availabilityApi from "@/features/appointments/availability.api"
 import type { DoctorAvailability } from "@/features/appointments/types"
 import { TeamMemberAccessDrawer } from "./TeamMemberAccessDrawer"
 import { getBasicMetrics, getSpecialtyMetrics } from "@/types/progress"
+import {
+  CHECKLIST_PRESET_IDS,
+  formatChecklistDisplayLabel,
+  normalizeChecklistId,
+} from "@/types/visit-progress"
+import {
+  MEDICAL_CONDITIONS,
+  DEFAULT_MEDICAL_CONDITION_IDS,
+} from "@/features/patients/detail/medical-conditions"
 import { getClinicMembersByUserId } from "@/data/mock/users-clinics"
 import { getBackendType } from "@/lib/api/repository-factory"
 import type { ClinicMembership } from "./TeamMemberAccessDrawer"
 
-type TabId = "account" | "clinic" | "team" | "appointments" | "patient" | "followup" | "modules"
+type TabId = "account" | "clinic" | "team" | "appointments" | "patient" | "automation" | "modules"
 
-const TAB_IDS: TabId[] = ["account", "clinic", "team", "appointments", "patient", "followup", "modules"]
+const TAB_IDS: TabId[] = ["account", "clinic", "team", "appointments", "patient", "automation", "modules"]
 
 function isValidTabId(value: string | null): value is TabId {
   return value !== null && TAB_IDS.includes(value as TabId)
@@ -77,7 +86,12 @@ function SettingsPageContent() {
   const t = useAppTranslations()
 
   // Sync activeTab with ?tab= when URL changes (e.g. from Bot page deep link)
+  // Redirect legacy ?tab=followup or ?tab=reactivation to automation
   useEffect(() => {
+    if (tabFromUrl === "followup" || tabFromUrl === "reactivation") {
+      setActiveTab("automation")
+      return
+    }
     if (isValidTabId(tabFromUrl) && tabFromUrl !== activeTab) {
       setActiveTab(tabFromUrl)
     }
@@ -89,7 +103,7 @@ function SettingsPageContent() {
     { id: "team" as const, label: t.settings.team, labelShort: t.settings.team, icon: RiTeamLine },
     { id: "appointments" as const, label: t.settings.appointments, labelShort: t.settings.appointments, icon: RiCalendarLine },
     { id: "patient" as const, label: t.settings.patient, labelShort: t.settings.patient, icon: RiUserHeartLine },
-    { id: "followup" as const, label: t.settings.followUpRules, labelShort: t.settings.followUpRules.split(" ")[0], icon: RiRefreshLine },
+    { id: "automation" as const, label: t.settings.automation, labelShort: t.settings.automationShort, icon: RiRobotLine },
     { id: "modules" as const, label: t.settings.modules, labelShort: t.settings.modules, icon: RiPuzzleLine },
   ]
 
@@ -101,7 +115,7 @@ function SettingsPageContent() {
       <PageHeader title={t.settings.title} />
 
       {/* Tab Navigation - same structure as Appointments/Accounting for consistent spacing */}
-      <div className="space-y-3">
+      <div className="!mt-0 space-y-3">
         <div className="border-b border-gray-200 dark:border-gray-800">
           <nav className="-mb-px flex gap-4 overflow-x-auto pb-px sm:gap-8" aria-label="Settings tabs">
           {tabs.map((tab) => {
@@ -141,7 +155,7 @@ function SettingsPageContent() {
         {activeTab === "team" && <TeamTab />}
         {activeTab === "appointments" && <AppointmentsTab />}
         {activeTab === "patient" && <PatientTab />}
-        {activeTab === "followup" && <FollowUpRulesTab />}
+        {activeTab === "automation" && <ReactivationRulesTab />}
         {activeTab === "modules" && <ModulesTab canEdit={canEditModules} />}
       </div>
     </div>
@@ -199,29 +213,6 @@ function AccountTab() {
           <div className="space-y-2">
             <Label htmlFor="language">{t.settings.language}</Label>
             <LanguageSelect />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="date-format">{t.settings.dateFormat}</Label>
-            <select
-              id="date-format"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
-            >
-              <option>DD/MM/YYYY</option>
-              <option>MM/DD/YYYY</option>
-              <option>YYYY-MM-DD</option>
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="time-format">{t.settings.timeFormat}</Label>
-            <select
-              id="time-format"
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-50"
-            >
-              <option>{t.settings.timeFormat12}</option>
-              <option>{t.settings.timeFormat24}</option>
-            </select>
           </div>
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -799,7 +790,7 @@ function TeamTab() {
       {/* Pending invitations */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{t.settings.pendingInvitations}</CardTitle>
+          <CardTitle>{t.settings.pendingInvitations}</CardTitle>
         </CardHeader>
         <CardContent>
           {pendingInvites.length === 0 ? (
@@ -933,7 +924,7 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
         {featureGroups.map((group) => (
           <div key={group.title} className="space-y-4">
             <div>
-              <h3 className="text-base font-semibold text-gray-900 sm:text-lg dark:text-gray-50">{group.title}</h3>
+              <h3 className="text-xs font-semibold text-gray-900 sm:text-sm dark:text-gray-50">{group.title}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">{group.description}</p>
             </div>
 
@@ -1002,11 +993,16 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
 
 const DEFAULT_ENABLED_METRIC_IDS = ["weight", "bmi", "bp", "pulse", "blood_sugar"]
 
+
 // Patient tab: progress metrics (enable/disable; all enabled metrics show in patient Progress section)
 function PatientTab() {
   const t = useAppTranslations()
   const { currentClinic } = useUserClinic()
   const [enabledIds, setEnabledIds] = useState<Set<string>>(new Set())
+  const [checklistIds, setChecklistIds] = useState<string[]>([])
+  const [medicalConditionIds, setMedicalConditionIds] = useState<Set<string>>(new Set(DEFAULT_MEDICAL_CONDITION_IDS))
+  const [addChecklistOpen, setAddChecklistOpen] = useState(false)
+  const [customChecklistInput, setCustomChecklistInput] = useState("")
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
@@ -1016,6 +1012,23 @@ function PatientTab() {
           ? settings.enabledProgressMetricIds
           : DEFAULT_ENABLED_METRIC_IDS
       setEnabledIds(new Set(enabled))
+      const saved = settings.visitProgressChecklistIds
+      const legacyDefaults = ["vitals", "complaint", "examination", "diagnosis", "treatment", "labs", "followup"]
+      const isLegacy =
+        saved &&
+        saved.length === legacyDefaults.length &&
+        legacyDefaults.every((id) => saved!.includes(id))
+      setChecklistIds(
+        saved !== undefined && saved.length > 0 && !isLegacy
+          ? saved
+          : CHECKLIST_PRESET_IDS
+      )
+      const savedMed = settings.medicalConditionIds
+      setMedicalConditionIds(
+        savedMed !== undefined && savedMed.length > 0
+          ? new Set(savedMed)
+          : new Set(DEFAULT_MEDICAL_CONDITION_IDS)
+      )
     })
   }, [currentClinic.id])
 
@@ -1028,11 +1041,42 @@ function PatientTab() {
     })
   }
 
+  const handleAddChecklistItem = (id: string) => {
+    setChecklistIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
+    setAddChecklistOpen(false)
+  }
+
+  const handleAddCustomChecklistItem = () => {
+    const id = normalizeChecklistId(customChecklistInput)
+    if (!id) return
+    setChecklistIds((prev) => (prev.includes(id) ? prev : [...prev, id]))
+    setCustomChecklistInput("")
+  }
+
+  const handleRemoveChecklistItem = (id: string) => {
+    setChecklistIds((prev) => prev.filter((x) => x !== id))
+  }
+
+  const toggleMedicalCondition = (id: string) => {
+    setMedicalConditionIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   const handleSave = async () => {
     setIsSaving(true)
     try {
       await settingsApi.updateClinicSettings(currentClinic.id, {
         enabledProgressMetricIds: Array.from(enabledIds),
+        visitProgressChecklistIds: checklistIds,
+        medicalConditionIds:
+          medicalConditionIds.size === DEFAULT_MEDICAL_CONDITION_IDS.length &&
+          DEFAULT_MEDICAL_CONDITION_IDS.every((id) => medicalConditionIds.has(id))
+            ? []
+            : Array.from(medicalConditionIds),
       })
     } catch (error) {
       console.error("Failed to save progress settings:", error)
@@ -1089,6 +1133,132 @@ function PatientTab() {
                 ))}
               </div>
             </div>
+          </div>
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button variant="primary" onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
+              {isSaving ? t.settings.saving : t.settings.saveChanges}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
+          <div>
+            <CardTitle>{t.settings.visitProgressChecklist}</CardTitle>
+            <CardDescription>
+              {t.settings.visitProgressChecklistDesc}
+            </CardDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 shrink-0"
+            onClick={() => setAddChecklistOpen((o) => !o)}
+          >
+            <RiAddLine className="size-4" />
+            <span className="hidden sm:inline">{t.settings.addChecklistItem}</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {addChecklistOpen && (
+            <div className="space-y-3 rounded-lg border border-gray-200 p-3 dark:border-gray-800">
+              {CHECKLIST_PRESET_IDS.filter((id) => !checklistIds.includes(id)).length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {CHECKLIST_PRESET_IDS.filter((id) => !checklistIds.includes(id)).map((id) => (
+                    <Button
+                      key={id}
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleAddChecklistItem(id)}
+                    >
+                      {formatChecklistDisplayLabel(id)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder={t.settings.customChecklistPlaceholder}
+                  value={customChecklistInput}
+                  onChange={(e) => setCustomChecklistInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), handleAddCustomChecklistItem())
+                  }
+                  className="min-w-[12rem] flex-1"
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddCustomChecklistItem}
+                  disabled={
+                    !normalizeChecklistId(customChecklistInput) ||
+                    checklistIds.includes(normalizeChecklistId(customChecklistInput))
+                  }
+                >
+                  {t.settings.addCustomChecklistItem}
+                </Button>
+              </div>
+            </div>
+          )}
+          {checklistIds.length === 0 ? (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t.settings.noChecklistItems}
+            </p>
+          ) : (
+            <div className="rounded-lg border border-gray-200 divide-y divide-gray-200 dark:border-gray-800 dark:divide-gray-800">
+              {checklistIds.map((id) => (
+                <div
+                  key={id}
+                  className="flex items-center justify-between px-4 py-3"
+                >
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-50">
+                    {formatChecklistDisplayLabel(id)}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-500 hover:text-destructive"
+                    onClick={() => handleRemoveChecklistItem(id)}
+                    title={t.settings.removeChecklistItem}
+                    aria-label={t.settings.removeChecklistItem}
+                  >
+                    <RiDeleteBinLine className="size-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button variant="primary" onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
+              {isSaving ? t.settings.saving : t.settings.saveChanges}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.settings.medicalConditions}</CardTitle>
+          <CardDescription>
+            {t.settings.medicalConditionsDesc}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {MEDICAL_CONDITIONS.map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-2"
+              >
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{c.label}</span>
+                <Switch
+                  checked={medicalConditionIds.has(c.id)}
+                  onCheckedChange={() => toggleMedicalCondition(c.id)}
+                />
+              </div>
+            ))}
           </div>
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button variant="primary" onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">
@@ -1440,8 +1610,8 @@ export default function SettingsPage() {
   return (
     <Suspense
       fallback={
-        <div className="page-content flex min-h-[200px] items-center justify-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>
+        <div className="page-content">
+          <PageSkeleton showHeader contentBlocks={2} />
         </div>
       }
     >

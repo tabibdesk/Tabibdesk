@@ -39,7 +39,7 @@ export function InjectionsTab({ injections, onAddInjection }: InjectionsTabProps
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50">Injections History</h2>
+        <h2 className="text-base font-bold text-gray-900 dark:text-gray-50">Injections History</h2>
         <Button onClick={onAddInjection}>
           <RiAddLine className="mr-2 size-4" />
           Add Injection
@@ -61,7 +61,7 @@ export function InjectionsTab({ injections, onAddInjection }: InjectionsTabProps
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">{injection.medication_name}</CardTitle>
+                    <CardTitle>{injection.medication_name}</CardTitle>
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                       {new Date(injection.injection_date).toLocaleDateString("en-US", {
                         year: "numeric",

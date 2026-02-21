@@ -25,7 +25,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div
         className={cx(
-          "group/search relative flex w-full items-stretch rounded-lg border border-gray-200 bg-gray-50/50 shadow-sm transition-all focus-within:border-primary-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-inset dark:border-gray-700 dark:bg-gray-800/50 dark:focus-within:border-primary-500 dark:focus-within:bg-gray-900 dark:focus-within:ring-primary-500",
+          "group/search relative flex w-full items-stretch rounded-lg border border-gray-200 bg-gray-50/50 shadow-sm outline-none transition-all focus-within:border-primary-500 focus-within:bg-white focus-within:outline-2 focus-within:outline-primary-500 focus-within:outline-offset-2 dark:border-gray-700 dark:bg-gray-800/50 dark:focus-within:border-primary-500 dark:focus-within:bg-gray-900 dark:focus-within:outline-primary-500",
           "h-9 overflow-hidden rtl:flex-row-reverse",
           className
         )}

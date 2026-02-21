@@ -53,7 +53,7 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
   
   if (error) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <DayNavigation currentDate={currentDate} onDateChange={setCurrentDate} />
         <EmptyState
           variant="card"
@@ -66,17 +66,17 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
       </div>
     )
   }
-  
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 w-full">
       <DayNavigation currentDate={currentDate} onDateChange={setCurrentDate} />
       
       {loading ? (
-        <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+        <div className="rounded-2xl border border-gray-100 p-6 dark:border-gray-800 bg-white dark:bg-gray-900">
           <ListSkeleton rows={8} />
         </div>
       ) : (
-        <div className="space-y-1">
+        <div className="relative">
           {slots.length === 0 ? (
             <EmptyState
               variant="card"
@@ -85,43 +85,49 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
               description={t.appointments.noSlotsAvailableDesc}
             />
           ) : (
-            slots.map((slot, index) => {
-              const nextSlot = slots[index + 1]
-              const bufferMinutes = nextSlot ? calculateBufferTime(slot, nextSlot) : 0
-              
-              return (
-                <Fragment key={slot.id}>
-                  {slot.state === "empty" && (
-                    <EmptySlotRow
-                      slot={slot}
-                      onFillSlot={onFillSlot}
-                    />
-                  )}
-                  {slot.state === "cancelled" && (
-                    <CancelledSlotRow
-                      slot={slot}
-                      onFillSlot={onFillSlot}
-                    />
-                  )}
-                  {slot.state === "booked" && (
-                    <SlotRow 
-                      slot={slot} 
-                      onReschedule={onReschedule}
-                      onCancel={async () => {
-                        if (slot.appointmentId && refetch) {
-                          // Cancel will be handled by SlotRow, then refetch
-                          await refetch()
-                        }
-                      }}
-                    />
-                  )}
+            <>
+              {/* Vertical Timeline Line */}
+              <div className="absolute left-[26px] top-4 bottom-4 w-0.5 bg-gray-100 dark:bg-gray-800 hidden sm:block" />
+
+              <div className="space-y-4">
+                {slots.map((slot, index) => {
+                  const nextSlot = slots[index + 1]
+                  const bufferMinutes = nextSlot ? calculateBufferTime(slot, nextSlot) : 0
                   
-                  {bufferMinutes > 0 && (
-                    <BufferGap minutes={bufferMinutes} />
-                  )}
-                </Fragment>
-              )
-            })
+                  return (
+                    <Fragment key={slot.id}>
+                      {slot.state === "empty" && (
+                        <EmptySlotRow
+                          slot={slot}
+                          onFillSlot={onFillSlot}
+                        />
+                      )}
+                      {slot.state === "cancelled" && (
+                        <CancelledSlotRow
+                          slot={slot}
+                          onFillSlot={onFillSlot}
+                        />
+                      )}
+                      {slot.state === "booked" && (
+                        <SlotRow 
+                          slot={slot} 
+                          onReschedule={onReschedule}
+                          onCancel={async () => {
+                            if (slot.appointmentId && refetch) {
+                              await refetch()
+                            }
+                          }}
+                        />
+                      )}
+                      
+                      {bufferMinutes > 0 && (
+                        <BufferGap minutes={bufferMinutes} />
+                      )}
+                    </Fragment>
+                  )
+                })}
+              </div>
+            </>
           )}
         </div>
       )}

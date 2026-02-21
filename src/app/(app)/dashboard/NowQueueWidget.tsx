@@ -7,7 +7,7 @@ import { getBadgeColor } from "@/lib/badgeColors"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { WidgetSkeleton } from "@/components/skeletons"
 import { EmptyState } from "@/components/EmptyState"
-import { RiArrowRightLine, RiCalendarLine, RiCheckLine, RiUserLine } from "@remixicon/react"
+import { RiCalendarLine, RiCheckLine, RiUserLine } from "@remixicon/react"
 import type { DashboardAppointment } from "./dashboard.types"
 import { getTimeDisplay, getIconColorClass, getIconBackgroundClass } from "./useQueueActions"
 
@@ -35,12 +35,6 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.nowQueue}</h2>
-        <Link href="/appointments">
-          <Button variant="ghost" className="text-[11px] font-bold tracking-wider -mr-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50">
-            {t.dashboard.viewAll}
-            <RiArrowRightLine className="ml-1 size-3.5 rtl:rotate-180 rtl:ml-0 rtl:mr-1" />
-          </Button>
-        </Link>
       </div>
       <div className="space-y-3">
         {appointments.length > 0 ? (
@@ -103,7 +97,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
                       <Button
                         type="button"
                         variant="primary"
-                        className="btn-primary-widget shadow-sm"
+                        className="btn-primary-widget shadow-sm lowercase"
                         onClick={(e) => {
                           e.preventDefault()
                           e.stopPropagation()

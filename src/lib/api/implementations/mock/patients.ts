@@ -3,7 +3,7 @@
  */
 
 import { mockData } from "@/data/mock/mock-data"
-import { DEMO_CLINIC_ID } from "@/lib/constants"
+import { mockClinics } from "@/data/mock/users-clinics"
 import type {
   IPatientsRepository,
   PatientRow,
@@ -17,9 +17,10 @@ let initialized = false
 
 function initStore() {
   if (!initialized) {
-    patientsStore = mockData.patients.map((p) => ({
+    const clinicIds = mockClinics.map((c) => c.id)
+    patientsStore = mockData.patients.map((p, i) => ({
       ...p,
-      clinic_id: DEMO_CLINIC_ID,
+      clinic_id: clinicIds[i % clinicIds.length],
     })) as PatientRow[]
     initialized = true
   }

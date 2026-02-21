@@ -45,6 +45,8 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
   const [showReceiptModal, setShowReceiptModal] = useState(false)
   const [selectedExpenseForView, setSelectedExpenseForView] = useState<Expense | null>(null)
   const [showViewExpenseDrawer, setShowViewExpenseDrawer] = useState(false)
+  const [page, setPage] = useState(1)
+  const [accumulatedExpenses, setAccumulatedExpenses] = useState<Expense[]>([])
 
   const getDateRange = () => {
     if (dateRangePreset === "all") {
@@ -83,7 +85,7 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
     from: dateRange.from,
     to: dateRange.to,
     query: debouncedSearch || undefined,
-    page: 1,
+    page,
     pageSize: 20,
   })
 
@@ -92,7 +94,20 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const expenses = data?.expenses || []
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPage(1)
+    setAccumulatedExpenses([])
+  }, [dateRange.from, dateRange.to, debouncedSearch])
+
+  // Accumulate expenses for pagination
+  useEffect(() => {
+    if (data?.expenses) {
+      setAccumulatedExpenses((prev) => (page === 1 ? data.expenses : [...prev, ...data.expenses]))
+    }
+  }, [data?.expenses, page])
+
+  const expenses = page === 1 && loading ? [] : accumulatedExpenses
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0)
   const suppliesTotal = expenses.filter((e) => e.category === "supplies").reduce((sum, e) => sum + e.amount, 0)
   const rentTotal = expenses.filter((e) => e.category === "rent").reduce((sum, e) => sum + e.amount, 0)
@@ -169,11 +184,15 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
             searchPlaceholder={t.accounting.searchExpenses}
           />
         </div>
-        <Button variant="secondary" onClick={() => setShowAddModal(true)} className="w-full sm:w-auto shrink-0 md:h-9 md:py-1.5 md:text-sm inline-flex items-center gap-2 rtl:flex-row-reverse">
-          <RiAddLine className="size-4" />
+        <button
+          type="button"
+          onClick={() => setShowAddModal(true)}
+          className="btn-search-action w-full sm:w-auto rtl:flex-row-reverse"
+        >
+          <RiAddLine className="size-5 shrink-0" />
           <span className="hidden sm:inline">{t.expense.addExpense}</span>
           <span className="sm:hidden">{t.expense.add}</span>
-        </Button>
+        </button>
       </div>
 
       {/* Expenses List */}
@@ -312,6 +331,26 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
               </Card>
             ))}
           </div>
+
+          {(data?.hasMore ?? false) && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page > 1 && loading}
+                className="min-w-[140px]"
+              >
+                {page > 1 && loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {t.accounting.loadMore}
+                  </span>
+                ) : (
+                  t.accounting.loadMore
+                )}
+              </Button>
+            </div>
+          )}
         </>
       )}
 

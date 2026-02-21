@@ -69,6 +69,8 @@ function initializeMockExpenses() {
       receiptFileId: "receipt_004",
       createdByUserId: "user-001",
       createdAt: daysAgo(7),
+      dateFrom: daysAgo(14).split("T")[0],
+      dateTo: daysAgo(7).split("T")[0],
     },
     {
       id: "exp_mock_005",
@@ -109,6 +111,10 @@ export interface CreateExpenseParams {
   note?: string
   receiptFileId?: string
   createdByUserId: string
+  /** For marketing: ad campaign period start (YYYY-MM-DD) */
+  dateFrom?: string
+  /** For marketing: ad campaign period end (YYYY-MM-DD) */
+  dateTo?: string
 }
 
 export interface ListExpensesParams {
@@ -148,6 +154,8 @@ export async function createExpense(params: CreateExpenseParams): Promise<Expens
     receiptFileId: params.receiptFileId,
     createdByUserId: params.createdByUserId,
     createdAt: new Date().toISOString(),
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
   }
   
   expensesStore.push(expense)
@@ -239,4 +247,66 @@ export async function getExpenseById(expenseId: string): Promise<Expense | null>
   
   const expense = expensesStore.find((e) => e.id === expenseId)
   return expense || null
+}
+
+export interface MarketingCostPerLeadResult {
+  totalAdSpend: number
+  leadsCount: number
+  costPerLead: number | null
+  /** Campaign date range from contributing marketing expenses (min dateFrom, max dateTo) */
+  campaignDateRange?: { from: string; to: string }
+}
+
+/**
+ * Get marketing ad spend and cost per lead for a date range.
+ * Uses marketing expenses with dateFrom/dateTo overlapping the period, or createdAt for legacy.
+ */
+export async function getMarketingCostPerLead(params: {
+  clinicId: string
+  from: string
+  to: string
+  leadsInRange: { created_at: string }[]
+}): Promise<MarketingCostPerLeadResult> {
+  await delay(100)
+
+  const fromDate = new Date(params.from)
+  const toDate = new Date(params.to)
+  toDate.setHours(23, 59, 59, 999)
+
+  const leadsCount = params.leadsInRange.filter(
+    (l) => new Date(l.created_at) >= fromDate && new Date(l.created_at) <= toDate
+  ).length
+
+  if (expensesStore.length === 0) {
+    initializeMockExpenses()
+  }
+
+  const marketingExpenses = expensesStore.filter(
+    (e) => e.clinicId === params.clinicId && e.category === "marketing"
+  )
+
+  let totalAdSpend = 0
+  let campaignFrom: string | undefined
+  let campaignTo: string | undefined
+
+  for (const exp of marketingExpenses) {
+    const expFrom = exp.dateFrom ? new Date(exp.dateFrom) : new Date(exp.createdAt)
+    const expTo = exp.dateTo ? new Date(exp.dateTo) : new Date(exp.createdAt)
+    expTo.setHours(23, 59, 59, 999)
+
+    const overlaps = expFrom <= toDate && expTo >= fromDate
+    if (overlaps) {
+      totalAdSpend += exp.amount
+      const expFromStr = exp.dateFrom ?? exp.createdAt.split("T")[0]
+      const expToStr = exp.dateTo ?? exp.createdAt.split("T")[0]
+      if (!campaignFrom || expFromStr < campaignFrom) campaignFrom = expFromStr
+      if (!campaignTo || expToStr > campaignTo) campaignTo = expToStr
+    }
+  }
+
+  const costPerLead = leadsCount > 0 ? totalAdSpend / leadsCount : null
+  const campaignDateRange =
+    campaignFrom && campaignTo ? { from: campaignFrom, to: campaignTo } : undefined
+
+  return { totalAdSpend, leadsCount, costPerLead, campaignDateRange }
 }

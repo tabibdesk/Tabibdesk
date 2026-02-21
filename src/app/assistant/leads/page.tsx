@@ -113,7 +113,7 @@ export default function AssistantLeadsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">{lead.name}</CardTitle>
+                    <CardTitle>{lead.name}</CardTitle>
                     <div className="mt-2">{getStatusBadge(lead.status)}</div>
                   </div>
                 </div>

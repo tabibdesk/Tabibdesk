@@ -13,7 +13,7 @@ export default async function Page({
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">
+              <CardTitle className="text-lg">
                 Sorry, something went wrong.
               </CardTitle>
             </CardHeader>

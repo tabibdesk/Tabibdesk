@@ -48,7 +48,7 @@ export function ArchiveAppointmentsTable({ appointments }: ArchiveAppointmentsTa
                 <td className="px-4 py-4">
                   <Link
                     href={`/patients/${appointment.patient_id}`}
-                    className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-50 dark:hover:text-primary-400"
+                    className="text-sm font-medium text-gray-900 hover:text-primary-600 dark:text-gray-50 dark:hover:text-primary-400"
                   >
                     {appointment.patient_name}
                   </Link>

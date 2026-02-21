@@ -22,7 +22,7 @@ import {
   createFollowUpTask,
 } from "./tasks.api"
 import { updateLastActivity, markPatientCold } from "@/api/patients.api"
-import { getFollowUpRules } from "@/api/settings.api"
+import { getReactivationRules } from "@/api/settings.api"
 import type {
   TaskListItem,
   TaskSource,
@@ -67,7 +67,7 @@ export function TasksPage({
         page,
         pageSize,
       })
-      setTasks(response.tasks)
+      setTasks((prev) => (page === 1 ? response.tasks : [...prev, ...response.tasks]))
       setTotal(response.total)
       setHasMore(response.hasMore)
     } catch (error) {
@@ -119,7 +119,7 @@ export function TasksPage({
     }
 
     try {
-      const rules = await getFollowUpRules(clinicId)
+      const rules = await getReactivationRules(clinicId)
       const nextAttempt = (task.attempt || 1) + 1
 
       // Check if we've reached max attempts
@@ -160,9 +160,13 @@ export function TasksPage({
     }
   }
 
-  const handleAssign = async (assignedToUserId: string | undefined) => {
+  const handleAssign = async (result: { assignedToUserId?: string; assignedToPatientId?: string }) => {
     if (!assignTaskData) return
-    await assignTask({ id: assignTaskData.id, assignedToUserId })
+    await assignTask({
+      id: assignTaskData.id,
+      assignedToUserId: result.assignedToUserId,
+      assignedToPatientId: result.assignedToPatientId,
+    })
     await fetchTasks()
   }
 
@@ -214,14 +218,21 @@ export function TasksPage({
           />
 
           {hasMore && (
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-4">
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={loading}
-                isLoading={loading}
+                className="min-w-[140px]"
               >
-                Load More
+                {loading && page > 1 ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {t.common.loadMore}
+                  </span>
+                ) : (
+                  t.common.loadMore
+                )}
               </Button>
             </div>
           )}

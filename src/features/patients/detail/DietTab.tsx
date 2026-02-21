@@ -40,7 +40,7 @@ export function DietTab({ diets, onEditDiet: _onEditDiet }: DietTabProps) {
       // H1
       if (line.startsWith("# ")) {
         elements.push(
-          <h1 key={index} className="mb-4 mt-6 text-2xl font-bold text-gray-900 dark:text-gray-50">
+          <h1 key={index} className="mb-4 mt-6 text-lg font-bold text-gray-900 dark:text-gray-50">
             {line.replace("# ", "")}
           </h1>
         )
@@ -48,7 +48,7 @@ export function DietTab({ diets, onEditDiet: _onEditDiet }: DietTabProps) {
       // H2
       else if (line.startsWith("## ")) {
         elements.push(
-          <h2 key={index} className="mb-3 mt-5 text-xl font-semibold text-gray-900 dark:text-gray-50">
+          <h2 key={index} className="mb-3 mt-5 text-base font-semibold text-gray-900 dark:text-gray-50">
             {line.replace("## ", "")}
           </h2>
         )
@@ -56,7 +56,7 @@ export function DietTab({ diets, onEditDiet: _onEditDiet }: DietTabProps) {
       // H3
       else if (line.startsWith("### ")) {
         elements.push(
-          <h3 key={index} className="mb-2 mt-4 text-lg font-semibold text-gray-900 dark:text-gray-50">
+          <h3 key={index} className="mb-2 mt-4 text-sm font-semibold text-gray-900 dark:text-gray-50">
             {line.replace("### ", "")}
           </h3>
         )

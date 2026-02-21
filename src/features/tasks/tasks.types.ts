@@ -23,8 +23,10 @@ export interface Task {
   priority: TaskPriority
   dueDate?: string
   createdAt: string
+  updatedAt?: string
   createdByUserId: string
   assignedToUserId?: string
+  assignedToPatientId?: string
   patientId?: string
   clinicId: string
   source: TaskSource
@@ -76,6 +78,7 @@ export interface CreateTaskPayload {
   /** Alias for dueDate used by follow-up task creation */
   dueAt?: string
   assignedToUserId?: string
+  assignedToPatientId?: string
   patientId?: string
   appointmentId?: string
   /** Follow-up kind when type is follow_up */
@@ -93,4 +96,5 @@ export interface UpdateTaskStatusPayload {
 export interface AssignTaskPayload {
   id: string
   assignedToUserId?: string
+  assignedToPatientId?: string
 }

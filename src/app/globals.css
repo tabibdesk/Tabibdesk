@@ -62,11 +62,11 @@
 /* Global Button Styles for Dashboard Widgets */
 @layer components {
   .btn-primary-widget {
-    @apply h-9 px-4 text-xs font-semibold rounded-full;
+    @apply h-8 px-3 text-xs font-bold rounded-xl transition-all active:scale-95 shadow-sm;
   }
 
   .btn-secondary-widget {
-    @apply h-9 px-4 text-xs font-semibold rounded-full;
+    @apply h-8 px-3 text-xs font-bold rounded-xl transition-all active:scale-95 border-0 shadow-sm flex items-center gap-1.5 shrink-0 whitespace-nowrap;
   }
 
   /* Card action buttons (e.g. Reschedule, Cancel, Fill Slot) – use text-sm */
@@ -74,9 +74,14 @@
     @apply text-sm;
   }
 
-  /* Shared card surface: border, shadow, rounded, background – used by widget rows (Now Queue) and list cards (e.g. patient cards) */
+  /* Shared card surface: border, shadow, rounded, background – used by widget rows (Now Queue) and list cards (e.g. patient cards). Matches Card component rounded-2xl. */
   .card-surface {
-    @apply rounded-xl border border-gray-100 bg-white shadow-sm transition-colors dark:border-gray-800 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700;
+    @apply rounded-2xl border border-gray-100 bg-white shadow-card transition-colors dark:border-gray-800 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700;
+  }
+
+  /* Insight metric cards – default border and shadow for Marketing, Money, Visits tabs. Matches Re-activation cards. */
+  .insight-card {
+    @apply rounded-2xl border border-gray-200 bg-white shadow-card dark:border-gray-800 dark:bg-gray-900;
   }
 
   /* Widget Row Layout (Now Queue, Today's Appointments) */
@@ -107,9 +112,19 @@
     @apply absolute left-0 top-0 bottom-0 w-1;
   }
 
+  /* Patient/User Avatar - matches appointments tab slot row style */
+  .avatar-patient {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400;
+  }
+
   /* Page Content Container - Consistent spacing between page header/title and first component (matches dashboard) */
   .page-content {
     @apply space-y-6;
+  }
+
+  /* Search toolbar action button – primary action next to search bars (matches WaitlistTab) */
+  .btn-search-action {
+    @apply shrink-0 inline-flex items-center justify-center gap-2 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all active:scale-95 border-0 shadow-sm;
   }
 
   /* Nested Dropdowns - Mobile fixes */

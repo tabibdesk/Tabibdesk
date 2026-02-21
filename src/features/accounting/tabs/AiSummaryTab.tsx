@@ -22,6 +22,7 @@ import {
   RiCheckLine,
   RiFileTextLine,
   RiRobot2Line,
+  RiRefreshLine,
 } from "@remixicon/react"
 
 export function AiSummaryTab() {
@@ -38,10 +39,15 @@ export function AiSummaryTab() {
   })
   const [creatingTasks, setCreatingTasks] = useState(false)
   const [processingAlert, setProcessingAlert] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
 
-  const loadData = async () => {
+  const loadData = async (isRefresh = false) => {
     try {
-      setLoading(true)
+      if (isRefresh) {
+        setRefreshing(true)
+      } else {
+        setLoading(true)
+      }
       const currentMonth = new Date().toISOString().substring(0, 7)
       const today = new Date().toISOString().split("T")[0]
       
@@ -86,6 +92,7 @@ export function AiSummaryTab() {
       showToast("Failed to load summary", "error")
     } finally {
       setLoading(false)
+      setRefreshing(false)
     }
   }
 
@@ -349,12 +356,28 @@ export function AiSummaryTab() {
       {dailyReport && (
         <Card>
           <div className="p-6">
-            <div className="mb-4 flex items-center gap-2">
-              <RiFileTextLine className="size-5 text-primary-600 dark:text-primary-400" />
-              <h3 className="font-semibold text-gray-900 dark:text-gray-50">
-                Today&apos;s AI Summary
-              </h3>
-              <Badge color="gray" size="xs">{dailyReport.date}</Badge>
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <RiFileTextLine className="size-5 text-primary-600 dark:text-primary-400" />
+                <h3 className="font-semibold text-gray-900 dark:text-gray-50">
+                  Today&apos;s AI Summary
+                </h3>
+                <Badge color="gray" size="xs">{dailyReport.date}</Badge>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => loadData(true)}
+                disabled={refreshing}
+                className="shrink-0"
+                aria-label={t.common.refresh}
+              >
+                {refreshing ? (
+                  <div className="size-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+                ) : (
+                  <RiRefreshLine className="size-4" />
+                )}
+              </Button>
             </div>
 
             {/* AI Summary Text */}

@@ -18,6 +18,7 @@ export function EmptyPatientsState({ hasSearchQuery, onAddPatient }: EmptyPatien
       description={!hasSearchQuery ? t.patients.patientsDescription : undefined}
       actionLabel={!hasSearchQuery ? t.patients.addFirstPatient : undefined}
       onAction={!hasSearchQuery ? onAddPatient : undefined}
+      actionVariant="secondary"
     />
   )
 }

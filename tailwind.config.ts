@@ -121,6 +121,8 @@ const config: Config = {
         "tremor-full": "9999px",
       },
       boxShadow: {
+        /** Soft, diffused card shadow - subtle elevation with gentle lift */
+        card: "0 4px 14px 0 rgba(0, 0, 0, 0.06), 0 2px 6px 0 rgba(0, 0, 0, 0.04)",
         "tremor-card":
           "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
         "dark-tremor-card": "0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3)",

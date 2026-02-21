@@ -1,7 +1,14 @@
 "use client"
 
-import { BotPage } from "@/features/insights/BotPage"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
-export default function BotPageRoute() {
-  return <BotPage />
+export default function BotRedirectPage() {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace("/dashboard")
+  }, [router])
+
+  return null
 }

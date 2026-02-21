@@ -163,7 +163,7 @@ export function NotesTab({ notes: initialNotes, patient, onNoteAdded }: NotesTab
 
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden shadow-sm">
+      <Card className="overflow-hidden">
         <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12 flex flex-row items-center justify-between rtl:flex-row-reverse">
           <div className="flex items-center gap-2 rtl:flex-row-reverse">
             <RiFileTextLine className="size-4 text-primary-500/70 dark:text-primary-400/70 shrink-0" />

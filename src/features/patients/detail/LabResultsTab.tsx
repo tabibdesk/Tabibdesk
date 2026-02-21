@@ -410,7 +410,7 @@ export function LabResultsTab({ labResults }: LabResultsTabProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setViewingFile(null)}>
           <div className="relative max-h-[90vh] max-w-4xl overflow-auto rounded-lg bg-white dark:bg-gray-900" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Lab Report</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-50">Lab Report</h3>
               <button
                 onClick={() => setViewingFile(null)}
                 className="rounded-lg p-1 hover:bg-gray-100 dark:hover:bg-gray-800"

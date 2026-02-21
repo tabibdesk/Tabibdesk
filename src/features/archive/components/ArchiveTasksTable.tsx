@@ -69,14 +69,14 @@ export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className={cx(
-                    "text-sm text-gray-900 dark:text-white truncate",
+                    "text-sm font-medium text-gray-900 dark:text-white truncate",
                     isDone && "text-gray-400 line-through decoration-gray-400/50"
                   )}>
                     {task.description || task.title}
                   </p>
                 </div>
                 
-                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
                   {task.patientName && (
                     <Link
                       href={`/patients/${task.patientId}`}
@@ -104,12 +104,12 @@ export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
             <div className="flex items-center gap-2 ms-4 shrink-0 rtl:flex-row-reverse">
               <div className="flex flex-col items-end gap-1 rtl:items-start">
                 {completedDate && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     {task.status === "done" ? t.archive.completed : t.archive.ignored}: {completedDate.toLocaleDateString()}
                   </span>
                 )}
                 {task.dueDate && (
-                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     {t.archive.due} {formatTaskDateTranslated(task.dueDate, t, lang)}
                   </span>
                 )}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card, CardContent, CardHeader } from "@/components/Card"
 import { Badge } from "@/components/Badge"
@@ -16,6 +17,10 @@ import {
   RiCapsuleLine,
   RiTimeLine,
   RiAddLine,
+  RiRefreshLine,
+  RiEditLine,
+  RiSaveLine,
+  RiCloseLine,
 } from "@remixicon/react"
 import type { ProgressMetric } from "@/types/progress"
 import type { PastMedication, Prescription } from "@/features/prescriptions/prescriptions.types"
@@ -65,17 +70,24 @@ interface DoctorNote {
   created_at: string
 }
 
+interface MedicalConditionItem {
+  id: string
+  label: string
+}
+
 interface ProfileTabProps {
   patient: Patient
   notes: DoctorNote[]
   progressMetrics?: ProgressMetric[]
   pastMedications?: PastMedication[]
   prescriptions?: Prescription[]
+  enabledMedicalConditions?: MedicalConditionItem[]
   onAddPastMedication?: () => void
   onAddPrescription?: () => void
   onAddWeightLog?: () => void
   onNoteAdded?: () => void
   onUpdatePatient?: (updates: Partial<Patient>) => Promise<void>
+  onRefreshAiSummary?: () => void | Promise<void>
 }
 
 export function ProfileTab({
@@ -84,49 +96,153 @@ export function ProfileTab({
   progressMetrics = [],
   pastMedications = [],
   prescriptions = [],
+  enabledMedicalConditions = [],
   onAddPastMedication,
   onAddPrescription,
   onAddWeightLog,
   onNoteAdded,
   onUpdatePatient,
+  onRefreshAiSummary,
 }: ProfileTabProps) {
   const t = useAppTranslations()
 
-  // Medical condition labels kept in English (clinical terms)
-  const allMedicalConditions = [
-    { id: "is_diabetic", label: "Diabetes", value: patient.is_diabetic },
-    { id: "is_hypertensive", label: "Hypertension", value: patient.is_hypertensive },
-    { id: "has_pancreatitis", label: "Pancreatitis", value: patient.has_pancreatitis },
-    { id: "has_gerd", label: "GERD", value: patient.has_gerd },
-    { id: "has_gastritis", label: "Gastritis", value: patient.has_gastritis },
-    { id: "has_hepatic", label: "Hepatic Disease", value: patient.has_hepatic },
-    { id: "has_anaemia", label: "Anemia", value: patient.has_anaemia },
-    { id: "has_bronchial_asthma", label: "Bronchial Asthma", value: patient.has_bronchial_asthma },
-    { id: "has_rheumatoid", label: "Rheumatoid Arthritis", value: patient.has_rheumatoid },
-    { id: "has_ihd", label: "Ischemic Heart Disease", value: patient.has_ihd },
-    { id: "has_heart_failure", label: "Heart Failure", value: patient.has_heart_failure },
-    { id: "is_pregnant", label: "Pregnant", value: patient.is_pregnant },
-    { id: "is_breastfeeding", label: "Breastfeeding", value: patient.is_breastfeeding },
-    { id: "glp1a_previous_exposure", label: "GLP-1A Previous Exposure", value: patient.glp1a_previous_exposure },
-  ]
+  const patientRecord = patient as unknown as Record<string, unknown>
+  const selectedMedicalConditions = enabledMedicalConditions.filter((c) => patientRecord[c.id])
+  const aiDiagnosis = patient.ai_diagnosis || null
 
-  const handleConditionToggle = (_conditionId: string) => {
-    // TODO: Update condition in database
+  const [isEditingConditions, setIsEditingConditions] = useState(false)
+  const [conditionsEditState, setConditionsEditState] = useState<Record<string, boolean>>({})
+  const [isSavingConditions, setIsSavingConditions] = useState(false)
+
+  const handleStartEditConditions = () => {
+    const state: Record<string, boolean> = {}
+    enabledMedicalConditions.forEach((c) => {
+      state[c.id] = !!(patientRecord[c.id])
+    })
+    setConditionsEditState(state)
+    setIsEditingConditions(true)
   }
 
-  const aiDiagnosis = patient.ai_diagnosis || null
+  const handleConditionToggle = (conditionId: string) => {
+    setConditionsEditState((prev) => ({
+      ...prev,
+      [conditionId]: !prev[conditionId],
+    }))
+  }
+
+  const handleSaveConditions = async () => {
+    if (!onUpdatePatient) return
+    setIsSavingConditions(true)
+    try {
+      const updates: Record<string, boolean> = {}
+      enabledMedicalConditions.forEach((c) => {
+        updates[c.id] = conditionsEditState[c.id] ?? false
+      })
+      await onUpdatePatient(updates)
+      setIsEditingConditions(false)
+    } finally {
+      setIsSavingConditions(false)
+    }
+  }
+
+  const handleCancelConditions = () => {
+    setConditionsEditState({})
+    setIsEditingConditions(false)
+  }
 
   const chartableMetrics = progressMetrics.filter((m) => m.points.length >= 2)
 
   return (
     <div className="space-y-6">
-      {/* Basic Patient Information - Compact */}
-      <BasicInfoCompact patient={patient} onUpdate={onUpdatePatient} />
+      {/* Basic Patient Information + Medical Conditions - same row */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <BasicInfoCompact patient={patient} onUpdate={onUpdatePatient} />
+        {/* Medical Conditions - display or edit (edit button like patient info card) */}
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12 flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <RiHeartPulseLine className="size-4 text-red-500/70 dark:text-red-400/70" />
+              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                {t.profile.medicalConditions}
+              </h3>
+            </div>
+            {!isEditingConditions && onUpdatePatient && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleStartEditConditions}
+                className="h-6 px-1.5"
+                aria-label={t.profile.edit}
+              >
+                <RiEditLine className="size-3" />
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent className="p-4">
+            {isEditingConditions ? (
+              <>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {enabledMedicalConditions.map((c) => (
+                    <div key={c.id} className="flex items-center gap-3 group">
+                      <Checkbox
+                        id={`cond-${c.id}`}
+                        checked={conditionsEditState[c.id] ?? false}
+                        onCheckedChange={() => handleConditionToggle(c.id)}
+                        className="size-4 border-gray-300 dark:border-gray-700"
+                      />
+                      <label
+                        htmlFor={`cond-${c.id}`}
+                        className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors"
+                      >
+                        {c.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex justify-end gap-3">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleCancelConditions}
+                    disabled={isSavingConditions}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <RiCloseLine className="me-2 size-4" />
+                    {t.common.cancel}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleSaveConditions}
+                    disabled={isSavingConditions}
+                    className="flex-[2] sm:flex-none"
+                  >
+                    <RiSaveLine className="me-2 size-4" />
+                    {t.profile.saveChanges}
+                  </Button>
+                </div>
+              </>
+            ) : selectedMedicalConditions.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-gray-500">
+                {t.profile.noMedicalConditionsSelected}
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {selectedMedicalConditions.map((c) => (
+                  <Badge key={c.id} color="neutral" size="sm">
+                    {c.label}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* AI Medical Summary */}
       {aiDiagnosis && (
         <Card className="border-blue-100 dark:border-blue-900/30 overflow-hidden">
-          <CardHeader className="bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-900/30 px-4 py-3 min-h-12 flex flex-row items-center justify-start">
+          <CardHeader className="bg-blue-50/50 dark:bg-blue-900/10 border-b border-blue-100 dark:border-blue-900/30 px-4 py-3 min-h-12 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <RiRobot2Line className="size-4 text-blue-600 dark:text-blue-400" />
               <h3 className="text-xs font-bold text-blue-900/70 dark:text-blue-100/70 uppercase tracking-widest">
@@ -136,6 +252,18 @@ export function ProfileTab({
                 {t.profile.aiGenerated}
               </Badge>
             </div>
+            {onRefreshAiSummary && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onRefreshAiSummary}
+                className="size-7 shrink-0 p-0"
+                title={t.common.refresh}
+                aria-label={t.common.refresh}
+              >
+                <RiRefreshLine className="size-3.5" />
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="p-4">
             <div className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-medium">
@@ -150,46 +278,14 @@ export function ProfileTab({
         </Card>
       )}
 
-      {/* Medical Conditions and Medications Row */}
+      {/* Past Notes */}
+      <NotesTab notes={notes} patient={patient} onNoteAdded={onNoteAdded} />
+
+      {/* Past Medications + Prescriptions - same row */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {/* Medical Conditions */}
-        <Card className="overflow-hidden shadow-sm">
-          <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12 flex flex-row items-center justify-start">
-            <div className="flex items-center gap-2">
-              <RiHeartPulseLine className="size-4 text-red-500/70 dark:text-red-400/70" />
-              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                Medical Conditions
-              </h3>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {allMedicalConditions.map((condition) => (
-                <div key={condition.id} className="flex items-center gap-3 group">
-                  <Checkbox
-                    id={condition.id}
-                    checked={condition.value || false}
-                    onCheckedChange={() => handleConditionToggle(condition.id)}
-                    className="size-4 border-gray-300 dark:border-gray-700"
-                  />
-                  <label
-                    htmlFor={condition.id}
-                    className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors"
-                  >
-                    {condition.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Past Medications */}
         <PastMedications medications={pastMedications} onAddMedication={onAddPastMedication} />
-      </div>
-
-      {/* Prescriptions - compact */}
-      <Card className="overflow-hidden shadow-sm">
+        {/* Prescriptions - compact */}
+        <Card className="overflow-hidden">
         <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-3 py-2 min-h-10 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <RiCapsuleLine className="size-3.5 text-primary-500/70 dark:text-primary-400/70" />
@@ -276,12 +372,10 @@ export function ProfileTab({
           )}
         </CardContent>
       </Card>
-
-      {/* Past Notes */}
-      <NotesTab notes={notes} patient={patient} onNoteAdded={onNoteAdded} />
+      </div>
 
       {/* Progress (weight, labs, dosage, note-extracted) - same style as prescriptions */}
-      <Card className="overflow-hidden shadow-sm">
+      <Card className="overflow-hidden">
         <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-3 py-2 min-h-10 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <RiLineChartLine className="size-3.5 text-primary-500/70 dark:text-primary-400/70" />

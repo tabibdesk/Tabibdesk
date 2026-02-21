@@ -106,7 +106,7 @@ export function HorizontalTabNav({
   )
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-800">
+    <div className="!mt-0 border-b border-gray-200 dark:border-gray-800">
       <div className="flex items-center justify-between gap-0">
         {/* Tabs: full width on mobile (no + button), normal on desktop */}
         <nav
@@ -123,7 +123,7 @@ export function HorizontalTabNav({
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
                   className={cx(
-                    "group inline-flex flex-1 min-w-0 justify-center gap-2 whitespace-nowrap border-b-2 px-1 py-2.5 text-sm font-medium transition-colors sm:flex-initial sm:min-w-0 sm:justify-start sm:py-3",
+                    "group inline-flex flex-1 min-w-0 justify-center gap-2 whitespace-nowrap border-b-2 px-1 py-3 text-sm font-medium transition-colors sm:flex-initial sm:min-w-0 sm:justify-start sm:py-4",
                     isActive
                       ? "border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400"
                       : "border-transparent text-gray-600 hover:border-gray-300 hover:text-gray-900 dark:text-gray-400 dark:hover:border-gray-700 dark:hover:text-gray-200"

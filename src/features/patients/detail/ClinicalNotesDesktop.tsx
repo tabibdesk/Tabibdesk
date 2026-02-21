@@ -10,10 +10,17 @@ import {
   RiPlayLine,
   RiStopLine,
   RiCheckboxCircleLine,
+  RiHeartPulseLine,
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 
 interface MetricToRecord {
+  id: string
+  label: string
+}
+
+interface MedicalConditionItem {
   id: string
   label: string
 }
@@ -33,6 +40,11 @@ interface ClinicalNotesDesktopProps {
   checklistItems: any[]
   metricsToRecord?: MetricToRecord[]
   metricsChecklist?: Record<string, boolean>
+  medicalConditions?: MedicalConditionItem[]
+  medicalConditionValues?: Record<string, boolean>
+  handleMedicalConditionToggle?: (conditionId: string) => void
+  handleChecklistToggle?: (itemId: string) => void
+  handleMetricsChecklistToggle?: (metricId: string) => void
   
   handleSendNote: () => void
   handleStartRecording: () => void
@@ -52,21 +64,27 @@ export function ClinicalNotesDesktop({
   checklistItems,
   metricsToRecord = [],
   metricsChecklist = {},
+  medicalConditions = [],
+  medicalConditionValues = {},
+  handleMedicalConditionToggle,
+  handleChecklistToggle,
+  handleMetricsChecklistToggle,
   handleSendNote,
   handleStartRecording,
   handleStopRecording,
   handlePauseResume,
 }: ClinicalNotesDesktopProps) {
+  const t = useAppTranslations()
   return (
     <div className="flex h-[calc(100vh-200px)] min-h-[600px] gap-6 overflow-hidden">
       {/* Left Pane: Visit Progress */}
       <div className="w-80 flex flex-col shrink-0">
-        <Card className="flex-1 overflow-hidden flex flex-col border-gray-200 dark:border-gray-800 shadow-sm">
+        <Card className="flex-1 overflow-hidden flex flex-col border-gray-200 dark:border-gray-800 shadow-card">
           <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <RiCheckboxCircleLine className="size-5 text-primary-600" />
-                <CardTitle className="text-sm font-bold uppercase tracking-wider text-gray-500">Visit Progress</CardTitle>
+                <CardTitle className="text-sm font-bold uppercase tracking-wider text-gray-500">{t.clinicalNotes.visitProgress}</CardTitle>
               </div>
               <span className="text-xs font-bold text-primary-600">{completenessPercentage}%</span>
             </div>
@@ -80,11 +98,16 @@ export function ClinicalNotesDesktop({
           <CardContent className="flex-1 overflow-y-auto py-4">
             <div className="grid grid-cols-1 gap-4">
               {checklistItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-3">
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleChecklistToggle?.(item.id)}
+                  className="flex w-full items-center gap-3 text-start hover:opacity-80 transition-opacity"
+                >
                   <div className={cx(
-                    "size-5 rounded-full border flex items-center justify-center transition-all duration-300",
+                    "size-5 rounded-full border flex items-center justify-center transition-all duration-300 shrink-0",
                     checklist[item.id] 
-                      ? "bg-primary-600 border-primary-600 text-white scale-110 shadow-sm" 
+                      ? "bg-primary-600 border-primary-600 text-white scale-110 shadow-card" 
                       : "border-gray-200 dark:border-gray-700"
                   )}>
                     {checklist[item.id] && <RiCheckboxCircleLine className="size-3.5" />}
@@ -95,7 +118,7 @@ export function ClinicalNotesDesktop({
                   )}>
                     {item.label}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
             {metricsToRecord.length > 0 && (
@@ -103,11 +126,16 @@ export function ClinicalNotesDesktop({
                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <div className="grid grid-cols-1 gap-4">
                     {metricsToRecord.map((m) => (
-                      <div key={m.id} className="flex items-center gap-3">
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleMetricsChecklistToggle?.(m.id)}
+                        className="flex w-full items-center gap-3 text-start hover:opacity-80 transition-opacity"
+                      >
                         <div className={cx(
-                          "size-5 rounded-full border flex items-center justify-center transition-all duration-300",
+                          "size-5 rounded-full border flex items-center justify-center transition-all duration-300 shrink-0",
                           metricsChecklist[m.id]
-                            ? "bg-primary-600 border-primary-600 text-white scale-110 shadow-sm"
+                            ? "bg-primary-600 border-primary-600 text-white scale-110 shadow-card"
                             : "border-gray-200 dark:border-gray-700"
                         )}>
                           {metricsChecklist[m.id] && <RiCheckboxCircleLine className="size-3.5" />}
@@ -118,18 +146,55 @@ export function ClinicalNotesDesktop({
                         )}>
                           {m.label}
                         </span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
               </>
+            )}
+            {medicalConditions.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="grid grid-cols-1 gap-4">
+                  {medicalConditions.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => handleMedicalConditionToggle?.(c.id)}
+                      className="flex w-full items-center gap-3 text-start"
+                    >
+                      <div
+                        className={cx(
+                          "size-5 shrink-0 rounded-full border flex items-center justify-center transition-all duration-300",
+                          medicalConditionValues[c.id]
+                            ? "bg-primary-600 border-primary-600 text-white scale-110 shadow-card"
+                            : "border-gray-200 dark:border-gray-700"
+                        )}
+                      >
+                        {medicalConditionValues[c.id] && (
+                          <RiCheckboxCircleLine className="size-3.5" />
+                        )}
+                      </div>
+                      <span
+                        className={cx(
+                          "text-sm transition-colors",
+                          medicalConditionValues[c.id]
+                            ? "text-gray-900 dark:text-gray-100 font-semibold"
+                            : "text-gray-400"
+                        )}
+                      >
+                        {c.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Center Pane: Note Entry - same Card/CardHeader as progress card for matching borders */}
-      <Card className="flex-1 flex flex-col min-w-0 overflow-hidden border-gray-200 dark:border-gray-800 shadow-sm">
+      <Card className="flex-1 flex flex-col min-w-0 overflow-hidden border-gray-200 dark:border-gray-800 shadow-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-100 dark:border-gray-800">
           <Badge color="indigo" size="xs">Active Session</Badge>
           <div className="flex items-center gap-2">

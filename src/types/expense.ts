@@ -19,4 +19,8 @@ export interface Expense {
   receiptFileId?: string
   createdByUserId: string
   createdAt: string
+  /** For marketing/ad spend: campaign period start (YYYY-MM-DD). Used for cost-per-lead. */
+  dateFrom?: string
+  /** For marketing/ad spend: campaign period end (YYYY-MM-DD). Used for cost-per-lead. */
+  dateTo?: string
 }

@@ -29,6 +29,9 @@ import {
   RiArrowDownSLine,
   RiMore2Line,
   RiEyeLine,
+  RiFileTextLine,
+  RiImageLine,
+  RiHeartPulseLine,
 } from "@remixicon/react"
 import type { Attachment, AttachmentKind, LabResult, ScanExtraction } from "@/types/attachment"
 
@@ -45,12 +48,44 @@ function getKind(att: Attachment): AttachmentKind {
   return att.attachment_kind ?? "document"
 }
 
-function getKindLabel(att: Attachment): string {
+function getKindLabel(
+  att: Attachment,
+  t: { fileUpload: { lab: string; scan: string; ecg: string; document: string } }
+): string {
   const k = getKind(att)
-  if (k === "lab") return "Lab"
-  if (k === "scan") return "Scan"
-  if (k === "ecg") return "ECG"
-  return "Document"
+  if (k === "lab") return t.fileUpload.lab
+  if (k === "scan") return t.fileUpload.scan
+  if (k === "ecg") return t.fileUpload.ecg
+  return t.fileUpload.document
+}
+
+function getKindIcon(att: Attachment) {
+  const k = getKind(att)
+  if (k === "lab") return RiFlaskLine
+  if (k === "scan") return RiImageLine
+  if (k === "ecg") return RiHeartPulseLine
+  return RiFileTextLine
+}
+
+function getKindBadgeColor(
+  att: Attachment
+): "indigo" | "emerald" | "amber" | "gray" {
+  const k = getKind(att)
+  if (k === "lab") return "indigo"
+  if (k === "scan") return "emerald"
+  if (k === "ecg") return "amber"
+  return "gray"
+}
+
+function getKindIconBg(att: Attachment): string {
+  const k = getKind(att)
+  if (k === "lab")
+    return "bg-primary-100 text-primary-600 dark:bg-primary-900/40 dark:text-primary-300"
+  if (k === "scan")
+    return "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300"
+  if (k === "ecg")
+    return "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300"
+  return "bg-gray-100 text-gray-600 dark:bg-gray-800/60 dark:text-gray-400"
 }
 
 export function FilesTab({
@@ -238,77 +273,123 @@ export function FilesTab({
     const id = attachment.id
     const results = [...getDisplayLabResults(id), ...(pendingNewLabRows[id] ?? [])]
     const hasExtracted = results.length > 0
+    const KindIcon = getKindIcon(attachment)
 
     return (
-      <div key={id} className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-        {/* Top row: content left, dropdown right */}
-        <div className="flex gap-3 px-4 py-3">
+      <div
+        key={id}
+        className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-[0_6px_20px_0_rgba(0,0,0,0.08)] dark:border-gray-800 dark:bg-gray-900 dark:hover:shadow-[0_6px_20px_0_rgba(0,0,0,0.2)]"
+      >
+        {/* Header: icon + content + actions */}
+        <div className="flex gap-4 px-4 py-4">
+          <div
+            className={cx(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+              getKindIconBg(attachment)
+            )}
+          >
+            <KindIcon className="size-5" />
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => window.open(attachment.file_url, "_blank")}
                 className="max-w-full truncate text-left text-sm font-semibold text-gray-900 hover:text-primary-600 hover:underline dark:text-gray-50 dark:hover:text-primary-400"
-                title="View in new tab"
+                title={t.profile.viewInNewTab}
               >
                 {attachment.file_name}
               </button>
-              <Badge color="gray" size="xs">{getKindLabel(attachment)}</Badge>
+              <Badge
+                color={getKindBadgeColor(attachment)}
+                size="xs"
+              >
+                {getKindLabel(attachment, t)}
+              </Badge>
             </div>
-            <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}
+            </p>
           </div>
-          <div className="flex shrink-0 items-center">
+          <div className="flex shrink-0 items-start">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex h-6 w-6 shrink-0 items-center justify-end p-0">
-                  <RiMore2Line className="size-4 text-gray-500" />
-                  <span className="sr-only">Actions</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  aria-label={t.table.actions}
+                >
+                  <RiMore2Line className="size-4 text-gray-500 dark:text-gray-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-36">
-                <DropdownMenuItem onClick={() => setExtractConfirm({ type: "lab", attachmentId: id, fileName: attachment.file_name })}>
-                  <DropdownMenuIconWrapper className="mr-2">
+                <DropdownMenuItem
+                  onClick={() =>
+                    setExtractConfirm({
+                      type: "lab",
+                      attachmentId: id,
+                      fileName: attachment.file_name,
+                    })
+                  }
+                >
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiQuillPenAiLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  Extract with AI
+                  {t.profile.extractWithAi}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.open(attachment.file_url, "_blank")}>
-                  <DropdownMenuIconWrapper className="mr-2">
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiEyeLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  View
+                  {t.profile.view}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.open(attachment.file_url, "_blank")}>
-                  <DropdownMenuIconWrapper className="mr-2">
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiDownloadLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  Download
+                  {t.common.download}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setDeleteConfirm({ id, fileName: attachment.file_name })} className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400">
-                  <DropdownMenuIconWrapper className="mr-2">
+                <DropdownMenuItem
+                  onClick={() => setDeleteConfirm({ id, fileName: attachment.file_name })}
+                  className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                >
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiDeleteBinLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  Delete
+                  {t.profile.delete}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-        {/* Full-width separator + compact collapsible row */}
-        <div className="w-full border-t border-gray-200 dark:border-gray-800">
-            <button
+        {/* Collapsible row */}
+        <div className="border-t border-gray-100 dark:border-gray-800">
+          <button
             type="button"
             onClick={() => toggleCardLower(id)}
-            className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left bg-gray-50 dark:bg-gray-800/30"
+            className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/30"
             aria-label={expandedCardIds.has(id) ? "Collapse" : "Expand"}
           >
-            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Lab results</span>
-            <RiArrowDownSLine className={cx("size-4 shrink-0 text-gray-500 transition-transform dark:text-gray-400", expandedCardIds.has(id) && "rotate-180")} />
+            <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+              {t.profile.labResults}
+            </span>
+            <RiArrowDownSLine
+              className={cx(
+                "size-4 shrink-0 text-gray-500 transition-transform dark:text-gray-400",
+                expandedCardIds.has(id) && "rotate-180"
+              )}
+            />
           </button>
         </div>
         {/* Expanded content */}
-        <div className={cx("bg-gray-50/50 dark:bg-gray-900/20", !expandedCardIds.has(id) && "border-t border-gray-200 dark:border-gray-800")}>
+        <div
+          className={cx(
+            "border-t border-gray-100 bg-gray-50/50 dark:border-gray-800 dark:bg-gray-900/20",
+            !expandedCardIds.has(id) && "hidden"
+          )}
+        >
           {expandedCardIds.has(id) && (
             <div className="pb-4 pt-0">
               {hasExtracted ? (
@@ -341,7 +422,8 @@ export function FilesTab({
                                 </div>
                               ) : (
                                 <div className="truncate text-xs font-medium text-gray-800 dark:text-gray-200">
-                                  {result.value} <span className="ml-0.5 font-normal text-gray-500">{result.unit}</span>
+                                  {result.value}{" "}
+                                  <span className="ms-0.5 font-normal text-gray-500">{result.unit}</span>
                                 </div>
                               )}
                             </td>
@@ -357,22 +439,22 @@ export function FilesTab({
                               ) : (
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" aria-label="Row actions">
+                                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" aria-label={t.table.actions}>
                                       <RiMore2Line className="size-4 text-gray-500 dark:text-gray-400" />
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end" className="min-w-32">
                                     <DropdownMenuItem onClick={() => handleEdit(result)}>
-                                      <DropdownMenuIconWrapper className="mr-2">
+                                      <DropdownMenuIconWrapper className="me-2">
                                         <RiEditLine className="size-4" />
                                       </DropdownMenuIconWrapper>
-                                      Edit
+                                      {t.common.edit}
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => handleDelete(result.id)} className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400">
-                                      <DropdownMenuIconWrapper className="mr-2">
+                                      <DropdownMenuIconWrapper className="me-2">
                                         <RiDeleteBinLine className="size-4" />
                                       </DropdownMenuIconWrapper>
-                                      Delete
+                                      {t.profile.delete}
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
@@ -384,8 +466,8 @@ export function FilesTab({
                     </table>
                   </div>
                   <div className="mt-2 flex justify-end px-4">
-                    <Button variant="link" className="text-[9px] font-medium" onClick={() => handleAddTest(id)}>
-                      <RiAddLine className="mr-1 size-3" /> Add Test
+                    <Button variant="link" className="text-2xs font-medium" onClick={() => handleAddTest(id)}>
+                      <RiAddLine className="me-1 size-3" /> {t.profile.addTest}
                     </Button>
                   </div>
                 </>
@@ -415,110 +497,182 @@ export function FilesTab({
     const displayScanText = (isScan || isEcg) ? getDisplayScanText(id) : undefined
     const displayDocumentText = isDocument ? getDisplayDocumentText(id) : undefined
     const hasExpandableArea = isScan || isEcg || isDocument
+    const KindIcon = getKindIcon(attachment)
 
     return (
-      <div key={id} className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-        {/* Top row: content left, dropdown right */}
-        <div className="flex gap-3 px-4 py-3">
+      <div
+        key={id}
+        className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-[0_6px_20px_0_rgba(0,0,0,0.08)] dark:border-gray-800 dark:bg-gray-900 dark:hover:shadow-[0_6px_20px_0_rgba(0,0,0,0.2)]"
+      >
+        {/* Header: icon + content + actions */}
+        <div className="flex gap-4 px-4 py-4">
+          <div
+            className={cx(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+              getKindIconBg(attachment)
+            )}
+          >
+            <KindIcon className="size-5" />
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => window.open(attachment.file_url, "_blank")}
                 className="max-w-full truncate text-left text-sm font-semibold text-gray-900 hover:text-primary-600 hover:underline dark:text-gray-50 dark:hover:text-primary-400"
-                title="View in new tab"
+                title={t.profile.viewInNewTab}
               >
                 {attachment.file_name}
               </button>
-              <Badge color="gray" size="xs">{getKindLabel(attachment)}</Badge>
+              <Badge color={getKindBadgeColor(attachment)} size="xs">
+                {getKindLabel(attachment, t)}
+              </Badge>
             </div>
-            <p className="mt-0.5 text-xs font-medium text-gray-500">{formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {formatDate(attachment.uploaded_at)} · {formatFileSize(attachment.file_size)}
+            </p>
           </div>
-          <div className="flex shrink-0 items-center">
+          <div className="flex shrink-0 items-start">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex h-6 w-6 shrink-0 items-center justify-end p-0">
-                  <RiMore2Line className="size-4 text-gray-500" />
-                  <span className="sr-only">Actions</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  aria-label={t.table.actions}
+                >
+                  <RiMore2Line className="size-4 text-gray-500 dark:text-gray-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-36">
-                <DropdownMenuItem onClick={() => setExtractConfirm({ type: isEcg ? "ecg" : isScan ? "scan" : "document", attachmentId: id, fileName: attachment.file_name })}>
-                  <DropdownMenuIconWrapper className="mr-2">
+                <DropdownMenuItem
+                  onClick={() =>
+                    setExtractConfirm({
+                      type: isEcg ? "ecg" : isScan ? "scan" : "document",
+                      attachmentId: id,
+                      fileName: attachment.file_name,
+                    })
+                  }
+                >
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiQuillPenAiLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  Extract with AI
+                  {t.profile.extractWithAi}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.open(attachment.file_url, "_blank")}>
-                  <DropdownMenuIconWrapper className="mr-2">
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiEyeLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  View
+                  {t.profile.view}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.open(attachment.file_url, "_blank")}>
-                  <DropdownMenuIconWrapper className="mr-2">
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiDownloadLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  Download
+                  {t.common.download}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setDeleteConfirm({ id, fileName: attachment.file_name })} className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400">
-                  <DropdownMenuIconWrapper className="mr-2">
+                <DropdownMenuItem
+                  onClick={() => setDeleteConfirm({ id, fileName: attachment.file_name })}
+                  className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
+                >
+                  <DropdownMenuIconWrapper className="me-2">
                     <RiDeleteBinLine className="size-4" />
                   </DropdownMenuIconWrapper>
-                  Delete
+                  {t.profile.delete}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
-        {/* Full-width separator + compact collapsible row */}
+        {/* Collapsible row for scan/document/ecg */}
         {hasExpandableArea && (
-          <div className="w-full border-t border-gray-200 dark:border-gray-800">
+          <div className="border-t border-gray-100 dark:border-gray-800">
             <button
               type="button"
               onClick={() => toggleCardLower(id)}
-              className="flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left bg-gray-50 dark:bg-gray-800/30"
+              className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/30"
               aria-label={expandedCardIds.has(id) ? "Collapse" : "Expand"}
             >
-              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{isScan || isEcg ? "AI note" : "AI summary"}</span>
-              <RiArrowDownSLine className={cx("size-4 shrink-0 text-gray-500 transition-transform dark:text-gray-400", expandedCardIds.has(id) && "rotate-180")} />
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+                {isScan || isEcg ? t.profile.aiNote : t.profile.aiSummary}
+              </span>
+              <RiArrowDownSLine
+                className={cx(
+                  "size-4 shrink-0 text-gray-500 transition-transform dark:text-gray-400",
+                  expandedCardIds.has(id) && "rotate-180"
+                )}
+              />
             </button>
           </div>
         )}
-        {/* Expanded content for scan and document - compact, matches card upper part */}
+        {/* Expanded content for scan and document */}
         {hasExpandableArea && expandedCardIds.has(id) && (
-          <div className="border-t border-gray-200 dark:border-gray-800 bg-gray-50/50 px-4 py-2.5 dark:bg-gray-900/20">
+          <div className="border-t border-gray-100 bg-gray-50/50 px-4 py-3 dark:border-gray-800 dark:bg-gray-900/20">
             {isScan || isEcg ? (
               displayScanText ? (
-                <div className="rounded-r border-l-2 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/60 dark:border-gray-600/40 bg-white dark:bg-gray-900/50 py-2 px-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">AI note</p>
-                  <p className="mt-0.5 line-clamp-4 whitespace-pre-wrap text-xs text-gray-600 dark:text-gray-400">{displayScanText}</p>
+                <div className="rounded-e-lg border-s-2 border-s-primary-500 border border-gray-200/60 bg-white py-2.5 ps-3 pe-3 dark:border-s-primary-400 dark:border-gray-600/40 dark:bg-gray-900/50">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    {t.profile.aiNote}
+                  </p>
+                  <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-xs text-gray-600 dark:text-gray-400">
+                    {displayScanText}
+                  </p>
                 </div>
               ) : (
                 <div className="flex items-center justify-between gap-3 py-1">
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
                     <RiQuillPenAiLine className="size-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
-                    <span className="text-xs text-gray-600 dark:text-gray-400 truncate">{t.profile.noAiNoteYet}</span>
+                    <span className="truncate text-xs text-gray-600 dark:text-gray-400">
+                      {t.profile.noAiNoteYet}
+                    </span>
                   </div>
-                  <Button variant="ghost" size="sm" className="h-6 shrink-0 text-xs px-2" onClick={() => setExtractConfirm({ type: isEcg ? "ecg" : "scan", attachmentId: id, fileName: attachment.file_name })}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 shrink-0 px-2.5 text-xs"
+                    onClick={() =>
+                      setExtractConfirm({
+                        type: isEcg ? "ecg" : "scan",
+                        attachmentId: id,
+                        fileName: attachment.file_name,
+                      })
+                    }
+                  >
                     {t.profile.extractWithAi}
                   </Button>
                 </div>
               )
             ) : (
               displayDocumentText ? (
-                <div className="rounded-r border-l-2 border-l-primary-500 dark:border-l-primary-400 border border-gray-200/60 dark:border-gray-600/40 bg-white dark:bg-gray-900/50 py-2 px-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">AI summary</p>
-                  <p className="mt-0.5 line-clamp-4 whitespace-pre-wrap text-xs text-gray-600 dark:text-gray-400">{displayDocumentText}</p>
+                <div className="rounded-e-lg border-s-2 border-s-primary-500 border border-gray-200/60 bg-white py-2.5 ps-3 pe-3 dark:border-s-primary-400 dark:border-gray-600/40 dark:bg-gray-900/50">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    {t.profile.aiSummary}
+                  </p>
+                  <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-xs text-gray-600 dark:text-gray-400">
+                    {displayDocumentText}
+                  </p>
                 </div>
               ) : (
                 <div className="flex items-center justify-between gap-3 py-1">
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex min-w-0 items-center gap-2">
                     <RiQuillPenAiLine className="size-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
-                    <span className="text-xs text-gray-600 dark:text-gray-400 truncate">{t.profile.noAiNoteYet}</span>
+                    <span className="truncate text-xs text-gray-600 dark:text-gray-400">
+                      {t.profile.noAiNoteYet}
+                    </span>
                   </div>
-                  <Button variant="ghost" size="sm" className="h-6 shrink-0 text-xs px-2" onClick={() => setExtractConfirm({ type: "document", attachmentId: id, fileName: attachment.file_name })}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 shrink-0 px-2.5 text-xs"
+                    onClick={() =>
+                      setExtractConfirm({
+                        type: "document",
+                        attachmentId: id,
+                        fileName: attachment.file_name,
+                      })
+                    }
+                  >
                     {t.profile.extractWithAi}
                   </Button>
                 </div>
@@ -551,7 +705,7 @@ export function FilesTab({
                 onClick={() => setVisibleCount((c) => c + LOAD_MORE_INCREMENT)}
                 className="w-full text-sm font-medium text-gray-600 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
               >
-                Load more
+                {t.profile.loadMoreFiles}
               </Button>
             </div>
           )}

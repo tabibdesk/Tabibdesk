@@ -26,8 +26,10 @@ function mapRowToTask(row: any): Task {
     priority: row.priority,
     dueDate: row.due_date,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
     createdByUserId: row.created_by_user_id,
     assignedToUserId: row.assigned_to_user_id,
+    assignedToPatientId: row.assigned_to_patient_id,
     patientId: row.patient_id,
     clinicId: row.clinic_id,
     source: row.source,
@@ -43,15 +45,19 @@ function mapRowToTask(row: any): Task {
 }
 
 function mapRowToTaskListItem(row: any): TaskListItem {
+  const assignedToName =
+    row.assigned_to_user?.first_name && row.assigned_to_user?.last_name
+      ? `${row.assigned_to_user.first_name} ${row.assigned_to_user.last_name}`
+      : row.assigned_to_patient?.first_name && row.assigned_to_patient?.last_name
+        ? `${row.assigned_to_patient.first_name} ${row.assigned_to_patient.last_name}`
+        : undefined
   return {
     ...mapRowToTask(row),
     patientName: row.patient?.first_name && row.patient?.last_name
       ? `${row.patient.first_name} ${row.patient.last_name}`
       : undefined,
     patientPhone: row.patient?.phone,
-    assignedToName: row.assigned_to_user?.first_name && row.assigned_to_user?.last_name
-      ? `${row.assigned_to_user.first_name} ${row.assigned_to_user.last_name}`
-      : undefined,
+    assignedToName,
     createdByName: row.created_by_user?.first_name && row.created_by_user?.last_name
       ? `${row.created_by_user.first_name} ${row.created_by_user.last_name}`
       : undefined,
@@ -64,8 +70,9 @@ export class SupabaseTasksRepository implements ITasksRepository {
       .from("tasks")
       .select(
         `*,
-        patient:patients(id, first_name, last_name, phone),
+        patient:patients!patient_id(id, first_name, last_name, phone),
         assigned_to_user:clinic_members!assigned_to_user_id(id, first_name, last_name),
+        assigned_to_patient:patients!assigned_to_patient_id(id, first_name, last_name),
         created_by_user:clinic_members!created_by_user_id(id, first_name, last_name)`,
       )
       .eq("clinic_id", params.clinicId)
@@ -132,7 +139,8 @@ export class SupabaseTasksRepository implements ITasksRepository {
       type: payload.type,
       priority: payload.priority || "normal",
       due_date: payload.dueDate,
-      assigned_to_user_id: payload.assignedToUserId,
+      assigned_to_user_id: payload.assignedToUserId ?? null,
+      assigned_to_patient_id: payload.assignedToPatientId ?? null,
       patient_id: payload.patientId,
       clinic_id: payload.clinicId,
       created_by_user_id: payload.createdByUserId,
@@ -161,9 +169,13 @@ export class SupabaseTasksRepository implements ITasksRepository {
   }
 
   async assign(payload: AssignTaskPayload): Promise<Task> {
+    const updatePayload: Record<string, unknown> = {
+      assigned_to_user_id: payload.assignedToUserId ?? null,
+      assigned_to_patient_id: payload.assignedToPatientId ?? null,
+    }
     const { data, error } = await (supabase as any)
       .from("tasks")
-      .update({ assigned_to_user_id: payload.assignedToUserId })
+      .update(updatePayload)
       .eq("id", payload.id)
       .select()
       .single()

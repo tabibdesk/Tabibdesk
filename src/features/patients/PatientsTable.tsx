@@ -1,11 +1,10 @@
 "use client"
 
 import { Badge } from "@/components/Badge"
-import { getBadgeColor } from "@/lib/badgeColors"
 import { RiPhoneLine, RiStethoscopeLine } from "@remixicon/react"
 import Link from "next/link"
 import type { PatientListItem } from "./patients.types"
-import { calculateAge, getStatusBadgeVariant, getStatusLabel } from "./patients.utils"
+import { calculateAge, getStatusLabel } from "./patients.utils"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 
 interface PatientsTableProps {
@@ -70,7 +69,7 @@ export function PatientsTable({ patients }: PatientsTableProps) {
                     </div>
                   </td>
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-1.5 rtl:flex-row-reverse text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-1 rtl:flex-row-reverse text-sm text-gray-600 dark:text-gray-400">
                       <RiPhoneLine className="size-4 shrink-0" />
                       <span>{patient.phone}</span>
                     </div>
@@ -79,7 +78,7 @@ export function PatientsTable({ patients }: PatientsTableProps) {
                     {formatDate(patient.lastAppointmentDate)}
                   </td>
                   <td className="px-4 py-4">
-<Badge color={getBadgeColor(getStatusBadgeVariant(patient.status))} size="xs">
+<Badge color="black" size="xs">
                     {getStatusLabel(patient.status)}
                   </Badge>
                   </td>

@@ -4,8 +4,6 @@ import { useState } from "react"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { getAppointmentTypeLabel } from "../appointmentTypes"
 import Link from "next/link"
-import { Badge } from "@/components/Badge"
-import { Button } from "@/components/Button"
 import { RiPhoneLine, RiCalendarLine, RiCloseLine, RiUserLine } from "@remixicon/react"
 import { formatSlotTime } from "../utils/slotFormatters"
 import { updateStatus } from "../appointments.api"
@@ -27,7 +25,6 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
 
   const startTime = formatSlotTime(slot.startAt)
   const endTime = formatSlotTime(slot.endAt)
-  const timeRange = `${startTime} - ${endTime}`
 
   const handleCancelClick = () => {
     setShowCancelModal(true)
@@ -63,66 +60,73 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
   }
 
   return (
-    <div className="card-surface flex items-center gap-4 px-5 py-4">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-900/20">
-        <RiUserLine className="size-5 text-primary-600 dark:text-primary-400" aria-hidden />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium text-gray-900 dark:text-gray-100">{timeRange}</span>
-          <Badge color="indigo" size="xs">
-            Booked
-          </Badge>
-        </div>
-        {slot.patientId ? (
-          <>
-            <div className="mt-1">
+    <div className="relative group">
+      {/* Timeline Dot */}
+      <div className="absolute left-[21px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 hidden sm:block bg-primary-600 transition-colors" />
+
+      <div className="ms-0 sm:ms-12 transition-all duration-300 rounded-[24px] border border-primary-100 bg-white dark:bg-gray-900 dark:border-primary-900/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:ring-1 hover:ring-primary-50 dark:hover:ring-primary-900/20">
+        <div className="flex items-center gap-5">
+          {/* Time Indicator */}
+          <div className="flex flex-col min-w-[70px]">
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-none">{startTime}</span>
+            <span className="text-[11px] font-medium text-gray-400 mt-1 uppercase tracking-wider">{endTime}</span>
+          </div>
+
+          {/* Divider */}
+          <div className="h-10 w-px bg-gray-100 dark:bg-gray-800 hidden md:block" />
+
+          {/* Content */}
+          <div className="flex items-center gap-4">
+            <div className="avatar-patient">
+              <RiUserLine className="size-5" aria-hidden />
+            </div>
+            <div className="flex flex-col">
               <Link
                 href={`/patients/${slot.patientId}`}
-                className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
+                className="text-sm font-bold text-gray-800 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
               >
                 {slot.patientName}
               </Link>
-            </div>
-            {(slot.appointmentType && slot.appointmentType !== "flexible") || slot.patientPhone ? (
-              <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
                 {slot.appointmentType && slot.appointmentType !== "flexible" && (
-                  <span>{getAppointmentTypeLabel(slot.appointmentType, t.appointments)}</span>
+                  <span className="flex items-center gap-1">
+                    {getAppointmentTypeLabel(slot.appointmentType, t.appointments)}
+                  </span>
                 )}
                 {slot.patientPhone && (
-                  <>
-                    {slot.appointmentType && slot.appointmentType !== "flexible" && (
-                      <span className="text-gray-300 dark:text-gray-600">·</span>
-                    )}
-                    <span className="flex items-center gap-1.5">
-                      <RiPhoneLine className="size-3.5 shrink-0" aria-hidden />
-                      {slot.patientPhone}
-                    </span>
-                  </>
+                  <span className="flex items-center gap-1">
+                    <RiPhoneLine className="size-3" aria-hidden />
+                    {slot.patientPhone}
+                  </span>
                 )}
               </div>
-            ) : null}
-          </>
-        ) : null}
-      </div>
-      <div className="shrink-0 flex items-center gap-2">
-        {onReschedule && slot.appointmentId && (
-          <Button variant="secondary" size="sm" onClick={handleReschedule} className="btn-card-action">
-            <RiCalendarLine className="size-4 mr-1" />
-            Reschedule
-          </Button>
-        )}
-        {slot.appointmentId && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCancelClick}
-            className="btn-card-action text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-          >
-            <RiCloseLine className="size-4 mr-1" />
-            Cancel
-          </Button>
-        )}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-4 md:mt-0 flex items-center gap-3 self-end md:self-auto">
+          {onReschedule && slot.appointmentId && (
+            <button
+              type="button"
+              onClick={handleReschedule}
+              className="bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all"
+            >
+              <RiCalendarLine className="size-4" />
+              {t.appointments.reschedule}
+            </button>
+          )}
+          {slot.appointmentId && (
+            <button
+              type="button"
+              onClick={handleCancelClick}
+              className="bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all"
+            >
+              <RiCloseLine className="size-4" />
+              {t.common.cancel}
+            </button>
+          )}
+        </div>
       </div>
 
       <CancelAppointmentModal
@@ -130,7 +134,7 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
         onClose={() => setShowCancelModal(false)}
         onConfirm={handleConfirmCancel}
         patientName={slot.patientName}
-        appointmentTime={timeRange}
+        appointmentTime={`${startTime} - ${endTime}`}
         isLoading={isCancelling}
       />
     </div>

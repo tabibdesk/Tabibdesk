@@ -15,12 +15,12 @@ const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(
     <div
       ref={forwardedRef}
       className={cx(
-        "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+        "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between pt-3",
         className,
       )}
     >
       <div className="hidden flex-1 space-y-0.5 lg:block">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50 sm:text-3xl">{title}</h1>
+        <h1 className="text-base font-bold text-gray-900 dark:text-gray-50 sm:text-xl">{title}</h1>
         {description && (
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {description}

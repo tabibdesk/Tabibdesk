@@ -1,25 +1,43 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/Dialog"
 import { Button } from "@/components/Button"
-import { Label } from "@/components/Label"
 import { Select } from "@/components/Select"
 import { mockUsers } from "@/data/mock/users-clinics"
+import { mockData } from "@/data/mock/mock-data"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 import type { TaskListItem } from "./tasks.types"
+
+/** Staff associated with the task's patient (doctors from appointments + patient's doctor). Falls back to all staff if none found. */
+function getStaffForPatient(patientId: string | undefined): typeof mockUsers {
+  if (!patientId) return mockUsers
+  const patient = mockData.patients.find((p) => p.id === patientId)
+  const doctorIds = new Set<string>()
+  if (patient?.doctor_id) doctorIds.add(patient.doctor_id)
+  mockData.appointments
+    .filter((a) => a.patient_id === patientId && a.doctor_id)
+    .forEach((a) => doctorIds.add(a.doctor_id!))
+  const staff = mockUsers.filter((u) => doctorIds.has(u.id))
+  return staff.length > 0 ? staff : mockUsers
+}
+
+export interface AssignTaskResult {
+  assignedToUserId?: string
+  assignedToPatientId?: string
+}
 
 interface AssignModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (assignedToUserId: string | undefined) => Promise<void>
+  onSubmit: (result: AssignTaskResult) => Promise<void>
   task: TaskListItem | null
 }
 
@@ -29,17 +47,27 @@ export function AssignModal({
   onSubmit,
   task,
 }: AssignModalProps) {
-  const [assignedToUserId, setAssignedToUserId] = useState<string>("")
+  const t = useAppTranslations()
+  const [assigneeValue, setAssigneeValue] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const availableUsers = mockUsers
+  const availableUsers = useMemo(() => getStaffForPatient(task?.patientId), [task?.patientId])
+  const taskPatient = useMemo(
+    () => (task?.patientId ? mockData.patients.find((p) => p.id === task.patientId) : null),
+    [task?.patientId]
+  )
 
   useEffect(() => {
     if (isOpen && task) {
-      setAssignedToUserId(task.assignedToUserId || "")
+      if (task.assignedToUserId) {
+        setAssigneeValue(`user:${task.assignedToUserId}`)
+      } else if (task.assignedToPatientId) {
+        setAssigneeValue(`patient:${task.assignedToPatientId}`)
+      } else {
+        setAssigneeValue("")
+      }
     } else if (!isOpen) {
-      // Reset form when modal closes
-      setAssignedToUserId("")
+      setAssigneeValue("")
       setIsSubmitting(false)
     }
   }, [isOpen, task])
@@ -47,10 +75,16 @@ export function AssignModal({
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
-      await onSubmit(assignedToUserId || undefined)
+      let assignedToUserId: string | undefined
+      let assignedToPatientId: string | undefined
+      if (assigneeValue.startsWith("user:")) {
+        assignedToUserId = assigneeValue.slice(5) || undefined
+      } else if (assigneeValue.startsWith("patient:")) {
+        assignedToPatientId = assigneeValue.slice(8) || undefined
+      }
+      await onSubmit({ assignedToUserId, assignedToPatientId })
       onClose()
     } catch (error) {
-      // Error handling would go here
       console.error("Failed to assign task:", error)
     } finally {
       setIsSubmitting(false)
@@ -60,11 +94,11 @@ export function AssignModal({
   const getRoleLabel = (role: string) => {
     switch (role) {
       case "doctor":
-        return "Doctor"
+        return t.common.doctor
       case "assistant":
-        return "Assistant"
+        return t.common.assistant
       case "manager":
-        return "Manager"
+        return t.common.manager
       default:
         return role
     }
@@ -74,39 +108,35 @@ export function AssignModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign Task</DialogTitle>
-          {task && (
-            <DialogDescription className="mt-1">
-              {task.patientName
-                ? `Assign "${task.description || task.title}" for ${task.patientName}`
-                : `Assign "${task.description || task.title}"`}
-            </DialogDescription>
-          )}
+          <DialogTitle>{t.tasks.assignTask}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="assignedTo">Assign To</Label>
-            <Select
-              id="assignedTo"
-              value={assignedToUserId}
-              onChange={(e) => setAssignedToUserId(e.target.value)}
-              disabled={isSubmitting}
-            >
-              <option value="">Unassigned</option>
-              {availableUsers.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.full_name} ({getRoleLabel(user.role)})
-                </option>
-              ))}
-            </Select>
-          </div>
+          <Select
+            id="assignedTo"
+            value={assigneeValue}
+            onChange={(e) => setAssigneeValue(e.target.value)}
+            disabled={isSubmitting}
+            className="w-full"
+          >
+            <option value="">{t.tasks.unassigned}</option>
+            {availableUsers.map((user) => (
+              <option key={`user-${user.id}`} value={`user:${user.id}`}>
+                {user.full_name} ({getRoleLabel(user.role)})
+              </option>
+            ))}
+            {taskPatient && (
+              <option key={`patient-${taskPatient.id}`} value={`patient:${taskPatient.id}`}>
+                {taskPatient.first_name} {taskPatient.last_name} ({t.tasks.assigneeRolePatient})
+              </option>
+            )}
+          </Select>
         </div>
 
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="secondary" disabled={isSubmitting}>
-              Cancel
+              {t.common.cancel}
             </Button>
           </DialogClose>
           <Button
@@ -115,7 +145,7 @@ export function AssignModal({
             disabled={isSubmitting}
             isLoading={isSubmitting}
           >
-            Assign
+            {t.tasks.assign}
           </Button>
         </DialogFooter>
       </DialogContent>

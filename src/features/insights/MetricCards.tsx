@@ -1,14 +1,12 @@
 "use client"
 
-import { Card, AreaChart } from "@tremor/react"
+import { Card } from "@/components/Card"
+import { AreaChart } from "@tremor/react"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
-import { DEMO_CLINIC_ID } from "@/lib/constants"
 import { mockData } from "@/data/mock/mock-data"
 import { calculatePercentageChange } from "./insights.utils"
-import { useEffect, useState } from "react"
-import { listPayments } from "@/api/payments.api"
 import { useDemo } from "@/contexts/demo-context"
 
 export function MetricCards() {
@@ -21,42 +19,6 @@ export function MetricCards() {
 
   const sixtyDaysAgo = new Date(thirtyDaysAgo)
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 30)
-
-  const [revenueData, setRevenueData] = useState<{ current: number; previous: number }>({ current: 0, previous: 0 })
-
-  // Fetch revenue data
-  useEffect(() => {
-    async function fetchRevenue() {
-      try {
-        const [currentPayments, previousPayments] = await Promise.all([
-          listPayments({
-            clinicId: DEMO_CLINIC_ID,
-            from: thirtyDaysAgo.toISOString(),
-            to: now.toISOString(),
-            pageSize: 1000,
-          }),
-          listPayments({
-            clinicId: DEMO_CLINIC_ID,
-            from: sixtyDaysAgo.toISOString(),
-            to: thirtyDaysAgo.toISOString(),
-            pageSize: 1000,
-          }),
-        ])
-
-        const currentRevenue = currentPayments.payments.reduce((sum, p) => sum + p.amount, 0)
-        const previousRevenue = previousPayments.payments.reduce((sum, p) => sum + p.amount, 0)
-
-        setRevenueData({ current: currentRevenue, previous: previousRevenue })
-      } catch (error) {
-        console.error("Failed to fetch revenue:", error)
-      }
-    }
-    
-    // Only fetch revenue in demo mode
-    if (isDemoMode) {
-      fetchRevenue()
-    }
-  }, [isDemoMode])
 
   // Return zero metrics if not in demo mode
   if (!isDemoMode) {
@@ -89,15 +51,6 @@ export function MetricCards() {
         color: "amber" as const,
       },
       {
-        id: "revenue-collected",
-        label: t.insights.revenueCollected,
-        value: "EGP 0",
-        change: 0,
-        changeType: "neutral" as const,
-        data: [],
-        color: "emerald" as const,
-      },
-      {
         id: "new-patients",
         label: t.insights.newPatients,
         value: "0",
@@ -120,7 +73,7 @@ export function MetricCards() {
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {emptyMetrics.map((metric) => (
-          <Card key={metric.id}>
+          <Card key={metric.id} className="insight-card">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{metric.label}</p>
@@ -199,11 +152,7 @@ export function MetricCards() {
   const previousCancellationRate = previousBookedAppointments.length > 0 ? (previousLastMinuteCancellations / previousBookedAppointments.length) * 100 : 0
   const cancellationRateChange = calculatePercentageChange(cancellationRate, previousCancellationRate)
 
-  // 4. Revenue Collected - total money actually collected
-  const revenueCollected = revenueData.current
-  const revenueChange = calculatePercentageChange(revenueCollected, revenueData.previous)
-
-  // 5. New Patients Count - first-time patients
+  // 4. New Patients Count - first-time patients
   const newPatients = mockData.patients.filter((patient) => {
     if (!patient.first_visit_at) return false
     const firstVisitDate = new Date(patient.first_visit_at)
@@ -340,15 +289,6 @@ export function MetricCards() {
       color: "amber" as const,
     },
     {
-      id: "revenue-collected",
-      label: t.insights.revenueCollected,
-      value: `EGP ${revenueCollected.toLocaleString()}`,
-      change: revenueChange.value,
-      changeType: revenueChange.type,
-      data: generateSparkline(revenueCollected / 100),
-      color: "emerald" as const,
-    },
-    {
       id: "new-patients",
       label: t.insights.newPatients,
       value: newPatients.toString(),
@@ -371,7 +311,7 @@ export function MetricCards() {
   return (
     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {metrics.map((metric) => (
-        <Card key={metric.id} className="overflow-hidden p-4 flex flex-col h-full justify-between gap-4">
+        <Card key={metric.id} className="insight-card overflow-hidden p-4 flex flex-col h-full justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold uppercase tracking-wider text-tremor-content-subtle dark:text-dark-tremor-content-subtle">

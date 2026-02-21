@@ -5,7 +5,7 @@ import { Button } from "@/components/Button"
 import { Badge } from "@/components/Badge"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { getBadgeColor } from "@/lib/badgeColors"
-import { RiArrowRightLine, RiCalendarLine, RiCheckboxCircleLine, RiCloseLine, RiMenuLine, RiMoneyDollarCircleLine } from "@remixicon/react"
+import { RiCalendarLine, RiCheckboxCircleLine, RiCloseLine, RiMenuLine, RiMoneyDollarCircleLine } from "@remixicon/react"
 import { WidgetSkeleton } from "@/components/skeletons"
 import { EmptyState } from "@/components/EmptyState"
 import type { DashboardAppointment } from "./dashboard.types"
@@ -67,12 +67,6 @@ export function TodaysAppointmentsWidget({
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.todaysAppointments}</h2>
-        <Link href="/appointments">
-          <Button variant="ghost" className="text-[11px] font-bold tracking-wider -mr-2 text-primary-600 hover:text-primary-700 hover:bg-primary-50">
-            {t.dashboard.viewAll}
-            <RiArrowRightLine className="ml-1 size-3.5 rtl:rotate-180 rtl:ml-0 rtl:mr-1" />
-          </Button>
-        </Link>
       </div>
       <div className="space-y-3">
         {appointments.length > 0 ? (
@@ -128,6 +122,37 @@ export function TodaysAppointmentsWidget({
                             {getTimeDisplay(apt.scheduled_at)}
                           </span>
                         )}
+                        {apt.status === "arrived" && (
+                          <Badge
+                            color="emerald"
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onUnmarkArrived(apt)
+                            }}
+                            title={t.dashboard.unmarkArrived}
+                          >
+                            {t.dashboard.arrived}
+                          </Badge>
+                        )}
+                        {paidAppointments.has(apt.id) && (
+                          <Badge
+                            color="emerald"
+                            size="xs"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onUnmarkPaid(apt)
+                            }}
+                            title={t.dashboard.unmarkPaid}
+                          >
+                            {t.dashboard.paid}
+                          </Badge>
+                        )}
+                        {apt.queueStatus === "no_show" && (
+                          <Badge color="red" size="xs">
+                            {t.dashboard.noShow}
+                          </Badge>
+                        )}
                       </div>
                       <div className="mt-0.5 flex items-center gap-1.5">
                         <p className="text-xs text-gray-500 dark:text-gray-400 truncate lowercase font-medium">
@@ -138,40 +163,7 @@ export function TodaysAppointmentsWidget({
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-1.5 ms-2 sm:ms-4 shrink-0">
-                    <div className="flex items-center gap-1 flex-wrap">
-                      {apt.queueStatus === "no_show" && (
-                        <Badge color="red" size="xs">
-                          {t.dashboard.noShow}
-                        </Badge>
-                      )}
-                      {apt.status === "arrived" && (
-                        <Badge
-                          color="emerald"
-                          size="xs"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onUnmarkArrived(apt)
-                          }}
-                          title={t.dashboard.unmarkArrived}
-                        >
-                          {t.dashboard.arrived}
-                        </Badge>
-                      )}
-                      {paidAppointments.has(apt.id) && (
-                        <Badge
-                          color="emerald"
-                          size="xs"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            onUnmarkPaid(apt)
-                          }}
-                          title={t.dashboard.unmarkPaid}
-                        >
-                          {t.dashboard.paid}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 flex-wrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {(apt.status === "scheduled" || apt.status === "confirmed" || apt.status === "in_progress") && (
                         <Button
                           variant="secondary"
@@ -180,11 +172,11 @@ export function TodaysAppointmentsWidget({
                             onMarkArrived(apt)
                           }}
                           disabled={markingArrived === apt.id}
-                          className="btn-secondary-widget text-green-600 hover:text-green-700 hover:bg-green-50 border-green-100 shrink-0 whitespace-nowrap"
+                          className="btn-secondary-widget bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
                           title={t.dashboard.markAsArrived}
                         >
-                          <RiCheckboxCircleLine className="size-3.5 sm:mr-1 rtl:ml-1 rtl:mr-0" />
-                          <span className="hidden sm:inline">{t.dashboard.arrived}</span>
+                          <RiCheckboxCircleLine className="size-4" />
+                          <span className="hidden sm:inline lowercase">{t.dashboard.arrived}</span>
                         </Button>
                       )}
                       {!paidAppointments.has(apt.id) && apt.status === "arrived" && (
@@ -195,11 +187,11 @@ export function TodaysAppointmentsWidget({
                             onCreateInvoice(apt)
                           }}
                           disabled={markingPaid === apt.id || markingArrived === apt.id}
-                          className="btn-secondary-widget text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-100 shrink-0 whitespace-nowrap"
+                          className="btn-secondary-widget bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
                           title={t.dashboard.createInvoice}
                         >
-                          <RiMoneyDollarCircleLine className="size-3.5 sm:mr-1 rtl:ml-1 rtl:mr-0" />
-                          <span className="hidden sm:inline">{t.dashboard.createInvoice}</span>
+                          <RiMoneyDollarCircleLine className="size-4" />
+                          <span className="hidden sm:inline lowercase">{t.dashboard.createInvoice}</span>
                         </Button>
                       )}
                       <Button
@@ -208,11 +200,11 @@ export function TodaysAppointmentsWidget({
                           e.stopPropagation()
                           onNoShow(apt)
                         }}
-                        className="btn-secondary-widget text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 shrink-0 whitespace-nowrap"
+                        className="btn-secondary-widget bg-gray-50 text-gray-600 hover:bg-gray-100 dark:bg-gray-950/30 dark:text-gray-400 dark:hover:bg-gray-900/50"
                         title={t.dashboard.markAsNoShow}
                       >
-                        <RiCloseLine className="size-3.5 sm:mr-1 rtl:ml-1 rtl:mr-0" />
-                        <span className="hidden sm:inline">{t.dashboard.noShow}</span>
+                        <RiCloseLine className="size-4" />
+                        <span className="hidden sm:inline lowercase">{t.dashboard.noShow}</span>
                       </Button>
                     </div>
                   </div>

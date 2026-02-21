@@ -23,6 +23,11 @@ import {
   RiCloseLine,
   RiInformationLine,
   RiWhatsappLine,
+  RiCakeLine,
+  RiUser3Line,
+  RiHeartLine,
+  RiShareLine,
+  RiStethoscopeLine,
 } from "@remixicon/react"
 import type { Patient } from "@/features/patients/patients.types"
 
@@ -200,14 +205,14 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
   }) => {
     if (!value) return null
     return (
-      <div className="flex items-center gap-2">
-        <Icon className="size-3.5 shrink-0 text-gray-400" />
-        <div className="min-w-0 flex-1">
-          <p className="text-xs text-gray-500 dark:text-gray-500">{label}</p>
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
-            {value}
-          </p>
-        </div>
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500">
+          <Icon className="size-3.5 shrink-0 text-gray-400" />
+          {label}
+        </p>
+        <p className="mt-0.5 text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
+          {value}
+        </p>
       </div>
     )
   }
@@ -254,7 +259,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
 
   return (
     <>
-      <Card className="overflow-hidden shadow-sm">
+      <Card className="overflow-hidden">
         <CardHeader className="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 px-4 py-3 min-h-12 flex flex-row items-center justify-start">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
@@ -263,36 +268,41 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                 {t.profile.patientInfo}
               </h3>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-6 px-1.5 text-[10px] font-bold uppercase tracking-wider">
-              <RiEditLine className="size-3 me-1" />
-              {t.profile.edit}
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)} className="h-6 px-1.5" aria-label={t.profile.edit}>
+              <RiEditLine className="size-3" />
             </Button>
           </div>
         </CardHeader>
         <CardContent className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {patient.phone ? (
-              <div className="flex items-center gap-2">
-                <RiPhoneLine className="size-3.5 shrink-0 text-gray-400" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-500 dark:text-gray-500">{t.profile.phone}</p>
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
-                      {patient.phone}
-                    </p>
-                    <a
-                      href={`https://wa.me/${patient.phone.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="shrink-0 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                      title="WhatsApp"
-                    >
-                      <RiWhatsappLine className="size-4" />
-                    </a>
-                  </div>
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500">
+                  <RiPhoneLine className="size-3.5 shrink-0 text-gray-400" />
+                  {t.profile.phone}
+                </p>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
+                    {patient.phone}
+                  </p>
+                  <a
+                    href={`https://wa.me/${patient.phone.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="shrink-0 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                    title="WhatsApp"
+                  >
+                    <RiWhatsappLine className="size-4" />
+                  </a>
                 </div>
               </div>
             ) : null}
+            <InfoItem
+              icon={RiCakeLine}
+              label={t.profile.age}
+              value={patient.age != null ? `${patient.age}y` : undefined}
+            />
+            <InfoItem icon={RiUser3Line} label={t.profile.gender} value={patient.gender || undefined} />
             {patient.email ? (
               <InfoItem icon={RiMailLine} label={t.profile.email} value={patient.email} />
             ) : null}
@@ -303,14 +313,14 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
               <InfoItem icon={RiBriefcaseLine} label={t.profile.occupation} value={patient.job} />
             ) : null}
             {patient.social_status ? (
-              <InfoItem icon={RiUserLine} label={t.profile.socialStatus} value={patient.social_status} />
+              <InfoItem icon={RiHeartLine} label={t.profile.socialStatus} value={patient.social_status} />
             ) : null}
             {patient.height ? (
               <InfoItem icon={RiRulerLine} label={t.profile.height} value={`${patient.height} cm`} />
             ) : null}
             {patient.source ? (
               <InfoItem
-                icon={RiUserLine}
+                icon={RiShareLine}
                 label={t.profile.source}
                 value={formatSource(patient.source, patient.source_other)}
               />
@@ -324,10 +334,11 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
 
           {patient.complaint && (
             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-800">
-              <div className="flex items-start gap-2">
-                <RiInformationLine className="size-3.5 shrink-0 text-gray-400 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">{t.profile.complaint}</p>
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500 mb-1">
+                  <RiStethoscopeLine className="size-3.5 shrink-0 text-gray-400" />
+                  {t.profile.complaint}
+                </p>
                   <p className="text-sm text-gray-700 dark:text-gray-300">
                     {showFullComplaint || patient.complaint.length <= 120
                       ? patient.complaint
@@ -341,7 +352,6 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
                       {showFullComplaint ? t.profile.showLess : t.profile.readMore}
                     </button>
                   )}
-                </div>
               </div>
             </div>
           )}
@@ -532,7 +542,7 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
               />
             </FieldWrapper>
 
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
               <Button
                 type="button"
                 variant="secondary"

@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@/components/Button"
 import { SearchInput } from "@/components/SearchInput"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { RiUserAddLine } from "@remixicon/react"
@@ -32,14 +31,10 @@ export function PatientsToolbar({
           className="flex-1 min-w-0"
         />
         {onAddPatient && (
-          <Button
-            onClick={onAddPatient}
-            variant="secondary"
-            className="shrink-0 inline-flex items-center gap-2 rtl:flex-row-reverse"
-          >
-            <RiUserAddLine className="size-4 shrink-0" />
+          <button type="button" onClick={onAddPatient} className="btn-search-action rtl:flex-row-reverse">
+            <RiUserAddLine className="size-5 shrink-0" />
             {t.patients.addPatient}
-          </Button>
+          </button>
         )}
       </div>
 

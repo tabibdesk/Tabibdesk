@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { Badge } from "@/components/Badge"
 import { Tooltip } from "@/components/Tooltip"
 import { cx, focusRing } from "@/lib/utils"
@@ -103,6 +104,7 @@ export function Sidebar({ role }: SidebarProps) {
           <ul className="space-y-1">
             {filteredNavigation.map((item) => {
               const active = isActiveRoute(item.href, pathname)
+              const showSeparatorAfter = item.navKey === "insights"
 
               const linkContent = (
                 <Link
@@ -134,15 +136,22 @@ export function Sidebar({ role }: SidebarProps) {
               )
 
               return (
-                <li key={item.navKey}>
-                  {isCollapsed ? (
-                    <Tooltip content={t.nav[item.navKey]} side={isRtl ? "left" : "right"}>
-                      {linkContent}
-                    </Tooltip>
-                  ) : (
-                    linkContent
+                <React.Fragment key={item.navKey}>
+                  <li>
+                    {isCollapsed ? (
+                      <Tooltip content={t.nav[item.navKey]} side={isRtl ? "left" : "right"}>
+                        {linkContent}
+                      </Tooltip>
+                    ) : (
+                      linkContent
+                    )}
+                  </li>
+                  {showSeparatorAfter && (
+                    <li className="py-2" aria-hidden="true">
+                      <div className={cx("border-t border-gray-200 dark:border-gray-700", isCollapsed ? "mx-2" : "mx-4")} />
+                    </li>
                   )}
-                </li>
+                </React.Fragment>
               )
             })}
           </ul>

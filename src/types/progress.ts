@@ -83,3 +83,20 @@ export type ProgressMetricId = (typeof PROGRESS_METRIC_IDS)[number]
 export const PROGRESS_METRIC_LABELS: Record<string, string> = Object.fromEntries(
   PROGRESS_METRIC_CATALOG.map((m) => [m.id, m.label])
 )
+
+/** Regex patterns to auto-detect progress metrics in note text. */
+export const PROGRESS_METRIC_REGEX: Record<string, RegExp> = {
+  pulse: /\d+\s*bpm|pulse\s*[:=]?\s*\d+|heart rate\s*[:=]?\s*\d+/i,
+  oxygen: /spo2\s*[:=]?\s*\d+|\d+\s*%\s*oxygen|oxygen\s*[:=]?\s*\d+|saturation\s*[:=]?\s*\d+/i,
+  temp: /\d+(\.\d+)?\s*°?c|temp\s*[:=]?\s*\d+|temperature\s*[:=]?\s*\d+/i,
+  bp: /\d+\s*\/\s*\d+|bp\s*[:=]?\s*\d+|blood pressure\s*[:=]?\s*\d+|\d+\s*\/\s*\d+\s*mmhg/i,
+  blood_sugar: /\d+\s*mg\/dl|glucose\s*[:=]?\s*\d+|blood sugar\s*[:=]?\s*\d+|fasting\s*[:=]?\s*\d+/i,
+  weight: /\d+(\.\d+)?\s*kg|weight\s*[:=]?\s*\d+/i,
+  bmi: /bmi\s*[:=]?\s*[\d.]+|[\d.]+\s*kg\/m/i,
+  pregnancy: /pregnan|gravid|gestati|trimester|lmp|last menstrual/i,
+  smoking: /smok|tobacco|cigarette|nicotine|non.?smoker|ex.?smoker/i,
+  hba1c: /hba1c\s*[:=]?\s*[\d.]+|a1c\s*[:=]?\s*[\d.]+|[\d.]+\s*%/i,
+  ldl: /ldl\s*[:=]?\s*\d+|\d+\s*ldl/i,
+  cholesterol_total: /cholesterol\s*[:=]?\s*\d+|total\s*chol/i,
+  ozempic_dose: /ozempic|semaglutide|dose\s*[:=]?\s*[\d.]+/i,
+}

@@ -12,26 +12,32 @@ export type BadgeColor =
   | "blue"
   | "slate"
   | "neutral"
+  | "brand"
+  | "black"
 
 export type BadgeSize = "xs" | "sm" | "md"
 
 const COLOR_STYLES: Record<BadgeColor, string> = {
+  brand:
+    "bg-secondary-50 text-secondary-700 border-secondary-100 dark:bg-secondary-900/40 dark:text-secondary-200 dark:border-secondary-700/50",
+  black:
+    "bg-gray-900 text-white border-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:border-gray-300",
   indigo:
-    "bg-indigo-100 text-indigo-800 border-indigo-200/80 dark:bg-indigo-900/40 dark:text-indigo-200 dark:border-indigo-700/50",
+    "bg-primary-50 text-primary-700 border-primary-100 dark:bg-primary-900/40 dark:text-primary-200 dark:border-primary-700/50",
   gray:
-    "bg-gray-100 text-gray-700 border-gray-200/80 dark:bg-gray-800/60 dark:text-gray-300 dark:border-gray-600/50",
+    "bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800/60 dark:text-gray-300 dark:border-gray-600/50",
   emerald:
-    "bg-emerald-100 text-emerald-800 border-emerald-200/80 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700/50",
+    "bg-[#E6F4EA] text-[#137333] border-[#CEEAD6] dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-700/50",
   red:
-    "bg-red-100 text-red-800 border-red-200/80 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700/50",
+    "bg-red-50 text-red-700 border-red-100 dark:bg-red-900/40 dark:text-red-200 dark:border-red-700/50",
   amber:
-    "bg-amber-100 text-amber-800 border-amber-200/80 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700/50",
+    "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-700/50",
   blue:
-    "bg-blue-100 text-blue-800 border-blue-200/80 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700/50",
+    "bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/40 dark:text-blue-200 dark:border-blue-700/50",
   slate:
-    "bg-slate-100 text-slate-700 border-slate-200/80 dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-600/50",
+    "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-600/50",
   neutral:
-    "bg-slate-100 text-slate-700 border-slate-200/80 dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-600/50",
+    "bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800/60 dark:text-gray-300 dark:border-gray-600/50",
 }
 
 const SIZE_STYLES: Record<BadgeSize, string> = {
@@ -43,19 +49,21 @@ const SIZE_STYLES: Record<BadgeSize, string> = {
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   color?: BadgeColor
   size?: BadgeSize
+  rounded?: "md" | "full"
   /** @deprecated Use color instead; icon not supported in custom Badge */
   icon?: React.ElementType
   tooltip?: string
 }
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ color = "gray", size = "xs", className, children, title, tooltip, ...props }, ref) => {
+  ({ color = "gray", size = "xs", rounded = "md", className, children, title, tooltip, ...props }, ref) => {
     return (
       <span
         ref={ref}
         title={tooltip ?? title}
         className={cx(
-          "inline-flex shrink-0 items-center justify-center rounded-md border whitespace-nowrap transition-colors",
+          "inline-flex shrink-0 items-center justify-center border whitespace-nowrap transition-colors",
+          rounded === "full" ? "rounded-full" : "rounded-md",
           COLOR_STYLES[color as BadgeColor] ?? COLOR_STYLES.gray,
           SIZE_STYLES[size],
           className

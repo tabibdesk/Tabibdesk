@@ -1,6 +1,7 @@
 "use client"
 
 import { useAppTranslations } from "@/lib/useAppTranslations"
+import { Badge } from "@/components/Badge"
 import { RiPhoneLine, RiCalendarLine, RiUserLine } from "@remixicon/react"
 import Link from "next/link"
 import type { PatientListItem } from "./patients.types"
@@ -23,11 +24,11 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
           <Link
             key={patient.id}
             href={`/patients/${patient.id}`}
-            className="widget-row cursor-pointer"
+            className="widget-row cursor-pointer py-5"
           >
             <div className="widget-content-stack">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-                <RiUserLine className="size-5 text-gray-500 dark:text-gray-400" aria-hidden />
+              <div className="avatar-patient">
+                <RiUserLine className="size-5" aria-hidden />
               </div>
 
               <div className="min-w-0 flex-1">
@@ -35,9 +36,9 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
                   <p className="font-semibold text-gray-900 dark:text-white truncate">
                     {patient.first_name} {patient.last_name}
                   </p>
-                  <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300 shrink-0">
+                  <Badge color="black" size="xs" className="shrink-0">
                     {ageDisplay} • {patient.gender || "—"}
-                  </span>
+                  </Badge>
                 </div>
                 {patient.complaint ? (
                   <div className="mt-0.5 flex items-center gap-1.5">
@@ -49,7 +50,7 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
               </div>
 
               <div className="hidden shrink-0 text-end sm:block ms-4">
-                <div className="flex items-center justify-end gap-1.5 text-sm text-gray-900 dark:text-gray-100 rtl:flex-row-reverse">
+                <div className="flex items-center justify-end gap-1 text-sm text-gray-900 dark:text-gray-100 rtl:flex-row-reverse">
                   <RiPhoneLine className="size-4 shrink-0 text-gray-500 dark:text-gray-400" aria-hidden />
                   <span>{patient.phone}</span>
                 </div>

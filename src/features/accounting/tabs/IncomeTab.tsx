@@ -41,6 +41,9 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
   const [showCaptureDrawer, setShowCaptureDrawer] = useState(false)
   const [selectedInvoiceForView, setSelectedInvoiceForView] = useState<Invoice | null>(null)
   const [showViewInvoiceDrawer, setShowViewInvoiceDrawer] = useState(false)
+  const [page, setPage] = useState(1)
+  const [accumulatedPayments, setAccumulatedPayments] = useState<Payment[]>([])
+  const [accumulatedRefunds, setAccumulatedRefunds] = useState<Refund[]>([])
 
   // Calculate date range
   const getDateRange = () => {
@@ -80,8 +83,8 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
     from: dateRange.from,
     to: dateRange.to,
     query: debouncedSearch || undefined,
-    page: 1,
-    pageSize: 50,
+    page,
+    pageSize: 20,
   })
   const {
     data: refundsData,
@@ -92,8 +95,8 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
     clinicId: currentClinic?.id || "clinic-001",
     dateFrom: dateRange.from,
     dateTo: dateRange.to,
-    page: 1,
-    pageSize: 50,
+    page,
+    pageSize: 20,
   })
 
   useEffect(() => {
@@ -101,8 +104,27 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  const payments = data?.payments || []
-  const refunds: Refund[] = refundsData?.refunds || []
+  // Reset pagination when filters change
+  useEffect(() => {
+    setPage(1)
+    setAccumulatedPayments([])
+    setAccumulatedRefunds([])
+  }, [dateRange.from, dateRange.to, debouncedSearch])
+
+  // Accumulate payments and refunds for pagination
+  useEffect(() => {
+    if (data?.payments) {
+      setAccumulatedPayments((prev) => (page === 1 ? data.payments : [...prev, ...data.payments]))
+    }
+  }, [data?.payments, page])
+  useEffect(() => {
+    if (refundsData?.refunds) {
+      setAccumulatedRefunds((prev) => (page === 1 ? refundsData.refunds : [...prev, ...refundsData.refunds]))
+    }
+  }, [refundsData?.refunds, page])
+
+  const payments = page === 1 && loading ? [] : accumulatedPayments
+  const refunds: Refund[] = page === 1 && refundsLoading ? [] : accumulatedRefunds
   const loadingAny = loading || refundsLoading
   const errorAny = error || refundsError
 
@@ -120,6 +142,9 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
       refund: r,
     })),
   ].sort((a, b) => b.date.localeCompare(a.date))
+
+  const hasMore = (data?.hasMore) || (refundsData?.hasMore) || false
+  const loadingMore = page > 1 && loadingAny
 
   const totalCollected = payments.reduce((sum, p) => sum + p.amount, 0)
   const totalRefunded = refunds.reduce((sum: number, r: Refund) => sum + r.amount, 0)
@@ -220,14 +245,14 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
         <div className="flex-1 min-w-0 w-full">
           <AccountingToolbar searchQuery={searchQuery} onSearchQueryChange={setSearchQuery} searchPlaceholder={t.accounting.searchIncome} />
         </div>
-        <Button
-          variant="secondary"
+        <button
+          type="button"
           onClick={() => setShowCaptureDrawer(true)}
-          className="w-full sm:w-auto shrink-0 md:h-9 md:py-1.5 md:text-sm inline-flex items-center gap-2 rtl:flex-row-reverse"
+          className="btn-search-action w-full sm:w-auto rtl:flex-row-reverse"
         >
-          <RiAddLine className="size-4" />
+          <RiAddLine className="size-5 shrink-0" />
           <span>{t.accounting.capture}</span>
-        </Button>
+        </button>
       </div>
 
       {/* Income List (payments + refunds) */}
@@ -463,6 +488,26 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
               )
             )}
           </div>
+
+          {hasMore && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={loadingMore}
+                className="min-w-[140px]"
+              >
+                {loadingMore ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {t.accounting.loadMore}
+                  </span>
+                ) : (
+                  t.accounting.loadMore
+                )}
+              </Button>
+            </div>
+          )}
         </>
       )}
 

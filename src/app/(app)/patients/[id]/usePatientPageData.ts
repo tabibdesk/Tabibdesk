@@ -14,6 +14,11 @@ import { createTask, listTasks, updateTaskStatus } from "@/features/tasks/tasks.
 import type { CreateTaskPayload, TaskListItem } from "@/features/tasks/tasks.types"
 import type { ProgressMetric } from "@/types/progress"
 import { getMetricsToRecord } from "@/types/progress"
+import { getChecklistItemsForNote, DEFAULT_CHECKLIST_IDS } from "@/types/visit-progress"
+import {
+  MEDICAL_CONDITIONS,
+  DEFAULT_MEDICAL_CONDITION_IDS,
+} from "@/features/patients/detail/medical-conditions"
 
 export function usePatientPageData(
   patientId: string,
@@ -26,6 +31,10 @@ export function usePatientPageData(
   const [patient, setPatient] = useState<any | null>(null)
   const [progressMetrics, setProgressMetrics] = useState<ProgressMetric[]>([])
   const [enabledProgressMetricIds, setEnabledProgressMetricIds] = useState<string[]>([])
+  const [visitProgressChecklistIds, setVisitProgressChecklistIds] = useState<string[]>(
+    () => DEFAULT_CHECKLIST_IDS
+  )
+  const [medicalConditionIds, setMedicalConditionIds] = useState<string[]>([])
   const [prescriptions, setPrescriptions] = useState<any[]>([])
   const [labResults, setLabResults] = useState<any[]>([])
   const [appointments, setAppointments] = useState<any[]>([])
@@ -51,6 +60,20 @@ export function usePatientPageData(
     if (!currentClinicId) return
     getClinicSettings(currentClinicId).then((settings) => {
       setEnabledProgressMetricIds(settings.enabledProgressMetricIds ?? [])
+      const saved = settings.visitProgressChecklistIds
+      if (saved !== undefined && saved.length > 0) {
+        const legacyDefaults = ["vitals", "complaint", "examination", "diagnosis", "treatment", "labs", "followup"]
+        const isLegacy = saved.length === legacyDefaults.length && legacyDefaults.every((id) => saved!.includes(id))
+        setVisitProgressChecklistIds(isLegacy ? DEFAULT_CHECKLIST_IDS : saved)
+      } else {
+        setVisitProgressChecklistIds(DEFAULT_CHECKLIST_IDS)
+      }
+      const savedMed = settings.medicalConditionIds
+      setMedicalConditionIds(
+        savedMed !== undefined && savedMed.length > 0
+          ? savedMed
+          : [...DEFAULT_MEDICAL_CONDITION_IDS]
+      )
     })
   }, [currentClinicId])
 
@@ -61,6 +84,21 @@ export function usePatientPageData(
         enabledProgressMetricIds.length > 0 ? enabledProgressMetricIds : defaultMetricIds
       ),
     [enabledProgressMetricIds, defaultMetricIds]
+  )
+
+  const checklistItems = useMemo(
+    () => getChecklistItemsForNote(visitProgressChecklistIds),
+    [visitProgressChecklistIds]
+  )
+
+  const enabledMedicalConditions = useMemo(
+    () =>
+      medicalConditionIds.length > 0
+        ? MEDICAL_CONDITIONS.filter((c) => medicalConditionIds.includes(c.id))
+        : MEDICAL_CONDITIONS.filter((c) =>
+            (DEFAULT_MEDICAL_CONDITION_IDS as readonly string[]).includes(c.id)
+          ),
+    [medicalConditionIds]
   )
 
   const fetchPatientData = async () => {
@@ -166,7 +204,8 @@ export function usePatientPageData(
   }
 
   const handleUpdatePatient = async (updates: Partial<any>) => {
-    const updatedPatient = await updatePatient(patientId, updates, currentClinicId)
+    const clinicId = currentClinicId ?? (patient as { clinic_id?: string })?.clinic_id
+    const updatedPatient = await updatePatient(patientId, updates, clinicId)
     setPatient(updatedPatient)
     return updatedPatient
   }
@@ -177,6 +216,8 @@ export function usePatientPageData(
     progressMetrics,
     setProgressMetrics,
     metricsToRecord,
+    checklistItems,
+    enabledMedicalConditions,
     prescriptions,
     labResults,
     appointments,

@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
-  // Ensure @remixicon/react is properly bundled
-  transpilePackages: ['@remixicon/react'],
+  // Optimize @remixicon/react imports to avoid vendor-chunk resolution issues
+  experimental: {
+    optimizePackageImports: ['@remixicon/react'],
+  },
   
   // Type checking enabled - all dead code removed
   typescript: {

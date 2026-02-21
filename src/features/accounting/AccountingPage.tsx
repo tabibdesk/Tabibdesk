@@ -37,7 +37,7 @@ export function AccountingPage() {
         }
       />
 
-      <div className="space-y-3">
+      <div className="!mt-0 space-y-3">
         <div className="border-b border-gray-200 dark:border-gray-800">
           <nav className="-mb-px flex gap-4 overflow-x-auto pb-px sm:gap-8" aria-label="Accounting tabs">
             <button

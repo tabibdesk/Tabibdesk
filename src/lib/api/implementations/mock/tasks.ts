@@ -24,6 +24,8 @@ function initStore() {
   const nextWeek = new Date(now)
   nextWeek.setDate(nextWeek.getDate() + 7)
 
+  const yesterday = new Date(now)
+  yesterday.setDate(yesterday.getDate() - 1)
   const manualTasks: Task[] = [
     {
       id: "task-001",
@@ -34,6 +36,7 @@ function initStore() {
       priority: "high",
       dueDate: tomorrow.toISOString(),
       createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
       createdByUserId: "user-001",
       assignedToUserId: "user-003",
       patientId: mockData.patients[0]?.id,
@@ -45,10 +48,11 @@ function initStore() {
       title: "Review lab results",
       description: "Patient Fatima - blood work results",
       type: "labs",
-      status: "pending",
+      status: "done",
       priority: "normal",
       dueDate: nextWeek.toISOString(),
-      createdAt: now.toISOString(),
+      createdAt: yesterday.toISOString(),
+      updatedAt: now.toISOString(),
       createdByUserId: "user-001",
       assignedToUserId: "user-001",
       patientId: mockData.patients[1]?.id,
@@ -62,14 +66,20 @@ function initStore() {
 
 function enrichTaskWithNames(task: Task): TaskListItem {
   const patient = task.patientId ? mockData.patients.find((p) => p.id === task.patientId) : undefined
-  const assignedTo = task.assignedToUserId ? mockUsers.find((u) => u.id === task.assignedToUserId) : undefined
+  const assignedToUser = task.assignedToUserId ? mockUsers.find((u) => u.id === task.assignedToUserId) : undefined
+  const assignedToPatient = task.assignedToPatientId ? mockData.patients.find((p) => p.id === task.assignedToPatientId) : undefined
+  const assignedToName = assignedToUser
+    ? `${assignedToUser.first_name} ${assignedToUser.last_name}`
+    : assignedToPatient
+      ? `${assignedToPatient.first_name} ${assignedToPatient.last_name}`
+      : undefined
   const createdBy = mockUsers.find((u) => u.id === task.createdByUserId)
 
   return {
     ...task,
     patientName: patient ? `${patient.first_name} ${patient.last_name}` : undefined,
     patientPhone: patient?.phone,
-    assignedToName: assignedTo ? `${assignedTo.first_name} ${assignedTo.last_name}` : undefined,
+    assignedToName,
     createdByName: createdBy ? `${createdBy.first_name} ${createdBy.last_name}` : undefined,
   }
 }
@@ -138,8 +148,11 @@ export class MockTasksRepository implements ITasksRepository {
     const task: Task = {
       id: generateId(),
       ...payload,
+      assignedToUserId: payload.assignedToUserId,
+      assignedToPatientId: payload.assignedToPatientId,
       priority: payload.priority ?? "normal",
       createdAt: now,
+      updatedAt: now,
       status: "pending",
       source: "manual",
     }
@@ -153,7 +166,11 @@ export class MockTasksRepository implements ITasksRepository {
     const idx = tasksStore.findIndex((t) => t.id === payload.id)
     if (idx === -1) throw new Error("Task not found")
 
-    tasksStore[idx] = { ...tasksStore[idx], status: payload.status }
+    const updated = { ...tasksStore[idx], status: payload.status }
+    if (payload.status === "done" || payload.status === "cancelled") {
+      updated.updatedAt = new Date().toISOString()
+    }
+    tasksStore[idx] = updated
     return tasksStore[idx]
   }
 
@@ -162,7 +179,11 @@ export class MockTasksRepository implements ITasksRepository {
     const idx = tasksStore.findIndex((t) => t.id === payload.id)
     if (idx === -1) throw new Error("Task not found")
 
-    tasksStore[idx] = { ...tasksStore[idx], assignedToUserId: payload.assignedToUserId }
+    tasksStore[idx] = {
+      ...tasksStore[idx],
+      assignedToUserId: payload.assignedToUserId,
+      assignedToPatientId: payload.assignedToPatientId,
+    }
     return tasksStore[idx]
   }
 

@@ -85,9 +85,11 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
               <ul role="list" className="space-y-1">
                 {filteredNavigation.map((item) => {
                   const active = isActiveRoute(item.href, pathname)
+                  const showSeparatorAfter = item.navKey === "insights"
 
                   return (
-                    <li key={item.navKey}>
+                    <React.Fragment key={item.navKey}>
+                    <li>
                       <DrawerClose asChild>
                         <Link
                           href={item.href}
@@ -110,6 +112,12 @@ export default function MobileSidebar({ role }: MobileSidebarProps) {
                         </Link>
                       </DrawerClose>
                     </li>
+                    {showSeparatorAfter && (
+                      <li className="py-2" aria-hidden="true">
+                        <div className="mx-4 border-t border-gray-200 dark:border-gray-700" />
+                      </li>
+                    )}
+                    </React.Fragment>
                   )
                 })}
               </ul>

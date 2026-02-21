@@ -6,6 +6,7 @@ import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useDebounce } from "@/lib/useDebounce"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useUserClinic } from "@/contexts/user-clinic-context"
 import { createPatient, listPatients } from "./patients.api"
 import { AddPatientDrawer } from "./AddPatientDrawer"
 import { EmptyPatientsState } from "./EmptyPatientsState"
@@ -22,6 +23,7 @@ export function PatientsPage() {
   const t = useAppTranslations()
   const router = useRouter()
   const { showToast } = useToast()
+  const { currentClinic } = useUserClinic()
   const [patients, setPatients] = useState<PatientListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
@@ -40,7 +42,7 @@ export function PatientsPage() {
     setPage(1)
     fetchPatients(1, debouncedSearch, statusFilter)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch, activeTab])
+  }, [debouncedSearch, activeTab, currentClinic?.id])
 
   const fetchPatients = async (pageNum: number, query?: string, status?: PatientStatus) => {
     setLoading(true)
@@ -50,6 +52,7 @@ export function PatientsPage() {
         pageSize: PAGE_SIZE,
         query: query || undefined,
         status: status,
+        clinicId: currentClinic?.id,
       })
       if (pageNum === 1) {
         setPatients(response.patients)
@@ -126,12 +129,19 @@ export function PatientsPage() {
           {hasMore && (
             <div className="mt-6 flex justify-center">
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={handleLoadMore}
                 disabled={loading}
-                isLoading={loading}
+                className="min-w-[140px]"
               >
-                Load More
+                {loading && page > 1 ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    {t.common.loadMore}
+                  </span>
+                ) : (
+                  t.common.loadMore
+                )}
               </Button>
             </div>
           )}

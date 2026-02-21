@@ -55,7 +55,9 @@ export function AddTaskDrawer({
   const [description, setDescription] = useState("")
   const [type, setType] = useState<TaskType>("follow_up")
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined)
-  const [assignedToUserId, setAssignedToUserId] = useState<string>(defaultAssignedToUserId || "")
+  const [assigneeValue, setAssigneeValue] = useState<string>(() =>
+    defaultAssignedToUserId ? `user:${defaultAssignedToUserId}` : ""
+  )
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(() => {
     if (!defaultPatientId) return null
     const p = mockData.patients.find((x) => x.id === defaultPatientId)
@@ -84,7 +86,7 @@ export function AddTaskDrawer({
       setDescription("")
       setType("follow_up")
       setDueDate(undefined)
-      setAssignedToUserId(defaultAssignedToUserId || "")
+      setAssigneeValue(defaultAssignedToUserId ? `user:${defaultAssignedToUserId}` : "")
       setUserClearedPatient(false)
       if (defaultPatientId) {
         const p = mockData.patients.find((x) => x.id === defaultPatientId)
@@ -99,6 +101,14 @@ export function AddTaskDrawer({
     e.preventDefault()
     if (!title.trim()) return
 
+    let assignedToUserId: string | undefined
+    let assignedToPatientId: string | undefined
+    if (assigneeValue.startsWith("user:")) {
+      assignedToUserId = assigneeValue.slice(5) || undefined
+    } else if (assigneeValue.startsWith("patient:")) {
+      assignedToPatientId = assigneeValue.slice(8) || undefined
+    }
+
     setIsSubmitting(true)
     try {
       await onSubmit({
@@ -106,7 +116,8 @@ export function AddTaskDrawer({
         description: description.trim() || undefined,
         type,
         dueDate: dueDate?.toISOString(),
-        assignedToUserId: assignedToUserId || undefined,
+        assignedToUserId,
+        assignedToPatientId,
         patientId: selectedPatient?.id || undefined,
         clinicId,
         createdByUserId: currentUserId,
@@ -128,6 +139,49 @@ export function AddTaskDrawer({
         <DrawerBody>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="patient">{t.tasks.patientLabel} {defaultPatientId ? t.tasks.patientPrefilled : t.tasks.patientOptional}</Label>
+                <PatientSelector
+                  initialPatient={effectiveInitialPatient}
+                  onPatientSelect={(p) => {
+                    const newPatient = p ?? null
+                    setSelectedPatient(newPatient)
+                    if (p) {
+                      setUserClearedPatient(false)
+                      if (assigneeValue.startsWith("patient:") && assigneeValue !== `patient:${p.id}`) {
+                        setAssigneeValue("")
+                      }
+                    } else {
+                      setUserClearedPatient(true)
+                      if (assigneeValue.startsWith("patient:")) setAssigneeValue("")
+                    }
+                  }}
+                  searchOnly
+                  required={false}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="assignedTo">{t.tasks.assignTo}</Label>
+                <Select
+                  id="assignedTo"
+                  value={assigneeValue}
+                  onChange={(e) => setAssigneeValue(e.target.value)}
+                >
+                  <option value="">{t.tasks.unassigned}</option>
+                  {availableUsers.map((user) => (
+                    <option key={`user-${user.id}`} value={`user:${user.id}`}>
+                      {user.full_name} ({user.role === "doctor" ? t.common.doctor : user.role === "assistant" ? t.common.assistant : t.common.manager})
+                    </option>
+                  ))}
+                  {selectedPatient && (
+                    <option key={`patient-${selectedPatient.id}`} value={`patient:${selectedPatient.id}`}>
+                      {selectedPatient.first_name} {selectedPatient.last_name} ({t.tasks.assigneeRolePatient})
+                    </option>
+                  )}
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="title">
                   {t.tasks.taskTitle} <span className="text-red-500">*</span>
@@ -162,36 +216,6 @@ export function AddTaskDrawer({
                   <option value="billing">{t.tasks.typeBilling}</option>
                   <option value="other">{t.tasks.typeOther}</option>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="assignedTo">{t.tasks.assignTo}</Label>
-                <Select
-                  id="assignedTo"
-                  value={assignedToUserId}
-                  onChange={(e) => setAssignedToUserId(e.target.value)}
-                >
-                  <option value="">{t.tasks.unassigned}</option>
-                  {availableUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.full_name} ({user.role === "doctor" ? t.common.doctor : user.role === "assistant" ? t.common.assistant : t.common.manager})
-                    </option>
-                  ))}
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="patient">{t.tasks.patientLabel} {defaultPatientId ? t.tasks.patientPrefilled : t.tasks.patientOptional}</Label>
-                <PatientSelector
-                  initialPatient={effectiveInitialPatient}
-                  onPatientSelect={(p) => {
-                    setSelectedPatient(p ?? null)
-                    if (p) setUserClearedPatient(false)
-                    else setUserClearedPatient(true)
-                  }}
-                  searchOnly
-                  required={false}
-                />
               </div>
 
               <div className="space-y-2">

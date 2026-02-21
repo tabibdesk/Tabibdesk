@@ -3,11 +3,12 @@
  * Uses repository factory for data access (mock or Supabase).
  */
 
-import { getPatientsRepository } from "@/lib/api/repository-factory"
+import { getPatientsRepository, getBackendType } from "@/lib/api/repository-factory"
 import { DEMO_CLINIC_ID } from "@/lib/constants"
+import { DEFAULT_CURRENT_CLINIC_ID } from "@/data/mock/users-clinics"
 import type { Patient, PatientStatus } from "@/features/patients/patients.types"
 import { applyPatientActivation } from "@/features/patients/patientLifecycle"
-import { getFollowUpRules } from "@/api/settings.api"
+import { getReactivationRules } from "@/api/settings.api"
 import { listAppointments } from "@/features/appointments/appointments.api"
 import { NotFoundError } from "@/lib/api/errors"
 
@@ -17,6 +18,9 @@ export interface ListPatientsParams {
   query?: string
   page: number
   pageSize: number
+  /** Filter by first_visit_at in range (for leads / new patients) */
+  firstVisitFrom?: string
+  firstVisitTo?: string
 }
 
 export interface ListPatientsResponse {
@@ -50,13 +54,29 @@ export type ActivationReason = "in_progress" | "completed" | "visit_note"
  */
 export async function list(params: ListPatientsParams): Promise<ListPatientsResponse> {
   const repo = await getPatientsRepository()
-  const clinicId = params.clinicId ?? DEMO_CLINIC_ID
-  const { page, pageSize, query, status } = params
+  const clinicId =
+    params.clinicId ??
+    (getBackendType() === "mock" ? DEFAULT_CURRENT_CLINIC_ID : DEMO_CLINIC_ID)
+  const { page, pageSize, query, status, firstVisitFrom, firstVisitTo } = params
 
   let patients = await repo.getPatients(clinicId)
 
   if (status) {
     patients = patients.filter((p) => p.status === status)
+  }
+
+  if (firstVisitFrom || firstVisitTo) {
+    patients = patients.filter((p) => {
+      if (!p.first_visit_at) return false
+      const d = new Date(p.first_visit_at)
+      if (firstVisitFrom && d < new Date(firstVisitFrom)) return false
+      if (firstVisitTo) {
+        const to = new Date(firstVisitTo)
+        to.setHours(23, 59, 59, 999)
+        if (d > to) return false
+      }
+      return true
+    })
   }
 
   if (query?.trim()) {
@@ -178,7 +198,12 @@ export async function update(
   clinicId?: string
 ): Promise<Patient> {
   const repo = await getPatientsRepository()
-  const effectiveClinicId = clinicId ?? DEMO_CLINIC_ID
+  let effectiveClinicId = clinicId ?? DEMO_CLINIC_ID
+
+  if (!clinicId) {
+    const existing = await repo.getById(patientId)
+    if (existing?.clinic_id) effectiveClinicId = existing.clinic_id
+  }
 
   try {
     await repo.getPatient(patientId, effectiveClinicId)
@@ -201,7 +226,7 @@ export async function isPatientInactive(
   const patient = await repo.getById(patientId)
   if (!patient) return false
 
-  const rules = await getFollowUpRules(clinicId)
+  const rules = await getReactivationRules(clinicId)
   const thresholdDays = rules.inactivityDaysThreshold
   const lastActivity =
     patient.last_activity_at ?? patient.last_visit_at ?? patient.created_at

@@ -6,7 +6,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/Popover"
 import { Calendar } from "@/components/Calendar"
 import { RiArrowLeftSLine, RiArrowRightSLine, RiCalendarLine } from "@remixicon/react"
 import { format, isBefore, startOfDay } from "date-fns"
-import { useLocale } from "@/contexts/locale-context"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { DATEPICKER_LOCALE } from "@/lib/date-utils"
 
@@ -22,7 +21,6 @@ function isBeforeToday(date: Date): boolean {
 export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const t = useAppTranslations()
-  // Datepicker always uses English (no translation of month/day names)
   
   const goToPreviousDay = () => {
     const prev = new Date(currentDate)
@@ -36,10 +34,6 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
     onDateChange(next)
   }
   
-  const goToToday = () => {
-    onDateChange(new Date())
-  }
-  
   const handleDateSelect = (date: Date | undefined) => {
     if (date && !isBeforeToday(date)) {
       onDateChange(date)
@@ -51,31 +45,31 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
   const cannotGoToPast = isToday
   
   return (
-    <div className="flex items-center justify-between gap-1 sm:gap-4 rounded-lg border border-gray-200 bg-white p-2 sm:p-4 dark:border-gray-800 dark:bg-gray-950">
-      {/* Previous Day - disabled when on today so we never go to past */}
+    <div className="flex items-center justify-between bg-white p-2 rounded-2xl shadow-sm border border-gray-100 dark:bg-gray-900 dark:border-gray-800">
       <Button
         variant="ghost"
         size="sm"
         onClick={goToPreviousDay}
         disabled={cannotGoToPast}
-        className="shrink-0 h-9 w-9 p-0 sm:h-auto sm:w-auto sm:px-3"
+        className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-400 shrink-0"
       >
         <RiArrowLeftSLine className="size-5 rtl:rotate-180" />
       </Button>
       
-      {/* Date Display & Calendar Popup */}
-      <div className="flex flex-1 items-center justify-center min-w-0">
+      <div className="flex items-center justify-center flex-1">
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
             <button
               type="button"
-              className="flex items-center gap-1.5 sm:gap-2 rounded-md px-2 sm:px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-50 dark:hover:bg-gray-800 truncate"
+              className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              <RiCalendarLine className="size-4 sm:size-5 text-gray-500 shrink-0" />
-              <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
+              <div className="bg-primary-50 dark:bg-primary-900/30 p-1.5 sm:p-2 rounded-xl text-primary-600 dark:text-primary-400 shrink-0">
+                <RiCalendarLine className="size-4 sm:size-5" />
+              </div>
+              <h2 className="font-bold text-sm sm:text-lg text-gray-800 dark:text-gray-100 whitespace-nowrap">
                 <span className="sm:hidden">{format(currentDate, "MMM d, yyyy", { locale: DATEPICKER_LOCALE })}</span>
                 <span className="hidden sm:inline">{format(currentDate, "EEEE, MMMM d, yyyy", { locale: DATEPICKER_LOCALE })}</span>
-              </span>
+              </h2>
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="center">
@@ -94,29 +88,14 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
         </Popover>
       </div>
       
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-        {/* Today Button */}
-        {!isToday && (
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={goToToday}
-            className="h-8 sm:h-9 px-2 sm:px-4 text-xs sm:text-sm"
-          >
-            {t.appointments.today}
-          </Button>
-        )}
-        
-        {/* Next Day */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={goToNextDay}
-          className="h-9 w-9 p-0 sm:h-auto sm:w-auto sm:px-3"
-        >
-          <RiArrowRightSLine className="size-5 rtl:rotate-180" />
-        </Button>
-      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={goToNextDay}
+        className="p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-400 shrink-0"
+      >
+        <RiArrowRightSLine className="size-5 rtl:rotate-180" />
+      </Button>
     </div>
   )
 }

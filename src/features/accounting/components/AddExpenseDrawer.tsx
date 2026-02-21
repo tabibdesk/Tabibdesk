@@ -42,6 +42,8 @@ export function AddExpenseDrawer({
   const [loading, setLoading] = useState(false)
   const [category, setCategory] = useState<ExpenseCategory>("supplies")
   const [amount, setAmount] = useState("")
+  const [dateFrom, setDateFrom] = useState("")
+  const [dateTo, setDateTo] = useState("")
   const [vendor, setVendor] = useState("")
   const [vendorPhone, setVendorPhone] = useState("")
   const [description, setDescription] = useState("")
@@ -55,6 +57,8 @@ export function AddExpenseDrawer({
     if (open) {
       setCategory("supplies")
       setAmount("")
+      setDateFrom("")
+      setDateTo("")
       setVendor("")
       setVendorPhone("")
       setDescription("")
@@ -63,6 +67,15 @@ export function AddExpenseDrawer({
       setReceiptFileId(undefined)
     }
   }, [open])
+
+  // Reset marketing-specific fields when switching away from marketing; clear vendor when switching categories
+  useEffect(() => {
+    if (category !== "marketing") {
+      setDateFrom("")
+      setDateTo("")
+    }
+    setVendor("")
+  }, [category])
 
   const handleReceiptUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -96,17 +109,34 @@ export function AddExpenseDrawer({
       return
     }
 
+    if (category === "marketing") {
+      if (!dateFrom || !dateTo) {
+        showToast(t.expense.adSpendDateRangeRequired, "error")
+        return
+      }
+      if (new Date(dateFrom) > new Date(dateTo)) {
+        showToast(t.expense.adSpendDateFromBeforeTo, "error")
+        return
+      }
+      if (!vendor) {
+        showToast(t.expense.marketingPlatformRequired, "error")
+        return
+      }
+    }
+
     setLoading(true)
     try {
       await createExpense({
         clinicId: currentClinic.id,
         category,
         amount: parseFloat(amount),
-        method: paymentMethod,
+        method: category === "marketing" ? "transfer" : paymentMethod,
         vendorName: vendor || undefined,
-        note: description || undefined,
-        receiptFileId: receiptFileId,
+        note: category === "marketing" ? undefined : description || undefined,
+        receiptFileId: category === "marketing" ? undefined : receiptFileId,
         createdByUserId: currentUser.id,
+        dateFrom: category === "marketing" ? dateFrom : undefined,
+        dateTo: category === "marketing" ? dateTo : undefined,
       })
 
       showToast("Expense added successfully", "success")
@@ -163,87 +193,135 @@ export function AddExpenseDrawer({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="vendor">{t.expense.vendorSupplier}</Label>
-                <VendorAutocomplete
-                  clinicId={currentClinic.id}
-                  value={vendor}
-                  onChange={setVendor}
-                  onSelect={(v) => setVendorPhone(v.phone ?? "")}
-                  createVendorPhone={vendorPhone}
-                  placeholder={t.expense.vendorPlaceholder}
-                />
-              </div>
+              {category === "marketing" ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="platform">
+                      {t.expense.marketingPlatform} <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      id="platform"
+                      value={vendor}
+                      onChange={(e) => setVendor(e.target.value)}
+                    >
+                      <option value="">{t.expense.marketingPlatformPlaceholder}</option>
+                      <option value="Meta WhatsApp">{t.expense.platformMetaWhatsApp}</option>
+                      <option value="Meta Instagram">{t.expense.platformMetaInstagram}</option>
+                      <option value="Meta Facebook">{t.expense.platformMetaFacebook}</option>
+                      <option value="Google">{t.expense.platformGoogle}</option>
+                      <option value="Other">{t.expense.platformOther}</option>
+                    </Select>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="vendorPhone">{t.expense.vendorPhone}</Label>
-                <Input
-                  id="vendorPhone"
-                  type="tel"
-                  value={vendorPhone}
-                  onChange={(e) => setVendorPhone(e.target.value)}
-                  placeholder={t.expense.vendorPhonePlaceholder}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">{t.expense.description}</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={t.expense.descriptionPlaceholder}
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="paymentMethod">
-                  {t.expense.paymentMethod} <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  id="paymentMethod"
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value as ExpenseMethod)}
-                >
-                  <option value="cash">{t.expense.methodCash}</option>
-                  <option value="instapay">{t.expense.methodInstapay}</option>
-                  <option value="transfer">{t.expense.methodTransfer}</option>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="receipt">{t.expense.receiptProof}</Label>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="receipt"
-                    className="flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
-                  >
-                    <RiUploadLine className="size-4" />
-                    {receiptFile ? receiptFile.name : t.expense.uploadReceipt}
-                  </label>
-                  <input
-                    id="receipt"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleReceiptUpload}
-                    className="hidden"
-                    disabled={uploadingReceipt}
-                  />
-                  {uploadingReceipt && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.expense.uploading}</p>
-                  )}
-                  {receiptFileId && (
-                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
-                      <RiFileLine className="size-4" />
-                      {t.expense.receiptUploaded}
+                  <div className="space-y-2">
+                    <Label className="block">{t.expense.adSpendDateRange} <span className="text-red-500">*</span></Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="dateFrom" className="text-xs text-gray-600 dark:text-gray-400">{t.expense.adSpendFrom}</Label>
+                        <Input
+                          id="dateFrom"
+                          type="date"
+                          value={dateFrom}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="dateTo" className="text-xs text-gray-600 dark:text-gray-400">{t.expense.adSpendTo}</Label>
+                        <Input
+                          id="dateTo"
+                          type="date"
+                          value={dateTo}
+                          onChange={(e) => setDateTo(e.target.value)}
+                        />
+                      </div>
                     </div>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {t.expense.receiptHint}
-                </p>
-              </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="vendor">{t.expense.vendorSupplier}</Label>
+                    <VendorAutocomplete
+                      clinicId={currentClinic.id}
+                      value={vendor}
+                      onChange={setVendor}
+                      onSelect={(v) => setVendorPhone(v.phone ?? "")}
+                      createVendorPhone={vendorPhone}
+                      placeholder={t.expense.vendorPlaceholder}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="vendorPhone">{t.expense.vendorPhone}</Label>
+                    <Input
+                      id="vendorPhone"
+                      type="tel"
+                      value={vendorPhone}
+                      onChange={(e) => setVendorPhone(e.target.value)}
+                      placeholder={t.expense.vendorPhonePlaceholder}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">{t.expense.description}</Label>
+                    <Textarea
+                      id="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder={t.expense.descriptionPlaceholder}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentMethod">
+                      {t.expense.paymentMethod} <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      id="paymentMethod"
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value as ExpenseMethod)}
+                    >
+                      <option value="cash">{t.expense.methodCash}</option>
+                      <option value="instapay">{t.expense.methodInstapay}</option>
+                      <option value="transfer">{t.expense.methodTransfer}</option>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="receipt">{t.expense.receiptProof}</Label>
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="receipt"
+                        className="flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+                      >
+                        <RiUploadLine className="size-4" />
+                        {receiptFile ? receiptFile.name : t.expense.uploadReceipt}
+                      </label>
+                      <input
+                        id="receipt"
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={handleReceiptUpload}
+                        className="hidden"
+                        disabled={uploadingReceipt}
+                      />
+                      {uploadingReceipt && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{t.expense.uploading}</p>
+                      )}
+                      {receiptFileId && (
+                        <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                          <RiFileLine className="size-4" />
+                          {t.expense.receiptUploaded}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {t.expense.receiptHint}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             <DrawerFooter>
@@ -259,7 +337,12 @@ export function AddExpenseDrawer({
               <Button
                 type="submit"
                 variant="primary"
-                disabled={loading || !amount || parseFloat(amount) <= 0}
+                disabled={
+                  loading ||
+                  !amount ||
+                  parseFloat(amount) <= 0 ||
+                  (category === "marketing" && (!dateFrom || !dateTo || !vendor))
+                }
                 isLoading={loading}
                 className="flex-1 sm:flex-initial"
               >

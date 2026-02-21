@@ -113,7 +113,7 @@ export function AppointmentsCards({
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <Link href={`/patients/${appointment.patient_id}`}>
-                  <CardTitle className="cursor-pointer text-lg text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
+                  <CardTitle className="cursor-pointer text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                     {appointment.patient_name}
                   </CardTitle>
                 </Link>

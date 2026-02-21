@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { useAppTranslations } from "@/lib/useAppTranslations"
+import { Skeleton } from "@/components/Skeleton"
 import { Select } from "@/components/Select"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { listDoctorsByClinic } from "../availability.api"
@@ -66,7 +67,7 @@ export function DoctorSelector({
   if (!show) return null
 
   if (loadingDoctors) {
-    return <span className={className ?? "text-sm text-gray-500 dark:text-gray-400"}>Loading...</span>
+    return <Skeleton className={className ?? "h-9 w-40 sm:w-48"} />
   }
   if (availableDoctors.length === 0) {
     return <span className={className ?? "text-sm text-gray-500 dark:text-gray-400"}>No doctors</span>
@@ -99,7 +100,7 @@ export function AppointmentsHeader({
 }: AppointmentsHeaderProps) {
   const t = useAppTranslations()
   return (
-    <div className="space-y-3">
+    <div className="!mt-0 space-y-3">
       <div className="border-b border-gray-200 dark:border-gray-800">
         <nav className="-mb-px flex gap-4 overflow-x-auto pb-px sm:gap-8" aria-label="Appointments tabs">
           <button

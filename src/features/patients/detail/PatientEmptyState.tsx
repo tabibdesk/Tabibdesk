@@ -29,6 +29,7 @@ export function PatientEmptyState({
       description={description}
       actionLabel={actionLabel}
       onAction={onAction}
+      actionVariant="secondary"
     />
   )
 }

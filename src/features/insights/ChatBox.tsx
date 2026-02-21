@@ -18,6 +18,8 @@ interface ChatBoxProps {
   quickPrompts: string[]
   quickPromptsSettings?: string[]
   onQuickPrompt: (prompt: string) => void
+  /** When true, used in floating widget - no min-height, borderless */
+  embedded?: boolean
 }
 
 export function ChatBox({
@@ -29,6 +31,7 @@ export function ChatBox({
   quickPrompts,
   quickPromptsSettings = [],
   onQuickPrompt,
+  embedded = false,
 }: ChatBoxProps) {
   const t = useAppTranslations()
   const router = useRouter()
@@ -49,7 +52,13 @@ export function ChatBox({
   }
 
   return (
-    <Card className="flex min-h-[400px] flex-col lg:min-h-0 lg:h-full">
+    <Card
+      className={
+        embedded
+          ? "flex min-h-0 flex-1 flex-col border-0 shadow-none"
+          : "flex min-h-[400px] flex-col lg:min-h-0 lg:h-full"
+      }
+    >
       <div 
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800"
@@ -62,7 +71,7 @@ export function ChatBox({
               </div>
               <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-16">{t.insights.aiName}</span>
             </div>
-            <div className="grid gap-6 w-fit max-w-full mx-auto grid-cols-1 lg:grid-cols-2">
+            <div className="flex flex-col gap-6 w-fit max-w-full mx-auto">
               <div className="flex flex-col items-center text-center lg:items-start lg:text-start rtl:lg:items-end rtl:lg:text-end max-w-xs w-full">
                 <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-4 text-start rtl:text-end">
                   {t.insights.askAboutPerformance}

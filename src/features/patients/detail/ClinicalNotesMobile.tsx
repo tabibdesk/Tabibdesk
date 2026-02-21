@@ -13,8 +13,14 @@ import {
   RiCloseLine as RiCloseIcon,
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
+import { useAppTranslations } from "@/lib/useAppTranslations"
 
 interface MetricToRecord {
+  id: string
+  label: string
+}
+
+interface MedicalConditionItem {
   id: string
   label: string
 }
@@ -34,6 +40,11 @@ interface ClinicalNotesMobileProps {
   checklistItems: any[]
   metricsToRecord?: MetricToRecord[]
   metricsChecklist?: Record<string, boolean>
+  medicalConditions?: MedicalConditionItem[]
+  medicalConditionValues?: Record<string, boolean>
+  handleMedicalConditionToggle?: (conditionId: string) => void
+  handleChecklistToggle?: (itemId: string) => void
+  handleMetricsChecklistToggle?: (metricId: string) => void
   
   // Handlers
   handleSendNote: () => void
@@ -54,11 +65,17 @@ export function ClinicalNotesMobile({
   checklistItems,
   metricsToRecord = [],
   metricsChecklist = {},
+  medicalConditions = [],
+  medicalConditionValues = {},
+  handleMedicalConditionToggle,
+  handleChecklistToggle,
+  handleMetricsChecklistToggle,
   handleSendNote,
   handleStartRecording,
   handleStopRecording,
   handlePauseResume,
 }: ClinicalNotesMobileProps) {
+  const t = useAppTranslations()
   const [showChecklist, setShowChecklist] = useState(false)
 
   return (
@@ -121,17 +138,19 @@ export function ClinicalNotesMobile({
             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mt-3 mb-1" />
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50 dark:border-gray-900">
               <div className="flex items-center gap-3">
-                <div className="size-8 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                <div className="size-8 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center shrink-0">
                   <RiCheckboxCircleLine className="size-5 text-primary-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">Investigation Progress</h3>
-                  <p className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">{completenessPercentage}% Complete</p>
+                  <h3 className="font-bold text-gray-900 dark:text-white">{t.clinicalNotes.visitProgress}</h3>
+                  <p className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">{completenessPercentage}% {t.clinicalNotes.complete}</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowChecklist(false)}
                 className="flex items-center justify-center size-10 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                aria-label={t.common.close}
+                title={t.common.close}
               >
                 <RiCloseIcon className="size-5" />
               </button>
@@ -139,14 +158,19 @@ export function ClinicalNotesMobile({
             <div className="overflow-y-auto p-6 max-h-[calc(80vh-80px)]">
               <div className="space-y-3">
                 {checklistItems.map((item) => (
-                  <div key={item.id} className={cx(
-                    "flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 border",
-                    checklist[item.id] 
-                      ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm" 
-                      : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
-                  )}>
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleChecklistToggle?.(item.id)}
+                    className={cx(
+                      "flex w-full items-center gap-4 p-4 rounded-2xl transition-all duration-300 border text-start active:scale-[0.98]",
+                      checklist[item.id] 
+                        ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm" 
+                        : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
+                    )}
+                  >
                     <div className={cx(
-                      "size-7 rounded-full border-2 flex items-center justify-center transition-all duration-500",
+                      "size-7 rounded-full border-2 flex items-center justify-center transition-all duration-500 shrink-0",
                       checklist[item.id] 
                         ? "bg-primary-600 border-primary-600 text-white scale-110 rotate-0" 
                         : "border-gray-300 dark:border-gray-700 rotate-45"
@@ -161,19 +185,24 @@ export function ClinicalNotesMobile({
                     )}>
                       {item.label}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
               {metricsToRecord.length > 0 && (
                 <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <div className="space-y-3">
                     {metricsToRecord.map((m) => (
-                      <div key={m.id} className={cx(
-                        "flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 border",
-                        metricsChecklist[m.id]
-                          ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm"
-                          : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
-                      )}>
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleMetricsChecklistToggle?.(m.id)}
+                        className={cx(
+                          "flex w-full items-center gap-4 p-4 rounded-2xl transition-all duration-300 border text-start active:scale-[0.98]",
+                          metricsChecklist[m.id]
+                            ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm"
+                            : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
+                        )}
+                      >
                         <div className={cx(
                           "size-7 rounded-full border-2 flex items-center justify-center transition-all duration-500 shrink-0",
                           metricsChecklist[m.id]
@@ -190,16 +219,68 @@ export function ClinicalNotesMobile({
                         )}>
                           {m.label}
                         </span>
-                      </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {medicalConditions.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <div className="space-y-3">
+                    {medicalConditions.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => handleMedicalConditionToggle?.(c.id)}
+                        className={cx(
+                          "flex w-full items-center gap-4 p-4 rounded-2xl transition-all duration-300 border text-start",
+                          medicalConditionValues[c.id]
+                            ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm"
+                            : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
+                        )}
+                      >
+                        <div
+                          className={cx(
+                            "size-7 shrink-0 rounded-full border-2 flex items-center justify-center transition-all duration-500",
+                            medicalConditionValues[c.id]
+                              ? "bg-primary-600 border-primary-600 text-white scale-110 rotate-0"
+                              : "border-gray-300 dark:border-gray-700 rotate-45"
+                          )}
+                        >
+                          {medicalConditionValues[c.id] ? (
+                            <RiCheckboxCircleLine className="size-5" />
+                          ) : (
+                            <div className="size-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                          )}
+                        </div>
+                        <span
+                          className={cx(
+                            "text-sm font-semibold flex-1 transition-colors",
+                            medicalConditionValues[c.id]
+                              ? "text-primary-900 dark:text-primary-100"
+                              : "text-gray-500 dark:text-gray-400"
+                          )}
+                        >
+                          {c.label}
+                        </span>
+                      </button>
                     ))}
                   </div>
                 </div>
               )}
               <div className="mt-8 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
                 <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed text-center font-medium">
-                  Clinical items are automatically detected as you type or record your observations.
+                  {t.clinicalNotes.itemsAutoDetected}
                 </p>
               </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 safe-area-inset-bottom">
+              <Button
+                onClick={() => setShowChecklist(false)}
+                className="w-full"
+              >
+                {t.common.close}
+              </Button>
             </div>
           </div>
         </>
