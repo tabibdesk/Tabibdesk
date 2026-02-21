@@ -36,7 +36,21 @@ Visit [http://localhost:3000](http://localhost:3000). Use **"Try Demo"** on the 
 ### Deploying to Netlify
 
 - **Build**: Uses `netlify.toml` (build: `npm run test && npm run build`, publish: `.next`, Node 20).
-- **Env**: In Netlify → Site settings → Environment variables, add the keys from `.env.example` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`). For demo-only deploys you can omit them and use "Try Demo" on the login page.
+- **Env**: In Netlify → Site settings → Environment variables, add the keys from `.env.example`:
+  - `NEXT_PUBLIC_SUPABASE_URL` – your Supabase project URL
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` – public anon key
+  - `SUPABASE_SERVICE_ROLE_KEY` – service role key (keep secret)
+  - For demo-only deploys you can omit them; use "Try Demo" on the login page.
+
+**Pre-deploy checklist** (run locally before pushing):
+
+```bash
+npm run typecheck   # must pass
+npm run test        # must pass
+npm run build       # must pass
+```
+
+Ensure `package-lock.json` is committed for reproducible installs.
 
 ## Project Structure
 
