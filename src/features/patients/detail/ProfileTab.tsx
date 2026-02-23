@@ -194,7 +194,7 @@ export function ProfileTab({
                         htmlFor={`cond-${c.id}`}
                         className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors"
                       >
-                        {c.label}
+                        {(t.profile as { conditions?: Record<string, string> }).conditions?.[c.id] ?? c.label}
                       </label>
                     </div>
                   ))}
@@ -230,7 +230,7 @@ export function ProfileTab({
               <div className="flex flex-wrap gap-2">
                 {selectedMedicalConditions.map((c) => (
                   <Badge key={c.id} color="neutral" size="sm">
-                    {c.label}
+                    {(t.profile as { conditions?: Record<string, string> }).conditions?.[c.id] ?? c.label}
                   </Badge>
                 ))}
               </div>

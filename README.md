@@ -135,3 +135,6 @@ Visit [http://localhost:3000](http://localhost:3000). Use **"Try Demo"** on the 
 ## License
 
 This project is licensed under the Apache 2.0 License.
+
+##Feature ideas:
+-make the system work offline and queue requests for when internet is back

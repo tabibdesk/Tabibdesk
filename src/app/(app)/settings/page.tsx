@@ -991,7 +991,7 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
   )
 }
 
-const DEFAULT_ENABLED_METRIC_IDS = ["weight", "bmi", "bp", "pulse", "blood_sugar"]
+const DEFAULT_ENABLED_METRIC_IDS = ["weight", "bmi", "bp", "pulse", "blood_sugar", "height"]
 
 
 // Patient tab: progress metrics (enable/disable; all enabled metrics show in patient Progress section)
@@ -1143,8 +1143,8 @@ function PatientTab() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
-          <div>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
             <CardTitle>{t.settings.visitProgressChecklist}</CardTitle>
             <CardDescription>
               {t.settings.visitProgressChecklistDesc}
@@ -1153,7 +1153,7 @@ function PatientTab() {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2 shrink-0"
+            className="ms-auto shrink-0 gap-2"
             onClick={() => setAddChecklistOpen((o) => !o)}
           >
             <RiAddLine className="size-4" />
@@ -1246,19 +1246,44 @@ function PatientTab() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {MEDICAL_CONDITIONS.map((c) => (
-              <div
-                key={c.id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-2"
-              >
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{c.label}</span>
-                <Switch
-                  checked={medicalConditionIds.has(c.id)}
-                  onCheckedChange={() => toggleMedicalCondition(c.id)}
-                />
-              </div>
-            ))}
+          <div className="space-y-6">
+            {(["basic", "cardiovascular", "respiratory", "neurology", "renal", "endocrine", "musculoskeletal", "infectious", "oncology", "other"] as const).map((category) => {
+              const items = MEDICAL_CONDITIONS.filter((c) => c.category === category)
+              if (items.length === 0) return null
+              const categoryLabels: Record<string, string> = {
+                basic: t.settings.conditionCategoryBasic,
+                cardiovascular: t.settings.conditionCategoryCardiovascular,
+                respiratory: t.settings.conditionCategoryRespiratory,
+                neurology: t.settings.conditionCategoryNeurology,
+                renal: t.settings.conditionCategoryRenal,
+                endocrine: t.settings.conditionCategoryEndocrine,
+                musculoskeletal: t.settings.conditionCategoryMusculoskeletal,
+                infectious: t.settings.conditionCategoryInfectious,
+                oncology: t.settings.conditionCategoryOncology,
+                other: t.settings.conditionCategoryOther,
+              }
+              return (
+                <div key={category}>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">{categoryLabels[category]}</h4>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {items.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-800 px-3 py-2"
+                      >
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {(t.profile as { conditions?: Record<string, string> }).conditions?.[c.id] ?? c.label}
+                        </span>
+                        <Switch
+                          checked={medicalConditionIds.has(c.id)}
+                          onCheckedChange={() => toggleMedicalCondition(c.id)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button variant="primary" onClick={handleSave} disabled={isSaving} className="w-full sm:w-auto">

@@ -122,9 +122,15 @@
     @apply space-y-6;
   }
 
-  /* Search toolbar action button – primary action next to search bars (matches WaitlistTab) */
+  /* WhatsApp button – green badge background (#E6F4EA) with black icon, applied globally */
+  .btn-whatsapp {
+    @apply inline-flex items-center justify-center rounded-md p-1.5 text-black hover:opacity-90 transition-opacity;
+    background-color: #E6F4EA;
+  }
+
+  /* Search toolbar action button – primary action next to search bars (matches SearchInput h-9) */
   .btn-search-action {
-    @apply shrink-0 inline-flex items-center justify-center gap-2 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all active:scale-95 border-0 shadow-sm;
+    @apply h-9 shrink-0 inline-flex items-center justify-center gap-2 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-4 rounded-xl text-sm font-bold hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all active:scale-95 border-0 shadow-sm;
   }
 
   /* Nested Dropdowns - Mobile fixes */

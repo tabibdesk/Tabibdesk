@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
@@ -60,8 +61,13 @@ export function CashierTable({
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900 dark:text-gray-50">
                 {formatTime(row.time)}
               </td>
-              <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-50">
-                {row.patientName}
+              <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
+                <Link
+                  href={`/patients/${row.patientId}`}
+                  className="text-primary-600 dark:text-primary-400 transition-colors hover:text-gray-900 dark:hover:text-black"
+                >
+                  {row.patientName}
+                </Link>
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-sm">
                 <Badge color={row.appointmentStatus === "completed" ? "emerald" : "gray"} size="xs">
@@ -101,9 +107,15 @@ export function CashierTable({
                       <Button variant="ghost" size="sm" onClick={() => onAddProof(row)} title="Add Payment Proof">
                         <RiImageAddLine className="size-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => onRequestProof(row)} title="Request via WhatsApp">
+                      <button
+                        type="button"
+                        onClick={() => onRequestProof(row)}
+                        className="btn-whatsapp"
+                        title="Request via WhatsApp"
+                        aria-label="Request via WhatsApp"
+                      >
                         <RiWhatsappLine className="size-4" />
-                      </Button>
+                      </button>
                       <Button variant="primary" size="sm" onClick={() => onCollect(row)}>
                         <RiMoneyDollarCircleLine className="size-4" />
                         Collect

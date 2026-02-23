@@ -24,7 +24,7 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
           <Link
             key={patient.id}
             href={`/patients/${patient.id}`}
-            className="widget-row cursor-pointer py-5"
+            className="widget-row cursor-pointer py-5 group"
           >
             <div className="widget-content-stack">
               <div className="avatar-patient">
@@ -33,10 +33,10 @@ export function PatientsCards({ patients }: PatientsCardsProps) {
 
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <p className="font-semibold text-gray-900 dark:text-white truncate">
+                  <p className="font-semibold text-primary-600 dark:text-primary-400 truncate transition-colors group-hover:text-gray-900 dark:group-hover:text-black">
                     {patient.first_name} {patient.last_name}
                   </p>
-                  <Badge color="black" size="xs" className="shrink-0">
+                  <Badge color="emerald" size="xs" className="shrink-0">
                     {ageDisplay} • {patient.gender || "—"}
                   </Badge>
                 </div>

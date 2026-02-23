@@ -108,7 +108,7 @@ export function TodaysAppointmentsWidget({
                       <div className="flex items-center gap-1.5">
                         <Link
                           href={`/patients/${apt.patient_id}`}
-                          className="font-semibold text-gray-900 dark:text-white truncate hover:text-primary-600 dark:hover:text-primary-400"
+                          className="font-semibold text-primary-600 dark:text-primary-400 truncate hover:text-gray-900 dark:hover:text-black transition-colors"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {apt.patientName}

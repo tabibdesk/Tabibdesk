@@ -3,11 +3,7 @@
 import Link from "next/link"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useLocale } from "@/contexts/locale-context"
-import { Button } from "@/components/Button"
-import {
-  RiUserLine,
-  RiCheckLine,
-} from "@remixicon/react"
+import { RiCheckLine } from "@remixicon/react"
 import {
   formatTaskDateTranslated,
   TASK_TYPE_KEYS,
@@ -67,7 +63,15 @@ export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-col gap-1">
+                  {task.patientName && (
+                    <Link
+                      href={`/patients/${task.patientId}`}
+                      className="text-sm font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors truncate rtl:flex-row-reverse"
+                    >
+                      {task.patientName}
+                    </Link>
+                  )}
                   <p className={cx(
                     "text-sm font-medium text-gray-900 dark:text-white truncate",
                     isDone && "text-gray-400 line-through decoration-gray-400/50"
@@ -77,15 +81,6 @@ export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
                 </div>
                 
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
-                  {task.patientName && (
-                    <Link
-                      href={`/patients/${task.patientId}`}
-                      className="flex items-center gap-1 hover:text-primary-600 dark:hover:text-primary-400 transition-colors font-medium rtl:flex-row-reverse"
-                    >
-                      <RiUserLine className="size-3 shrink-0" />
-                      {task.patientName}
-                    </Link>
-                  )}
                   {task.assignedToName && (
                     <span className="flex items-center gap-1 rtl:flex-row-reverse">
                       {t.archive.assignedTo} {task.assignedToName}
@@ -114,14 +109,6 @@ export function ArchiveTasksTable({ tasks }: ArchiveTasksTableProps) {
                   </span>
                 )}
               </div>
-              {task.patientId && (
-                <Link href={`/patients/${task.patientId}`}>
-                  <Button variant="ghost" size="sm" className="inline-flex items-center gap-2 rtl:flex-row-reverse">
-                    <RiUserLine className="size-4" />
-                    {t.archive.openPatient}
-                  </Button>
-                </Link>
-              )}
             </div>
           </div>
         )

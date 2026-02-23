@@ -20,10 +20,7 @@ export function CancelledSlotRow({ slot, onFillSlot }: CancelledSlotRowProps) {
 
   return (
     <div className="relative group">
-      {/* Timeline Dot */}
-      <div className="absolute left-[21px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 hidden sm:block bg-red-500 transition-colors" />
-
-      <div className="ms-0 sm:ms-12 transition-all duration-300 rounded-[24px] border border-red-100 bg-red-50/20 dark:bg-red-900/10 dark:border-red-900/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5">
+      <div className="transition-all duration-300 rounded-[24px] border border-red-100 bg-red-50/20 dark:bg-red-900/10 dark:border-red-900/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5">
         <div className="flex items-center gap-5">
           {/* Time Indicator */}
           <div className="flex flex-col min-w-[70px]">
@@ -46,7 +43,7 @@ export function CancelledSlotRow({ slot, onFillSlot }: CancelledSlotRowProps) {
                     {slot.patientId ? (
                       <Link
                         href={`/patients/${slot.patientId}`}
-                        className="text-sm font-bold text-gray-800 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
+                        className="font-semibold text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-black transition-colors"
                       >
                         {slot.patientName}
                       </Link>

@@ -7,7 +7,7 @@ import { getAppointmentTypeLabel } from "../appointmentTypes"
 import { SearchInput } from "@/components/SearchInput"
 import { EmptyState } from "@/components/EmptyState"
 import { useWaitlist } from "../hooks/useWaitlist"
-import { RiAddLine, RiPhoneLine, RiCalendarLine, RiUserLine, RiTimeLine } from "@remixicon/react"
+import { RiAddLine, RiWhatsappLine, RiCalendarLine, RiUserLine, RiTimeLine } from "@remixicon/react"
 import { format } from "date-fns"
 import { ListSkeleton } from "@/components/skeletons"
 import type { WaitlistEntry } from "../types"
@@ -54,20 +54,13 @@ function WaitlistTable({
   }
 
   return (
-    <div className="relative">
-      {/* Vertical Waitlist Line */}
-      <div className="absolute left-[26px] top-4 bottom-4 w-0.5 bg-gray-100 dark:bg-gray-800 hidden sm:block" />
-
-      <div className="space-y-4">
-        {entries.map((entry) => (
-          <div
-            key={entry.id}
-            className="relative group"
-          >
-            {/* Timeline Dot */}
-            <div className="absolute left-[21px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 hidden sm:block bg-amber-400 dark:border-gray-900 transition-colors" />
-
-            <div className="ms-0 sm:ms-12 transition-all duration-300 rounded-[24px] border border-gray-100 bg-white dark:bg-gray-900 dark:border-gray-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:ring-1 hover:ring-primary-50 dark:hover:ring-primary-900/20">
+    <div className="space-y-4">
+      {entries.map((entry) => (
+        <div
+          key={entry.id}
+          className="relative group"
+        >
+          <div className="transition-all duration-300 rounded-[24px] border border-gray-100 bg-white dark:bg-gray-900 dark:border-gray-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:ring-1 hover:ring-primary-50 dark:hover:ring-primary-900/20">
               <div className="flex items-center gap-5">
                 {/* Added Metadata Section */}
                 <div className="flex flex-col min-w-[75px]">
@@ -88,30 +81,23 @@ function WaitlistTable({
                     <RiUserLine className="size-5 text-primary-600 dark:text-primary-400" aria-hidden />
                   </div>
                   <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 pb-1.5">
                       <Link
                         href={`/patients/${entry.patientId}`}
-                        className="text-sm font-bold text-gray-800 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
+                        className="font-semibold text-primary-600 dark:text-primary-400 truncate hover:text-gray-900 dark:hover:text-black transition-colors"
                       >
                         {entry.patientName}
                       </Link>
                       {entry.appointmentType && (
-                        <Badge color="gray" size="xs" className="text-[10px] lowercase font-bold">
+                        <Badge color="emerald" size="xs" className="text-[10px] lowercase font-bold">
                           {getAppointmentTypeLabel(entry.appointmentType, t.appointments).toLowerCase()}
                         </Badge>
                       )}
                     </div>
                     
                     <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
-                      <div className="flex items-center gap-1.5">
-                        <RiPhoneLine className="size-3.5 shrink-0" aria-hidden />
-                        <span>{entry.patientPhone}</span>
-                      </div>
-
                       {(entry.preferredTimeWindow && entry.preferredTimeWindow !== "any") || (entry.preferredDays && entry.preferredDays.length > 0) ? (
-                        <>
-                          <span className="text-gray-300 dark:text-gray-600">·</span>
-                          <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5">
                             <RiCalendarLine className="size-3.5 shrink-0" />
                             <span className="flex items-center gap-1 text-[11px]">
                               {entry.preferredTimeWindow && entry.preferredTimeWindow !== "any" && entry.preferredTimeWindow}
@@ -122,13 +108,12 @@ function WaitlistTable({
                                 </>
                               )}
                             </span>
-                          </div>
-                        </>
+                        </div>
                       ) : null}
                     </div>
 
                     {entry.notes && (
-                      <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 italic">
+                      <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
                         <RiTimeLine className="size-3.5 shrink-0" />
                         <span className="line-clamp-1 overflow-hidden text-ellipsis">&quot;{entry.notes}&quot;</span>
                       </div>
@@ -137,7 +122,19 @@ function WaitlistTable({
                 </div>
               </div>
 
-              <div className="mt-4 md:mt-0 flex items-center gap-3 self-end md:self-auto">
+              <div className="mt-4 md:mt-0 flex items-center gap-3 self-end md:self-auto rtl:flex-row-reverse">
+                {entry.patientPhone ? (
+                  <a
+                    href={`https://wa.me/${entry.patientPhone.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-whatsapp"
+                    title="WhatsApp"
+                    aria-label="WhatsApp"
+                  >
+                    <RiWhatsappLine className="size-4" />
+                  </a>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => onBook(entry)}
@@ -150,7 +147,6 @@ function WaitlistTable({
             </div>
           </div>
         ))}
-      </div>
     </div>
   )
 }
@@ -173,7 +169,7 @@ export function WaitlistTab({ clinicId, doctorId, onBook, onAddToWaitlist }: Wai
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full bg-white dark:bg-gray-900 p-2 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
         <SearchInput
           placeholder={t.appointments.searchWaitlist}
           value={searchQuery}

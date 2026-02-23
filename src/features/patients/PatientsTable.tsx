@@ -53,7 +53,7 @@ export function PatientsTable({ patients }: PatientsTableProps) {
                     <div>
                       <Link
                         href={`/patients/${patient.id}`}
-                        className="font-medium text-gray-900 hover:text-primary-600 dark:text-gray-50 dark:hover:text-primary-400"
+                        className="font-medium text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-black transition-colors"
                       >
                         {patient.first_name} {patient.last_name}
                       </Link>
@@ -78,7 +78,7 @@ export function PatientsTable({ patients }: PatientsTableProps) {
                     {formatDate(patient.lastAppointmentDate)}
                   </td>
                   <td className="px-4 py-4">
-<Badge color="black" size="xs">
+<Badge color="emerald" size="xs">
                     {getStatusLabel(patient.status)}
                   </Badge>
                   </td>

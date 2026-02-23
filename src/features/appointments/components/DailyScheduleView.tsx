@@ -85,11 +85,7 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
               description={t.appointments.noSlotsAvailableDesc}
             />
           ) : (
-            <>
-              {/* Vertical Timeline Line */}
-              <div className="absolute left-[26px] top-4 bottom-4 w-0.5 bg-gray-100 dark:bg-gray-800 hidden sm:block" />
-
-              <div className="space-y-4">
+            <div className="space-y-4">
                 {slots.map((slot, index) => {
                   const nextSlot = slots[index + 1]
                   const bufferMinutes = nextSlot ? calculateBufferTime(slot, nextSlot) : 0
@@ -127,7 +123,6 @@ export const DailyScheduleView = forwardRef<DailyScheduleViewRef, DailyScheduleV
                   )
                 })}
               </div>
-            </>
           )}
         </div>
       )}

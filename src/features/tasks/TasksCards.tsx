@@ -67,7 +67,7 @@ export function TasksCards({
               }}
               disabled={isDone}
               className={cx(
-                "flex size-10 shrink-0 items-center justify-center rounded-full transition-all group/done cursor-pointer mt-1",
+                "flex size-10 shrink-0 items-center justify-center rounded-full transition-all group/done cursor-pointer",
                 isDone 
                   ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" 
                   : "bg-gray-50 text-gray-400 hover:bg-emerald-500 hover:text-white dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-emerald-600 shadow-sm"
@@ -89,18 +89,18 @@ export function TasksCards({
 
             <div className="flex-1 min-w-0 space-y-2.5">
               {/* Top row: Patient & Actions */}
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   {task.patientName && (
                     <Link
                       href={`/patients/${task.patientId}`}
-                      className="text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors uppercase tracking-wider block mb-0.5"
+                      className="font-semibold text-primary-600 dark:text-primary-400 truncate transition-colors hover:text-gray-900 dark:hover:text-black block mb-0.5"
                     >
                       {task.patientName}
                     </Link>
                   )}
                   <p className={cx(
-                    "text-base font-medium text-gray-900 dark:text-white leading-tight",
+                    "text-sm font-medium text-gray-900 dark:text-white leading-tight",
                     isDone && "text-gray-400 line-through decoration-gray-400/50"
                   )}>
                     {task.description || task.title}
@@ -109,12 +109,16 @@ export function TasksCards({
 
                 <div className="flex items-center gap-1 shrink-0">
                   {(task.patientName || task.patientId) && task.patientPhone && waHref && (
-                    <Button asChild variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-emerald-50 hover:text-emerald-600" title="Contact on WhatsApp">
-                      <a href={waHref} target="_blank" rel="noreferrer">
-                        <RiWhatsappLine className="size-4" />
-                        <span className="sr-only">Contact on WhatsApp</span>
-                      </a>
-                    </Button>
+                    <a
+                      href={waHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-whatsapp"
+                      title="WhatsApp"
+                      aria-label="WhatsApp"
+                    >
+                      <RiWhatsappLine className="size-4" />
+                    </a>
                   )}
                 </div>
               </div>

@@ -77,7 +77,7 @@ export function usePatientPageData(
     })
   }, [currentClinicId])
 
-  const defaultMetricIds = useMemo(() => ["weight", "bmi", "bp", "pulse", "blood_sugar"], [])
+  const defaultMetricIds = useMemo(() => ["weight", "bmi", "bp", "pulse", "blood_sugar", "height"], [])
   const metricsToRecord = useMemo(
     () =>
       getMetricsToRecord(

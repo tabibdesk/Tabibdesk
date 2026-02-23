@@ -157,7 +157,7 @@ export function TasksTable({
                 )}>
                   {task.patientName ? (
                     <>
-                      {t.table.patient}: <Link href={`/patients/${task.patientId}`} className="font-medium hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{task.patientName}</Link> → {task.description || task.title}
+                      {t.table.patient}: <Link href={`/patients/${task.patientId}`} className="font-medium text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-black transition-colors">{task.patientName}</Link> → {task.description || task.title}
                     </>
                   ) : (
                     task.description || task.title
@@ -169,12 +169,16 @@ export function TasksTable({
               {/* Right Side - Actions Only */}
               <div className="flex items-center gap-2 shrink-0">
               {waHref && (
-                <Button asChild variant="ghost" size="sm" className="h-8 w-8 p-0" title="Contact on WhatsApp">
-                  <a href={waHref} target="_blank" rel="noreferrer">
-                    <RiWhatsappLine className="size-4" />
-                    <span className="sr-only">Contact on WhatsApp</span>
-                  </a>
-                </Button>
+                <a
+                  href={waHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-whatsapp h-8 w-8"
+                  title="Contact on WhatsApp"
+                  aria-label="Contact on WhatsApp"
+                >
+                  <RiWhatsappLine className="size-4" />
+                </a>
               )}
               {task.follow_up_kind && onSnooze && !isDone && (
                 <Button

@@ -49,7 +49,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
                 <Link
                   key={apt.id}
                   href={`/patients/${apt.patient_id}`}
-                  className="widget-row cursor-pointer"
+                  className="widget-row cursor-pointer group"
                 >
                   <div className="widget-content-stack">
                     <button
@@ -71,7 +71,7 @@ export function NowQueueWidget({ loading, appointments, onMarkDone }: NowQueueWi
                     </button>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="font-semibold text-gray-900 dark:text-white truncate">
+                        <p className="font-semibold text-primary-600 dark:text-primary-400 truncate transition-colors group-hover:text-gray-900 dark:group-hover:text-black">
                           {apt.patientName}
                         </p>
                         {(isNow || isNext) ? (

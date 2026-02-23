@@ -195,7 +195,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                         <td className="px-4 py-4">
                           <Link
                             href={`/patients/${invoice.patientId}`}
-                            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                            className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-black transition-colors"
                           >
                             {getPatientName(invoice.patientId)}
                           </Link>
@@ -216,8 +216,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                                 href={whatsappLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center rounded-md p-1.5 text-[#128C7E] hover:opacity-90 transition-opacity"
-                                style={{ backgroundColor: "#b8f5e0" }}
+                                className="btn-whatsapp"
                                 title="WhatsApp"
                                 aria-label="WhatsApp"
                               >
@@ -261,7 +260,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/patients/${invoice.patientId}`}
-                          className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 break-words"
+                          className="text-sm font-medium text-primary-600 dark:text-primary-400 break-words hover:text-gray-900 dark:hover:text-black transition-colors"
                         >
                           {getPatientName(invoice.patientId)}
                         </Link>
@@ -280,8 +279,7 @@ export function DuesTab({ dateRangePreset }: DuesTabProps) {
                           href={whatsappLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center rounded-md p-1.5 text-[#128C7E] hover:opacity-90 transition-opacity"
-                          style={{ backgroundColor: "#b8f5e0" }}
+                          className="btn-whatsapp"
                           title="WhatsApp"
                           aria-label="WhatsApp"
                         >

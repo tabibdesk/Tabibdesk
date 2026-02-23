@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { RiRobot2Line, RiCloseLine } from "@remixicon/react"
+import { RiRobot2Line, RiSubtractLine, RiArrowUpSLine } from "@remixicon/react"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { ChatBox } from "./ChatBox"
@@ -74,25 +74,36 @@ export function FloatingBotWidget() {
 
   return (
     <>
-      {/* Floating button - hidden when panel is open */}
+      {/* Collapsed bar - bot icon + expand icon */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
           aria-label={t.insights.botOpen}
-        className={cx(
-          "fixed z-40 flex size-14 items-center justify-center rounded-full shadow-lg transition-all",
-          "bg-primary-600 text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900",
-          "bottom-6 end-6 sm:bottom-8 sm:end-8"
-        )}
-      >
-        <RiRobot2Line className="size-7" aria-hidden />
-      </button>
+          className={cx(
+            "fixed bottom-0 z-40 flex h-12 w-full items-center justify-between gap-3 px-4 rounded-t-2xl sm:rounded-2xl",
+            "border border-b-0 border-gray-200 dark:border-gray-700 sm:border",
+            "bg-white dark:bg-gray-900 shadow-lg",
+            "hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
+            "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900",
+            "inset-x-0 sm:inset-x-auto sm:end-4 sm:bottom-4 sm:w-[400px]"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+              <RiRobot2Line className="size-3 text-primary-600 dark:text-primary-400" aria-hidden />
+            </div>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+              {t.nav.bot}
+            </span>
+          </div>
+          <RiArrowUpSLine className="size-5 shrink-0 text-gray-600 dark:text-gray-300 rtl:rotate-180" aria-hidden />
+        </button>
       )}
 
-      {/* Expanded panel - Desktop: floating card | Mobile: bottom sheet */}
+      {/* Expanded panel */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 sm:inset-auto sm:bottom-24 sm:end-8 sm:top-auto sm:left-auto sm:z-50"
+          className="fixed inset-0 z-50 sm:inset-auto sm:bottom-4 sm:top-auto sm:end-4 sm:left-auto sm:z-50"
           aria-modal="true"
           aria-label={t.nav.bot}
           role="dialog"
@@ -104,20 +115,21 @@ export function FloatingBotWidget() {
             role="presentation"
           />
 
-          {/* Panel - Desktop: fixed size card | Mobile: bottom sheet */}
+          {/* Panel - Mobile: full height | Desktop: fixed size card */}
           <div
             className={cx(
               "absolute flex flex-col bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl sm:rounded-2xl",
-              "bottom-0 start-0 end-0 max-h-[85vh] sm:max-h-[560px] sm:h-[560px] sm:w-[400px] sm:start-auto sm:end-0",
-              "animate-in slide-in-from-bottom duration-300 sm:animate-in sm:slide-in-from-bottom-4 sm:duration-200"
+              "inset-0 h-full sm:inset-auto sm:bottom-4 sm:top-auto sm:end-4 sm:left-auto sm:h-[560px] sm:max-h-[560px] sm:w-[400px]",
+              "animate-in slide-in-from-bottom duration-300 sm:animate-in sm:slide-in-from-bottom-4 sm:duration-200",
+              "sm:origin-bottom-end"
             )}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-800">
               <div className="flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
-                  <RiRobot2Line className="size-4 text-primary-600 dark:text-primary-400" />
+                <div className="flex size-6 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+                  <RiRobot2Line className="size-3 text-primary-600 dark:text-primary-400" />
                 </div>
                 <span className="text-sm font-semibold text-gray-900 dark:text-gray-50">
                   {t.nav.bot}
@@ -127,10 +139,10 @@ export function FloatingBotWidget() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                aria-label={t.common.close}
+                aria-label={t.insights.botCollapse}
                 className="size-8 p-0"
               >
-                <RiCloseLine className="size-5" />
+                <RiSubtractLine className="size-5" />
               </Button>
             </div>
 

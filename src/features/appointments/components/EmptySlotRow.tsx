@@ -17,10 +17,7 @@ export function EmptySlotRow({ slot, onFillSlot }: EmptySlotRowProps) {
 
   return (
     <div className="relative group">
-      {/* Timeline Dot */}
-      <div className="absolute left-[21px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 hidden sm:block bg-gray-300 transition-colors group-hover:bg-primary-400" />
-
-      <div className="ms-0 sm:ms-12 transition-all duration-300 rounded-[24px] border border-gray-100 bg-white dark:bg-gray-900 dark:border-gray-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:border-primary-200 dark:hover:border-primary-800">
+      <div className="transition-all duration-300 rounded-[24px] border border-gray-100 bg-white dark:bg-gray-900 dark:border-gray-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:border-primary-200 dark:hover:border-primary-800">
         <div className="flex items-center gap-5">
           {/* Time Indicator */}
           <div className="flex flex-col min-w-[70px]">

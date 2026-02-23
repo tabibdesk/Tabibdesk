@@ -11,9 +11,11 @@ import {
   RiStopLine,
   RiCheckboxCircleLine,
   RiHeartPulseLine,
+  RiCloseLine,
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
 import { useAppTranslations } from "@/lib/useAppTranslations"
+import { PROGRESS_METRIC_REGEX } from "@/types/progress"
 
 interface MetricToRecord {
   id: string
@@ -31,8 +33,8 @@ interface ClinicalNotesDesktopProps {
   setNewNote: (note: string) => void
   isRecording: boolean
   isPaused: boolean
-  showReminder: boolean
-  lastDetectedItem: string | null
+  detectedBadges: Array<{ id: string; label: string }>
+  dismissDetectedBadge: (id: string) => void
   checklist: Record<string, boolean>
   completedCount: number
   totalCount: number
@@ -57,8 +59,8 @@ export function ClinicalNotesDesktop({
   setNewNote,
   isRecording,
   isPaused,
-  showReminder,
-  lastDetectedItem,
+  detectedBadges,
+  dismissDetectedBadge,
   checklist,
   completenessPercentage,
   checklistItems,
@@ -80,15 +82,15 @@ export function ClinicalNotesDesktop({
       {/* Left Pane: Visit Progress */}
       <div className="w-80 flex flex-col shrink-0">
         <Card className="flex-1 overflow-hidden flex flex-col border-gray-200 dark:border-gray-800 shadow-card">
-          <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
+          <CardHeader className="px-4 py-2 space-y-0 border-b border-gray-100 dark:border-gray-800 min-h-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <RiCheckboxCircleLine className="size-5 text-primary-600" />
-                <CardTitle className="text-sm font-bold uppercase tracking-wider text-gray-500">{t.clinicalNotes.visitProgress}</CardTitle>
+                <RiCheckboxCircleLine className="size-4 text-primary-600 shrink-0" />
+                <CardTitle className="text-sm font-semibold capitalize text-gray-500">{t.clinicalNotes.visitProgress}</CardTitle>
               </div>
               <span className="text-xs font-bold text-primary-600">{completenessPercentage}%</span>
             </div>
-            <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
               <div 
                 className="h-full bg-primary-600 transition-all duration-500 ease-out"
                 style={{ width: `${completenessPercentage}%` }}
@@ -97,12 +99,18 @@ export function ClinicalNotesDesktop({
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto py-4">
             <div className="grid grid-cols-1 gap-4">
-              {checklistItems.map((item) => (
+              {checklistItems.map((item) => {
+                const isValidatedFromNote = checklist[item.id] && item.regex.test(newNote.toLowerCase())
+                return (
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => handleChecklistToggle?.(item.id)}
-                  className="flex w-full items-center gap-3 text-start hover:opacity-80 transition-opacity"
+                  onClick={() => !isValidatedFromNote && handleChecklistToggle?.(item.id)}
+                  disabled={isValidatedFromNote}
+                  className={cx(
+                    "flex w-full items-center gap-3 text-start transition-opacity",
+                    isValidatedFromNote ? "pointer-events-none cursor-default opacity-90" : "hover:opacity-80"
+                  )}
                 >
                   <div className={cx(
                     "size-5 rounded-full border flex items-center justify-center transition-all duration-300 shrink-0",
@@ -113,24 +121,31 @@ export function ClinicalNotesDesktop({
                     {checklist[item.id] && <RiCheckboxCircleLine className="size-3.5" />}
                   </div>
                   <span className={cx(
-                    "text-sm transition-colors",
+                    "text-sm transition-colors capitalize",
                     checklist[item.id] ? "text-gray-900 dark:text-gray-100 font-semibold" : "text-gray-400"
                   )}>
                     {item.label}
                   </span>
                 </button>
-              ))}
+              )})}
             </div>
             {metricsToRecord.length > 0 && (
               <>
                 <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <div className="grid grid-cols-1 gap-4">
-                    {metricsToRecord.map((m) => (
+                    {metricsToRecord.map((m) => {
+                      const metricRegex = PROGRESS_METRIC_REGEX[m.id]
+                      const isMetricValidatedFromNote = metricsChecklist[m.id] && metricRegex?.test(newNote)
+                      return (
                       <button
                         key={m.id}
                         type="button"
-                        onClick={() => handleMetricsChecklistToggle?.(m.id)}
-                        className="flex w-full items-center gap-3 text-start hover:opacity-80 transition-opacity"
+                        onClick={() => !isMetricValidatedFromNote && handleMetricsChecklistToggle?.(m.id)}
+                        disabled={isMetricValidatedFromNote}
+                        className={cx(
+                          "flex w-full items-center gap-3 text-start transition-opacity",
+                          isMetricValidatedFromNote ? "pointer-events-none cursor-default opacity-90" : "hover:opacity-80"
+                        )}
                       >
                         <div className={cx(
                           "size-5 rounded-full border flex items-center justify-center transition-all duration-300 shrink-0",
@@ -141,13 +156,13 @@ export function ClinicalNotesDesktop({
                           {metricsChecklist[m.id] && <RiCheckboxCircleLine className="size-3.5" />}
                         </div>
                         <span className={cx(
-                          "text-sm transition-colors",
+                          "text-sm transition-colors capitalize",
                           metricsChecklist[m.id] ? "text-gray-900 dark:text-gray-100 font-semibold" : "text-gray-400"
                         )}>
                           {m.label}
                         </span>
                       </button>
-                    ))}
+                    )})}
                   </div>
                 </div>
               </>
@@ -176,13 +191,13 @@ export function ClinicalNotesDesktop({
                       </div>
                       <span
                         className={cx(
-                          "text-sm transition-colors",
+                          "text-sm transition-colors capitalize",
                           medicalConditionValues[c.id]
                             ? "text-gray-900 dark:text-gray-100 font-semibold"
                             : "text-gray-400"
                         )}
                       >
-                        {c.label}
+                        {(t.profile as { conditions?: Record<string, string> }).conditions?.[c.id] ?? c.label}
                       </span>
                     </button>
                   ))}
@@ -195,7 +210,7 @@ export function ClinicalNotesDesktop({
 
       {/* Center Pane: Note Entry - same Card/CardHeader as progress card for matching borders */}
       <Card className="flex-1 flex flex-col min-w-0 overflow-hidden border-gray-200 dark:border-gray-800 shadow-card">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-gray-100 dark:border-gray-800">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 px-4 py-2 shrink-0 border-b border-gray-100 dark:border-gray-800 min-h-0">
           <Badge color="indigo" size="xs">Active Session</Badge>
           <div className="flex items-center gap-2">
             {isRecording ? (
@@ -203,7 +218,7 @@ export function ClinicalNotesDesktop({
                 <button
                   onClick={handlePauseResume}
                   className={cx(
-                    "flex items-center gap-2 px-3 py-2 rounded-lg transition-all font-medium text-sm",
+                    "flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-all font-medium text-sm",
                     isPaused
                       ? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50"
                       : "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50"
@@ -215,7 +230,7 @@ export function ClinicalNotesDesktop({
                 </button>
                 <button
                   onClick={handleStopRecording}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-100 text-red-600 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all font-medium text-sm"
+                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-red-100 text-red-600 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all font-medium text-sm"
                   title="End Recording"
                 >
                   <RiStopLine className="size-4" />
@@ -230,17 +245,43 @@ export function ClinicalNotesDesktop({
               <Button
                 variant="secondary"
                 onClick={handleStartRecording}
-                className="gap-2 rounded-lg shadow-none"
+                className="size-10 rounded-lg shadow-none min-w-0 p-0 border-0"
                 title="Start Recording"
+                aria-label="Start Recording"
               >
-                <RiMicLine className="size-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Start Recording</span>
+                <RiMicLine className="size-5" />
               </Button>
             )}
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 relative flex flex-col p-0 pt-0 min-h-0">
+        <CardContent className="flex-1 flex flex-col p-0 pt-0 min-h-0 overflow-hidden">
+          {/* Detected badges - top, dismissable */}
+          {detectedBadges.length > 0 && (
+            <div className="shrink-0 px-4 pt-4 pb-2 flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              {detectedBadges.map((badge) => (
+                <div
+                  key={badge.id}
+                  className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+                >
+                  <RiCheckboxCircleLine className="size-3.5 shrink-0 text-primary-500 dark:text-primary-400" />
+                  <span className="text-xs font-medium">{badge.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => dismissDetectedBadge(badge.id)}
+                    className="shrink-0 rounded p-0.5 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
+                    aria-label={t.clinicalNotes.dismissDetected}
+                    title={t.clinicalNotes.dismissDetected}
+                  >
+                    <RiCloseLine className="size-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Note area - overlay + textarea */}
+          <div className="flex-1 relative min-h-0">
           {/* Highlight Overlay */}
           <div 
             className="absolute inset-0 pointer-events-none whitespace-pre-wrap break-words text-lg text-transparent leading-relaxed p-8 z-10"
@@ -260,26 +301,18 @@ export function ClinicalNotesDesktop({
             className="w-full flex-1 resize-none bg-transparent text-lg text-gray-900 placeholder-gray-300 outline-none focus:outline-none focus:ring-0 ring-0 border-0 shadow-none dark:text-gray-100 leading-relaxed p-8 pb-24 transition-all"
           />
           
-          {/* Detection toast - neutral, at bottom of card */}
-          {showReminder && (
-            <div className="absolute bottom-4 left-4 right-4 sm:left-8 sm:right-auto animate-in fade-in slide-in-from-bottom-2 duration-300 z-20">
-              <div className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                <RiCheckboxCircleLine className="size-3.5 shrink-0 text-gray-500 dark:text-gray-400" />
-                <span className="text-xs font-medium truncate max-w-[min(16rem,60vw)]">Detected: {lastDetectedItem}</span>
-              </div>
-            </div>
-          )}
-          
           {/* Action Bar at Bottom */}
           <div className="absolute bottom-8 right-8 z-20">
-            <Button
+            <button
+              type="button"
               onClick={handleSendNote}
               disabled={!newNote.trim() && !isRecording}
-              className="gap-2 rounded-lg shadow-none"
+              className="btn-search-action rtl:flex-row-reverse disabled:opacity-50 disabled:pointer-events-none"
             >
-              <RiSendPlaneLine className="size-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">Save Clinical Note</span>
-            </Button>
+              <RiSendPlaneLine className="size-5 shrink-0" />
+              {t.clinicalNotes.saveNote}
+            </button>
+          </div>
           </div>
         </CardContent>
       </Card>

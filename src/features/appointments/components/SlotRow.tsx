@@ -61,10 +61,7 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
 
   return (
     <div className="relative group">
-      {/* Timeline Dot */}
-      <div className="absolute left-[21px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10 hidden sm:block bg-primary-600 transition-colors" />
-
-      <div className="ms-0 sm:ms-12 transition-all duration-300 rounded-[24px] border border-primary-100 bg-white dark:bg-gray-900 dark:border-primary-900/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:ring-1 hover:ring-primary-50 dark:hover:ring-primary-900/20">
+      <div className="transition-all duration-300 rounded-[24px] border border-primary-100 bg-white dark:bg-gray-900 dark:border-primary-900/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:ring-1 hover:ring-primary-50 dark:hover:ring-primary-900/20">
         <div className="flex items-center gap-5">
           {/* Time Indicator */}
           <div className="flex flex-col min-w-[70px]">
@@ -83,7 +80,7 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
             <div className="flex flex-col">
               <Link
                 href={`/patients/${slot.patientId}`}
-                className="text-sm font-bold text-gray-800 hover:text-primary-600 dark:text-gray-100 dark:hover:text-primary-400"
+                className="font-semibold text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-black transition-colors"
               >
                 {slot.patientName}
               </Link>

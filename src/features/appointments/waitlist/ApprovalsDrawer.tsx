@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useLocale } from "@/contexts/locale-context"
 import {
@@ -189,9 +190,12 @@ export function ApprovalsDrawer({ open, onClose }: ApprovalsDrawerProps) {
                             <RiUserLine className="size-5 text-primary-600 dark:text-primary-400" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 dark:text-gray-50">
+                            <Link
+                              href={`/patients/${request.patientId}`}
+                              className="font-medium text-primary-600 dark:text-primary-400 transition-colors hover:text-gray-900 dark:hover:text-black"
+                            >
                               {request.patientName}
-                            </p>
+                            </Link>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                               {request.patientPhone}
                             </p>

@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Card } from "@/components/Card"
 import { Badge } from "@/components/Badge"
 import { getBadgeColor } from "@/lib/badgeColors"
@@ -36,9 +37,12 @@ export function CashierCards({
             {/* Header */}
             <div className="flex items-start justify-between">
               <div>
-                <p className="font-medium text-gray-900 dark:text-gray-50">
+                <Link
+                  href={`/patients/${row.patientId}`}
+                  className="font-medium text-primary-600 dark:text-primary-400 transition-colors hover:text-gray-900 dark:hover:text-black block"
+                >
                   {row.patientName}
-                </p>
+                </Link>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {formatTime(row.time)}
                 </p>
@@ -88,9 +92,15 @@ export function CashierCards({
                   <Button variant="ghost" size="sm" onClick={() => onAddProof(row)}>
                     <RiImageAddLine className="size-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => onRequestProof(row)}>
+                  <button
+                    type="button"
+                    onClick={() => onRequestProof(row)}
+                    className="btn-whatsapp"
+                    title="Request via WhatsApp"
+                    aria-label="Request via WhatsApp"
+                  >
                     <RiWhatsappLine className="size-4" />
-                  </Button>
+                  </button>
                   <Button variant="primary" size="sm" onClick={() => onCollect(row)}>
                     <RiMoneyDollarCircleLine className="size-4" />
                     Collect

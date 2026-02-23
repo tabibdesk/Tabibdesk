@@ -298,7 +298,7 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
                         <td className="px-4 py-4">
                           <Link
                             href={`/patients/${entry.payment.patientId}`}
-                            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                            className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-black transition-colors"
                           >
                             {getPatientName(entry.payment.patientId)}
                           </Link>
@@ -343,7 +343,7 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
                         <td className="px-4 py-4">
                           <Link
                             href={`/patients/${entry.refund.patientId}`}
-                            className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                            className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-gray-900 dark:hover:text-black transition-colors"
                           >
                             {entry.refund.patientName ?? getPatientName(entry.refund.patientId)}
                           </Link>
@@ -400,7 +400,7 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/patients/${entry.payment.patientId}`}
-                          className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 break-words"
+                          className="text-sm font-medium text-primary-600 dark:text-primary-400 break-words hover:text-gray-900 dark:hover:text-black transition-colors"
                         >
                           {getPatientName(entry.payment.patientId)}
                         </Link>
@@ -447,7 +447,7 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/patients/${entry.refund.patientId}`}
-                          className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 break-words"
+                          className="text-sm font-medium text-primary-600 dark:text-primary-400 break-words hover:text-gray-900 dark:hover:text-black transition-colors"
                         >
                           {entry.refund.patientName ?? getPatientName(entry.refund.patientId)}
                         </Link>

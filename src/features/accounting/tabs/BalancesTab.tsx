@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { Card } from "@/components/Card"
@@ -91,9 +92,12 @@ export function BalancesTab() {
             <Card key={balance.patientId} className="p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-50">
+                  <Link
+                    href={`/patients/${balance.patientId}`}
+                    className="font-medium text-primary-600 dark:text-primary-400 transition-colors hover:text-gray-900 dark:hover:text-black"
+                  >
                     {balance.patientName}
-                  </p>
+                  </Link>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {balance.phone}
                   </p>

@@ -275,40 +275,12 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
         </CardHeader>
         <CardContent className="p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {patient.phone ? (
-              <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500">
-                  <RiPhoneLine className="size-3.5 shrink-0 text-gray-400" />
-                  {t.profile.phone}
-                </p>
-                <div className="mt-0.5 flex items-center gap-1.5">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
-                    {patient.phone}
-                  </p>
-                  <a
-                    href={`https://wa.me/${patient.phone.replace(/\D/g, "")}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="shrink-0 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                    title="WhatsApp"
-                  >
-                    <RiWhatsappLine className="size-4" />
-                  </a>
-                </div>
-              </div>
-            ) : null}
             <InfoItem
               icon={RiCakeLine}
               label={t.profile.age}
               value={patient.age != null ? `${patient.age}y` : undefined}
             />
             <InfoItem icon={RiUser3Line} label={t.profile.gender} value={patient.gender || undefined} />
-            {patient.email ? (
-              <InfoItem icon={RiMailLine} label={t.profile.email} value={patient.email} />
-            ) : null}
-            {patient.address ? (
-              <InfoItem icon={RiMapPinLine} label={t.profile.address} value={patient.address} />
-            ) : null}
             {patient.job ? (
               <InfoItem icon={RiBriefcaseLine} label={t.profile.occupation} value={patient.job} />
             ) : null}
@@ -330,6 +302,38 @@ export function BasicInfoCompact({ patient, onUpdate }: BasicInfoCompactProps) {
               label={t.profile.registered}
               value={new Date(patient.created_at).toLocaleDateString()}
             />
+            {patient.phone ? (
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500">
+                  <RiPhoneLine className="size-3.5 shrink-0 text-gray-400" />
+                  {t.profile.phone}
+                </p>
+                <div className="mt-0.5 flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-50 truncate">
+                    {patient.phone}
+                  </p>
+                  <a
+                    href={`https://wa.me/${patient.phone.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-whatsapp shrink-0"
+                    title="WhatsApp"
+                  >
+                    <RiWhatsappLine className="size-4" />
+                  </a>
+                </div>
+              </div>
+            ) : null}
+            {patient.email ? (
+              <div className="col-span-full">
+                <InfoItem icon={RiMailLine} label={t.profile.email} value={patient.email} />
+              </div>
+            ) : null}
+            {patient.address ? (
+              <div className="col-span-full">
+                <InfoItem icon={RiMapPinLine} label={t.profile.address} value={patient.address} />
+              </div>
+            ) : null}
           </div>
 
           {patient.complaint && (

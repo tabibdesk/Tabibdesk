@@ -45,6 +45,8 @@ export interface Patient {
   is_pregnant?: boolean | null
   is_breastfeeding?: boolean | null
   glp1a_previous_exposure?: boolean | null
+  /** Extensible condition flags for new conditions (e.g. has_afib, smoking_status). Merged with legacy columns at read time. */
+  condition_flags?: Record<string, boolean> | null
   created_at: string
   updated_at: string
 }

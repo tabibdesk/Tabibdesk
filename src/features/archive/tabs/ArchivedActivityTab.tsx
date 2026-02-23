@@ -141,7 +141,7 @@ export function ArchivedActivityTab({
       ) : (
         <>
           <div className="relative">
-            {/* Timeline line - aligned with appointments page */}
+            {/* Timeline line - center at 27px for dot alignment */}
             <div className="absolute start-[26px] top-4 bottom-4 w-0.5 bg-gray-100 dark:bg-gray-800 hidden sm:block" />
 
             <div className="space-y-6">
@@ -197,8 +197,8 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
 
   return (
     <div className="relative ps-0 sm:ps-12">
-      {/* Icon dot - aligned with appointments page timeline (center at 27px) */}
-      <div className="absolute start-[21px] top-1/2 -translate-y-1/2 hidden sm:flex size-6 items-center justify-center">
+      {/* Icon dot - centered on timeline line (line center at 27px) */}
+      <div className="absolute start-[15px] top-1/2 -translate-y-1/2 hidden sm:flex size-6 items-center justify-center">
         <div
           className={cx(
             "w-3 h-3 rounded-full border-2 border-white shadow-sm",

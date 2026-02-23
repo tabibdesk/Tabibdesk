@@ -37,8 +37,7 @@ export function useClinicalNotes({
   const [newNote, setNewNote] = useState("")
   const [isRecording, setIsRecording] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
-  const [showReminder, setShowReminder] = useState(false)
-  const [lastDetectedItem, setLastDetectedItem] = useState<string | null>(null)
+  const [detectedBadges, setDetectedBadges] = useState<Array<{ id: string; label: string }>>([])
   
   // Checklist state
   const [checklist, setChecklist] = useState<Record<string, boolean>>({})
@@ -62,16 +61,15 @@ export function useClinicalNotes({
       const isDetected = item.regex.test(lowerNote)
       if (isDetected && !checklist[item.id]) {
         newChecklist[item.id] = true
-        setLastDetectedItem(item.label)
+        setDetectedBadges((prev) =>
+          prev.some((b) => b.id === item.id) ? prev : [...prev, { id: item.id, label: item.label }]
+        )
         detectedNew = true
       }
     })
 
     if (detectedNew) {
       setChecklist(newChecklist)
-      setShowReminder(true)
-      const timer = setTimeout(() => setShowReminder(false), 3000)
-      return () => clearTimeout(timer)
     }
   }, [newNote, checklist])
 
@@ -89,17 +87,24 @@ export function useClinicalNotes({
       return
     }
     const next: Record<string, boolean> = { ...metricsChecklist }
-    let changed = false
+    const newBadges: Array<{ id: string; label: string }> = []
     metricsToRecord.forEach((m) => {
       const regex = PROGRESS_METRIC_REGEX[m.id]
       if (!regex) return
       const isDetected = regex.test(newNote)
       if (isDetected && !next[m.id]) {
         next[m.id] = true
-        changed = true
+        newBadges.push({ id: m.id, label: m.label })
       }
     })
-    if (changed) setMetricsChecklist(next)
+    if (newBadges.length > 0) {
+      setMetricsChecklist(next)
+      setDetectedBadges((prev) => {
+        const existingIds = new Set(prev.map((b) => b.id))
+        const toAdd = newBadges.filter((b) => !existingIds.has(b.id))
+        return toAdd.length > 0 ? [...prev, ...toAdd] : prev
+      })
+    }
   }, [newNote, metricIdsKey, metricsChecklist, metricsToRecord])
 
   const completedCount = Object.values(checklist).filter(Boolean).length
@@ -112,7 +117,12 @@ export function useClinicalNotes({
       setNewNote("")
       setChecklist({})
       setMetricsChecklist({})
+      setDetectedBadges([])
     }
+  }
+
+  const dismissDetectedBadge = (id: string) => {
+    setDetectedBadges((prev) => prev.filter((b) => b.id !== id))
   }
 
   const handleStartRecording = () => {
@@ -131,7 +141,8 @@ export function useClinicalNotes({
 
   const handleMedicalConditionToggle = async (conditionId: string) => {
     if (!patient || !onUpdatePatient) return
-    const current = !!(patient as Record<string, unknown>)[conditionId]
+    const flags = (patient as Record<string, unknown>).condition_flags as Record<string, boolean> | undefined
+    const current = !!(flags?.[conditionId] ?? (patient as Record<string, unknown>)[conditionId])
     try {
       await onUpdatePatient({ [conditionId]: !current })
     } catch {
@@ -152,8 +163,8 @@ export function useClinicalNotes({
     setNewNote,
     isRecording,
     isPaused,
-    showReminder,
-    lastDetectedItem,
+    detectedBadges,
+    dismissDetectedBadge,
     checklist,
     completedCount,
     totalCount,
@@ -171,7 +182,11 @@ export function useClinicalNotes({
         : [],
     medicalConditionValues: patient
       ? Object.fromEntries(
-          enabledMedicalConditions.map((c) => [c.id, !!(patient as Record<string, unknown>)[c.id]])
+          enabledMedicalConditions.map((c) => {
+            const flags = (patient as Record<string, unknown>).condition_flags as Record<string, boolean> | undefined
+            const value = flags?.[c.id] ?? (patient as Record<string, unknown>)[c.id]
+            return [c.id, !!value]
+          })
         )
       : {},
     handleMedicalConditionToggle,

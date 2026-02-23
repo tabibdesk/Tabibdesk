@@ -4,6 +4,25 @@
 
 import { mockData } from "@/data/mock/mock-data"
 import { mockClinics } from "@/data/mock/users-clinics"
+import { MEDICAL_CONDITIONS } from "@/features/patients/detail/medical-conditions"
+
+const LEGACY_CONDITION_IDS = new Set([
+  "is_diabetic",
+  "is_hypertensive",
+  "has_pancreatitis",
+  "has_gerd",
+  "has_gastritis",
+  "has_hepatic",
+  "has_anaemia",
+  "has_bronchial_asthma",
+  "has_rheumatoid",
+  "has_ihd",
+  "has_heart_failure",
+  "is_pregnant",
+  "is_breastfeeding",
+  "glp1a_previous_exposure",
+])
+const CONDITION_IDS = new Set(MEDICAL_CONDITIONS.map((c) => c.id))
 import type {
   IPatientsRepository,
   PatientRow,
@@ -47,7 +66,12 @@ export class MockPatientsRepository implements IPatientsRepository {
 
   async getById(patientId: string): Promise<PatientRow | null> {
     initStore()
-    return patientsStore.find((p) => p.id === patientId) ?? null
+    const raw = patientsStore.find((p) => p.id === patientId) ?? null
+    if (!raw) return null
+    // Merge condition_flags so patient[c.id] works for UI
+    const flags = (raw as unknown as Record<string, unknown>).condition_flags as Record<string, boolean> | undefined
+    if (!flags || Object.keys(flags).length === 0) return raw as PatientRow
+    return { ...raw, ...flags } as PatientRow
   }
 
   async createPatient(insert: PatientInsert): Promise<PatientRow> {
@@ -92,11 +116,23 @@ export class MockPatientsRepository implements IPatientsRepository {
       (p) => p.id === id && p.clinic_id === clinicId
     )
     if (index === -1) throw new NotFoundError("Patient", id)
+    const current = patientsStore[index] as unknown as Record<string, unknown>
+    const legacyUpdates: Record<string, unknown> = {}
+    const existingFlags = (current.condition_flags as Record<string, boolean> | undefined) ?? {}
+    const conditionFlagUpdates: Record<string, boolean> = { ...existingFlags }
+    for (const [key, value] of Object.entries(updates)) {
+      if (CONDITION_IDS.has(key) && !LEGACY_CONDITION_IDS.has(key)) {
+        conditionFlagUpdates[key] = !!value
+      } else {
+        legacyUpdates[key] = value
+      }
+    }
     const updated: PatientRow = {
       ...patientsStore[index],
-      ...updates,
+      ...legacyUpdates,
+      condition_flags: Object.keys(conditionFlagUpdates).length > 0 ? conditionFlagUpdates : undefined,
       updated_at: new Date().toISOString(),
-    }
+    } as PatientRow
     patientsStore[index] = updated
     return updated
   }

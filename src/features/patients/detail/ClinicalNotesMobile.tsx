@@ -10,10 +10,12 @@ import {
   RiPlayLine,
   RiStopLine,
   RiCheckboxCircleLine,
+  RiCloseLine,
   RiCloseLine as RiCloseIcon,
 } from "@remixicon/react"
 import { cx } from "@/lib/utils"
 import { useAppTranslations } from "@/lib/useAppTranslations"
+import { PROGRESS_METRIC_REGEX } from "@/types/progress"
 
 interface MetricToRecord {
   id: string
@@ -31,8 +33,8 @@ interface ClinicalNotesMobileProps {
   setNewNote: (note: string) => void
   isRecording: boolean
   isPaused: boolean
-  showReminder: boolean
-  lastDetectedItem: string | null
+  detectedBadges: Array<{ id: string; label: string }>
+  dismissDetectedBadge: (id: string) => void
   checklist: Record<string, boolean>
   completedCount: number
   totalCount: number
@@ -58,8 +60,8 @@ export function ClinicalNotesMobile({
   setNewNote,
   isRecording,
   isPaused,
-  showReminder,
-  lastDetectedItem,
+  detectedBadges,
+  dismissDetectedBadge,
   checklist,
   completenessPercentage,
   checklistItems,
@@ -136,14 +138,14 @@ export function ClinicalNotesMobile({
           />
           <div className="fixed inset-x-0 bottom-0 z-50 animate-in slide-in-from-bottom duration-300 bg-white dark:bg-gray-950 rounded-t-[2rem] shadow-2xl max-h-[80vh] overflow-hidden">
             <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mx-auto mt-3 mb-1" />
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50 dark:border-gray-900">
+            <div className="flex items-center justify-between px-6 py-2.5 border-b border-gray-50 dark:border-gray-900">
               <div className="flex items-center gap-3">
                 <div className="size-8 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center shrink-0">
                   <RiCheckboxCircleLine className="size-5 text-primary-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">{t.clinicalNotes.visitProgress}</h3>
-                  <p className="text-[10px] font-medium text-gray-500 uppercase tracking-widest">{completenessPercentage}% {t.clinicalNotes.complete}</p>
+                  <h3 className="font-bold text-gray-900 dark:text-white capitalize">{t.clinicalNotes.visitProgress}</h3>
+                  <p className="text-[10px] font-medium text-gray-500 capitalize">{completenessPercentage}% {t.clinicalNotes.complete}</p>
                 </div>
               </div>
               <button
@@ -157,13 +159,17 @@ export function ClinicalNotesMobile({
             </div>
             <div className="overflow-y-auto p-6 max-h-[calc(80vh-80px)]">
               <div className="space-y-3">
-                {checklistItems.map((item) => (
+                {checklistItems.map((item) => {
+                  const isValidatedFromNote = checklist[item.id] && item.regex.test(newNote.toLowerCase())
+                  return (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => handleChecklistToggle?.(item.id)}
+                    onClick={() => !isValidatedFromNote && handleChecklistToggle?.(item.id)}
+                    disabled={isValidatedFromNote}
                     className={cx(
-                      "flex w-full items-center gap-4 p-4 rounded-2xl transition-all duration-300 border text-start active:scale-[0.98]",
+                      "flex w-full items-center gap-4 p-4 rounded-2xl transition-all duration-300 border text-start",
+                      isValidatedFromNote ? "pointer-events-none cursor-default opacity-90" : "active:scale-[0.98]",
                       checklist[item.id] 
                         ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm" 
                         : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
@@ -178,7 +184,7 @@ export function ClinicalNotesMobile({
                       {checklist[item.id] ? <RiCheckboxCircleLine className="size-5" /> : <div className="size-1 rounded-full bg-gray-300 dark:bg-gray-700" />}
                     </div>
                     <span className={cx(
-                      "text-sm font-semibold flex-1 transition-colors",
+                      "text-sm font-semibold flex-1 transition-colors capitalize",
                       checklist[item.id] 
                         ? "text-primary-900 dark:text-primary-100" 
                         : "text-gray-500 dark:text-gray-400"
@@ -186,18 +192,23 @@ export function ClinicalNotesMobile({
                       {item.label}
                     </span>
                   </button>
-                ))}
+                )})}
               </div>
               {metricsToRecord.length > 0 && (
                 <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
                   <div className="space-y-3">
-                    {metricsToRecord.map((m) => (
+                    {metricsToRecord.map((m) => {
+                      const metricRegex = PROGRESS_METRIC_REGEX[m.id]
+                      const isMetricValidatedFromNote = metricsChecklist[m.id] && metricRegex?.test(newNote)
+                      return (
                       <button
                         key={m.id}
                         type="button"
-                        onClick={() => handleMetricsChecklistToggle?.(m.id)}
+                        onClick={() => !isMetricValidatedFromNote && handleMetricsChecklistToggle?.(m.id)}
+                        disabled={isMetricValidatedFromNote}
                         className={cx(
-                          "flex w-full items-center gap-4 p-4 rounded-2xl transition-all duration-300 border text-start active:scale-[0.98]",
+                          "flex w-full items-center gap-4 p-4 rounded-2xl transition-all duration-300 border text-start",
+                          isMetricValidatedFromNote ? "pointer-events-none cursor-default opacity-90" : "active:scale-[0.98]",
                           metricsChecklist[m.id]
                             ? "bg-primary-50/50 border-primary-100 dark:bg-primary-900/10 dark:border-primary-900/20 shadow-sm"
                             : "bg-gray-50/50 border-gray-100 dark:bg-gray-900/50 dark:border-gray-800"
@@ -212,7 +223,7 @@ export function ClinicalNotesMobile({
                           {metricsChecklist[m.id] ? <RiCheckboxCircleLine className="size-5" /> : <div className="size-1 rounded-full bg-gray-300 dark:bg-gray-700" />}
                         </div>
                         <span className={cx(
-                          "text-sm font-semibold flex-1 transition-colors",
+                          "text-sm font-semibold flex-1 transition-colors capitalize",
                           metricsChecklist[m.id]
                             ? "text-primary-900 dark:text-primary-100"
                             : "text-gray-500 dark:text-gray-400"
@@ -220,7 +231,7 @@ export function ClinicalNotesMobile({
                           {m.label}
                         </span>
                       </button>
-                    ))}
+                    )})}
                   </div>
                 </div>
               )}
@@ -255,13 +266,13 @@ export function ClinicalNotesMobile({
                         </div>
                         <span
                           className={cx(
-                            "text-sm font-semibold flex-1 transition-colors",
+                            "text-sm font-semibold flex-1 transition-colors capitalize",
                             medicalConditionValues[c.id]
                               ? "text-primary-900 dark:text-primary-100"
                               : "text-gray-500 dark:text-gray-400"
                           )}
                         >
-                          {c.label}
+                          {(t.profile as { conditions?: Record<string, string> }).conditions?.[c.id] ?? c.label}
                         </span>
                       </button>
                     ))}
@@ -287,7 +298,31 @@ export function ClinicalNotesMobile({
       )}
 
       {/* Main Content - full width, no horizontal padding */}
-      <div className="flex-1 flex flex-col min-h-[320px] px-0 py-2 relative">
+      <div className="flex-1 flex flex-col min-h-[320px] px-0 py-2 overflow-hidden">
+        {/* Detected badges - top, dismissable */}
+        {detectedBadges.length > 0 && (
+          <div className="shrink-0 px-4 pt-2 pb-2 flex flex-wrap gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+            {detectedBadges.map((badge) => (
+              <div
+                key={badge.id}
+                className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+              >
+                <RiCheckboxCircleLine className="size-3.5 shrink-0 text-primary-500 dark:text-primary-400" />
+                <span className="text-xs font-medium">{badge.label}</span>
+                <button
+                  type="button"
+                  onClick={() => dismissDetectedBadge(badge.id)}
+                  className="shrink-0 rounded p-0.5 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 transition-colors"
+                  aria-label={t.clinicalNotes.dismissDetected}
+                  title={t.clinicalNotes.dismissDetected}
+                >
+                  <RiCloseLine className="size-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Textarea */}
         <div className="relative flex-1 flex flex-col min-h-[280px] w-full">
           <textarea
@@ -296,16 +331,6 @@ export function ClinicalNotesMobile({
             placeholder="Start typing or record..."
             className="w-full flex-1 min-h-[280px] resize-none rounded-none border-0 outline-none focus:outline-none focus:ring-0 ring-0 bg-white dark:bg-gray-900 text-base text-gray-900 placeholder-gray-300 dark:text-gray-100 leading-relaxed px-4 py-4 transition-all"
           />
-          
-          {/* Detection toast - neutral, at bottom of card */}
-          {showReminder && (
-            <div className="absolute bottom-3 left-3 right-3 animate-in fade-in slide-in-from-bottom-2 duration-300 z-20">
-              <div className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-1.5 text-gray-700 shadow-sm dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700 w-fit max-w-full mx-auto">
-                <RiCheckboxCircleLine className="size-3.5 shrink-0 text-gray-500 dark:text-gray-400" />
-                <span className="text-xs font-medium truncate">Detected: {lastDetectedItem}</span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -339,19 +364,20 @@ export function ClinicalNotesMobile({
               <Button
                 variant="secondary"
                 onClick={handleStartRecording}
-                className="size-11 rounded-xl shadow-none min-w-0 p-0"
+                className="size-11 rounded-xl shadow-none min-w-0 p-0 border-0"
                 title="Start Recording"
               >
                 <RiMicLine className="size-5" />
               </Button>
-              <Button
+              <button
+                type="button"
                 onClick={handleSendNote}
                 disabled={!newNote.trim()}
-                className="flex-1 h-11 rounded-xl text-xs font-semibold uppercase tracking-wider active:scale-95 shadow-md shadow-primary-500/20 min-h-0 py-2"
+                className="btn-search-action flex-1 rtl:flex-row-reverse disabled:opacity-50 disabled:pointer-events-none"
               >
-                <RiSendPlaneLine className="mr-1.5 size-4" />
-                Save Note
-              </Button>
+                <RiSendPlaneLine className="size-5 shrink-0" />
+                {t.clinicalNotes.saveNote}
+              </button>
             </>
           )}
         </div>

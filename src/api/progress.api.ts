@@ -27,17 +27,41 @@ function labTestToMetricId(testName: string): string {
   const lower = testName.toLowerCase()
   if (lower.includes("blood pressure")) return "bp"
   if (lower.includes("bmi") || lower.includes("body mass index")) return "bmi"
-  if (lower.includes("pregnan") || lower.includes("gravid")) return "pregnancy"
-  if (lower.includes("smok") || lower.includes("tobacco")) return "smoking"
-  if (lower.includes("hba1c")) return "hba1c"
+  if (lower.includes("hba1c") || lower.includes("a1c")) return "hba1c"
   if (lower.includes("ldl")) return "ldl"
+  if (lower.includes("hdl")) return "hdl"
   if (lower.includes("cholesterol") && lower.includes("total")) return "cholesterol_total"
+  if (lower.includes("triglyceride")) return "triglycerides"
+  if (lower.includes("tsh")) return "tsh"
+  if (lower.includes("creatinine") || lower.includes("creat")) return "creatinine"
+  if (lower.includes("egfr") || lower.includes("gfr")) return "egfr"
+  if (lower.includes("hemoglobin") || lower.includes("hgb") || lower.includes(" hb ")) return "hemoglobin"
+  if (lower.includes("wbc") || lower.includes("white blood") || lower.includes("leukocyte")) return "wbc"
+  if (lower.includes("platelet") || lower.includes(" plt ")) return "platelets"
+  if (lower.includes("inr") || lower.includes("pt/inr")) return "inr"
+  if (lower.includes("blood sugar") || lower.includes("glucose") || lower.includes("fasting")) return "blood_sugar"
+  if (lower.includes("peak flow") || lower.includes("pefr")) return "pefr"
+  if (lower.includes("fev1") && lower.includes("fvc")) return "fev1_fvc"
+  if (lower.includes("pulse") || lower.includes("heart rate")) return "pulse"
+  if (lower.includes("spo2") || lower.includes("oxygen") || lower.includes("saturation")) return "oxygen"
+  if (lower.includes("temp") || lower.includes("temperature")) return "temp"
+  if (lower.includes("respiratory") || lower.includes("resp rate")) return "respiratory_rate"
+  if (lower.includes("height")) return "height"
+  if (lower.includes("weight")) return "weight"
+  if (lower.includes("waist")) return "waist_cm"
+  if (lower.includes("head circumference") || lower.includes("ofc")) return "head_cm"
   return testName.replace(/\s+/g, "_").toLowerCase().replace(/[^a-z0-9_]/g, "")
 }
 
 /** Get display label for lab-based metric. */
 function labTestToLabel(testName: string): string {
-  if (testName.toLowerCase().includes("blood pressure")) return "Blood Pressure"
+  const lower = testName.toLowerCase()
+  if (lower.includes("blood pressure")) return "Blood Pressure"
+  if (lower.includes("creatinine")) return "Serum Creatinine"
+  if (lower.includes("egfr") || lower.includes("gfr")) return "eGFR"
+  if (lower.includes("hemoglobin") || lower.includes("hgb")) return "Hemoglobin"
+  if (lower.includes("inr")) return "INR"
+  if (lower.includes("peak flow") || lower.includes("pefr")) return "Peak Flow (PEFR)"
   return testName
 }
 
