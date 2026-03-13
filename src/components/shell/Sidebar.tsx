@@ -104,7 +104,7 @@ export function Sidebar({ role }: SidebarProps) {
           <ul className="space-y-1">
             {filteredNavigation.map((item) => {
               const active = isActiveRoute(item.href, pathname)
-              const showSeparatorBefore = item.navKey === "bot"
+              const showSeparatorBefore = item.navKey === "bot" || item.navKey === "automations"
 
               const linkContent = (
                 <Link

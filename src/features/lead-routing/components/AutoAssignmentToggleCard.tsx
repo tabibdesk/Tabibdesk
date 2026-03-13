@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
+import { Card, CardContent } from "@/components/Card"
 import { Label } from "@/components/Label"
 import { Switch } from "@/components/Switch"
 import { useAppTranslations } from "@/lib/useAppTranslations"
@@ -16,13 +16,7 @@ export function AutoAssignmentToggleCard({ settings, onUpdate }: AutoAssignmentT
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold">{t.settings.leadAutoAssignment}</CardTitle>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-          {t.settings.leadAutoAssignmentDesc}
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1">
             <Label htmlFor="enable-auto" className="text-sm font-medium">

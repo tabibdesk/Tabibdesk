@@ -23,7 +23,7 @@ export function ExistingPatientRoutingCard({
 }: ExistingPatientRoutingCardProps) {
   const t = useAppTranslations()
 
-  if (!settings.autoAssignmentEnabled) return null
+  if (!settings.autoAssignmentEnabled || settings.assignmentMode !== "auto_rules") return null
 
   return (
     <Card>

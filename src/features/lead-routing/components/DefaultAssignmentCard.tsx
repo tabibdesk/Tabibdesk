@@ -48,7 +48,7 @@ export function DefaultAssignmentCard({ settings, users, onUpdate, disabled }: D
     onUpdate({ defaultAssignmentTarget: value })
   }
 
-  if (!settings.autoAssignmentEnabled) return null
+  if (!settings.autoAssignmentEnabled || settings.assignmentMode !== "auto_rules") return null
 
   return (
     <Card>

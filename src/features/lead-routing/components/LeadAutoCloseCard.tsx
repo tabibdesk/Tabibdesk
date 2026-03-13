@@ -10,20 +10,24 @@ import type { LeadAutoCloseSettings } from "../leadAutoClose.types"
 interface LeadAutoCloseCardProps {
   settings: LeadAutoCloseSettings
   onUpdate: (updates: Partial<LeadAutoCloseSettings>) => void
+  /** When true, omits the card header (for use when title/subtitle are shown above the card) */
+  hideHeader?: boolean
 }
 
-export function LeadAutoCloseCard({ settings, onUpdate }: LeadAutoCloseCardProps) {
+export function LeadAutoCloseCard({ settings, onUpdate, hideHeader }: LeadAutoCloseCardProps) {
   const t = useAppTranslations()
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold">{t.settings.leadAutoClose}</CardTitle>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-          {t.settings.leadAutoCloseDesc}
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
+      {!hideHeader && (
+        <CardHeader>
+          <CardTitle className="text-sm font-semibold">{t.settings.leadAutoClose}</CardTitle>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {t.settings.leadAutoCloseDesc}
+          </p>
+        </CardHeader>
+      )}
+      <CardContent className={hideHeader ? "space-y-4 pt-6" : "space-y-4"}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 flex-1">
             <Label htmlFor="enable-auto-close" className="text-sm font-medium">

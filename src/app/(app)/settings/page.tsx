@@ -1,7 +1,7 @@
 "use client"
 
 import { Suspense, useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Input } from "@/components/Input"
@@ -44,8 +44,6 @@ import {
   RiDeleteBinLine,
 } from "@remixicon/react"
 import { PageSkeleton } from "@/components/skeletons"
-import { ReactivationRulesTab } from "./ReactivationRulesTab"
-import { LeadAutoAssignmentTab } from "./LeadAutoAssignmentTab"
 import {
   ClinicSettingsDrawer,
   type BranchFormValues,
@@ -71,9 +69,9 @@ import { getClinicMembersByUserId } from "@/data/mock/users-clinics"
 import { getBackendType } from "@/lib/api/repository-factory"
 import type { ClinicMembership } from "./TeamMemberAccessDrawer"
 
-type TabId = "account" | "clinic" | "team" | "appointments" | "patient" | "automation" | "modules"
+type TabId = "account" | "clinic" | "team" | "appointments" | "patient" | "modules"
 
-const TAB_IDS: TabId[] = ["account", "clinic", "team", "appointments", "patient", "automation", "modules"]
+const TAB_IDS: TabId[] = ["account", "clinic", "team", "appointments", "patient", "modules"]
 
 function isValidTabId(value: string | null): value is TabId {
   return value !== null && TAB_IDS.includes(value as TabId)
@@ -85,21 +83,20 @@ function SettingsPageContent() {
   const [activeTab, setActiveTab] = useState<TabId>(() =>
     isValidTabId(tabFromUrl) ? tabFromUrl : "account"
   )
-  const [automationSubTab, setAutomationSubTab] = useState<"automation" | "leadRouting">("automation")
+  const router = useRouter()
   const { currentUser } = useUserClinic()
   const t = useAppTranslations()
 
-  // Sync activeTab with ?tab= when URL changes (e.g. from Bot page deep link)
-  // Redirect legacy ?tab=followup or ?tab=reactivation to automation
+  // Sync activeTab with ?tab= when URL changes; redirect legacy automation tabs to /automations
   useEffect(() => {
-    if (tabFromUrl === "followup" || tabFromUrl === "reactivation") {
-      setActiveTab("automation")
+    if (tabFromUrl === "followup" || tabFromUrl === "reactivation" || tabFromUrl === "automation") {
+      router.replace("/automations")
       return
     }
     if (isValidTabId(tabFromUrl) && tabFromUrl !== activeTab) {
       setActiveTab(tabFromUrl)
     }
-  }, [tabFromUrl])
+  }, [tabFromUrl, router])
 
   const tabs = [
     { id: "account" as const, label: t.settings.account, labelShort: t.settings.account, icon: RiUserLine },
@@ -107,7 +104,6 @@ function SettingsPageContent() {
     { id: "team" as const, label: t.settings.team, labelShort: t.settings.team, icon: RiTeamLine },
     { id: "appointments" as const, label: t.settings.appointments, labelShort: t.settings.appointments, icon: RiCalendarLine },
     { id: "patient" as const, label: t.settings.patient, labelShort: t.settings.patient, icon: RiUserHeartLine },
-    { id: "automation" as const, label: t.settings.automation, labelShort: t.settings.automationShort, icon: RiRobotLine },
     { id: "modules" as const, label: t.settings.modules, labelShort: t.settings.modules, icon: RiPuzzleLine },
   ]
 
@@ -159,38 +155,6 @@ function SettingsPageContent() {
         {activeTab === "team" && <TeamTab />}
         {activeTab === "appointments" && <AppointmentsTab />}
         {activeTab === "patient" && <PatientTab />}
-        {activeTab === "automation" && (
-          <div className="space-y-4">
-            <div className="border-b border-gray-200 dark:border-gray-800">
-              <nav className="-mb-px flex gap-4 sm:gap-6" aria-label="Automation sub-tabs">
-                <button
-                  onClick={() => setAutomationSubTab("automation")}
-                  className={`whitespace-nowrap border-b-2 px-1 py-2 text-xs font-medium transition-colors sm:py-3 sm:text-sm ${
-                    automationSubTab === "automation"
-                      ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300"
-                  }`}
-                  aria-current={automationSubTab === "automation" ? "page" : undefined}
-                >
-                  {t.settings.automationGeneral}
-                </button>
-                <button
-                  onClick={() => setAutomationSubTab("leadRouting")}
-                  className={`whitespace-nowrap border-b-2 px-1 py-2 text-xs font-medium transition-colors sm:py-3 sm:text-sm ${
-                    automationSubTab === "leadRouting"
-                      ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300"
-                  }`}
-                  aria-current={automationSubTab === "leadRouting" ? "page" : undefined}
-                >
-                  {t.settings.leadAutoAssignment}
-                </button>
-              </nav>
-            </div>
-            {automationSubTab === "automation" && <ReactivationRulesTab />}
-            {automationSubTab === "leadRouting" && <LeadAutoAssignmentTab />}
-          </div>
-        )}
         {activeTab === "modules" && <ModulesTab canEdit={canEditModules} />}
       </div>
     </div>

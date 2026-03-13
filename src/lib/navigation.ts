@@ -11,10 +11,11 @@ import {
   RiMegaphoneLine,
   RiShoppingBagLine,
   RiRobot2Line,
+  RiWebhookLine,
 } from "@remixicon/react"
 import type { FeatureKey } from "@/features/settings/settings.types"
 
-export type NavKey = "home" | "patients" | "appointments" | "campaign" | "leads" | "bot" | "insights" | "tasks" | "accounting" | "suppliers" | "archive" | "settings"
+export type NavKey = "home" | "patients" | "appointments" | "campaign" | "leads" | "bot" | "insights" | "tasks" | "accounting" | "suppliers" | "archive" | "automations" | "settings"
 
 export type NavItem = {
   name: string // fallback for non-translated contexts
@@ -38,6 +39,7 @@ export const doctorNavigation: NavItem[] = [
   { name: "Insights", navKey: "insights", href: "/insights", icon: RiBarChartLine, featureKey: "insights" },
   { name: "Archive", navKey: "archive", href: "/archive", icon: RiArchiveLine },
   { name: "Suppliers", navKey: "suppliers", href: "/suppliers", icon: RiShoppingBagLine },
+  { name: "Automations", navKey: "automations", href: "/automations", icon: RiWebhookLine },
   { name: "Settings", navKey: "settings", href: "/settings", icon: RiSettingsLine },
 ]
 
@@ -51,6 +53,7 @@ export const assistantNavigation: NavItem[] = [
   { name: "Insights", navKey: "insights", href: "/insights", icon: RiBarChartLine, featureKey: "insights" },
   { name: "Archive", navKey: "archive", href: "/archive", icon: RiArchiveLine },
   { name: "Suppliers", navKey: "suppliers", href: "/suppliers", icon: RiShoppingBagLine },
+  { name: "Automations", navKey: "automations", href: "/automations", icon: RiWebhookLine },
   { name: "Settings", navKey: "settings", href: "/settings", icon: RiSettingsLine },
 ]
 
@@ -65,6 +68,7 @@ export const managerNavigation: NavItem[] = [
   { name: "Insights", navKey: "insights", href: "/insights", icon: RiBarChartLine, featureKey: "insights" },
   { name: "Archive", navKey: "archive", href: "/archive", icon: RiArchiveLine },
   { name: "Suppliers", navKey: "suppliers", href: "/suppliers", icon: RiShoppingBagLine },
+  { name: "Automations", navKey: "automations", href: "/automations", icon: RiWebhookLine },
   { name: "Settings", navKey: "settings", href: "/settings", icon: RiSettingsLine },
 ]
 
