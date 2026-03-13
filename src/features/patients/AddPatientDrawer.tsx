@@ -11,7 +11,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/Drawer"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { CreatePatientInput } from "./patients.types"
 import { PatientFormFields, type PatientFormData } from "./PatientFormFields"
 
@@ -19,9 +19,10 @@ interface AddPatientDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (data: CreatePatientInput) => Promise<void>
+  initialData?: Partial<CreatePatientInput>
 }
 
-export function AddPatientDrawer({ open, onOpenChange, onSubmit }: AddPatientDrawerProps) {
+export function AddPatientDrawer({ open, onOpenChange, onSubmit, initialData }: AddPatientDrawerProps) {
   const t = useAppTranslations()
   const { isRtl } = useLocale()
   const [formData, setFormData] = useState<PatientFormData>({
@@ -37,6 +38,33 @@ export function AddPatientDrawer({ open, onOpenChange, onSubmit }: AddPatientDra
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof CreatePatientInput, string>>>({})
+
+  // Update form data when initialData changes or drawer opens
+  useEffect(() => {
+    if (open && initialData) {
+      setFormData((prev) => ({
+        ...prev,
+        ...initialData,
+        // Ensure specific fields are correctly mapped if needed
+        first_name: initialData.first_name || "",
+        last_name: initialData.last_name || "",
+        phone: initialData.phone || "",
+      }))
+    } else if (open && !initialData) {
+      // Reset if opening without initial data
+      setFormData({
+        first_name: "",
+        last_name: "",
+        phone: "",
+        email: undefined,
+        gender: "",
+        source: undefined,
+        source_other: undefined,
+        address: undefined,
+        complaint: undefined,
+      })
+    }
+  }, [open, initialData])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

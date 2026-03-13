@@ -4,7 +4,7 @@ export const siteConfig = {
   description: "Modern medical practice management system for Egyptian doctors.",
   baseLinks: {
     home: "/",
-    dashboard: "/dashboard",
+    app: "/home",
     patients: "/patients",
     appointments: "/appointments",
     settings: "/settings",

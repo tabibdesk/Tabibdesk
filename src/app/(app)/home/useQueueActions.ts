@@ -2,8 +2,8 @@
 
 import { updateStatus as updateAppointmentStatus, updateAppointmentTime } from "@/features/appointments/appointments.api"
 import { getInvoiceByAppointmentId, markInvoiceUnpaid } from "@/api/invoices.api"
-import type { DashboardAppointment } from "./dashboard.types"
-import type { QueueStatus } from "./dashboard.types"
+import type { HomeAppointment } from "./home.types"
+import type { QueueStatus } from "./home.types"
 
 export function getTimeDisplay(scheduledAt: string) {
   const now = new Date()
@@ -46,13 +46,13 @@ export function getIconBackgroundClass(index: number) {
 }
 
 export interface UseQueueActionsParams {
-  appointments: DashboardAppointment[]
-  setAppointments: React.Dispatch<React.SetStateAction<DashboardAppointment[]>>
+  appointments: HomeAppointment[]
+  setAppointments: React.Dispatch<React.SetStateAction<HomeAppointment[]>>
   paidAppointments: Set<string>
   setPaidAppointments: React.Dispatch<React.SetStateAction<Set<string>>>
   currentUser: { id: string; full_name: string; role: string }
   showToast: (msg: string, variant: "success" | "error") => void
-  fetchDashboardData: () => Promise<void>
+  fetchHomeData: () => Promise<void>
   loadPaymentStatus: () => Promise<void>
 }
 
@@ -64,7 +64,7 @@ export function useQueueActions(params: UseQueueActionsParams) {
     setPaidAppointments,
     currentUser,
     showToast,
-    fetchDashboardData,
+    fetchHomeData,
     loadPaymentStatus,
   } = params
 
@@ -152,7 +152,7 @@ export function useQueueActions(params: UseQueueActionsParams) {
         rescheduledByName: currentUser.full_name,
         reason: "Reorganized via drag-and-drop in Today's Appointments widget",
       })
-      await fetchDashboardData()
+      await fetchHomeData()
       showToast(
         `Appointment rescheduled to ${new Date(newScheduledAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}`,
         "success"
@@ -166,7 +166,7 @@ export function useQueueActions(params: UseQueueActionsParams) {
   }
 
   const handleUnmarkPaid = async (
-    selectedAppointment: DashboardAppointment,
+    selectedAppointment: HomeAppointment,
     onSuccess: () => void
   ) => {
     try {
@@ -183,7 +183,7 @@ export function useQueueActions(params: UseQueueActionsParams) {
         return next
       })
       onSuccess()
-      fetchDashboardData()
+      fetchHomeData()
     } catch {
       showToast("Failed to remove payment record", "error")
     }

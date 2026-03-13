@@ -50,7 +50,7 @@ function LoginPageContent() {
 
   const handleDemoLogin = () => {
     enableDemoMode()
-    router.push("/dashboard")
+    router.push("/home")
     router.refresh()
   }
 
@@ -90,7 +90,7 @@ function LoginPageContent() {
         return
       }
       // Success! Keep isLoading true so spinner stays visible during redirect
-      router.push("/dashboard")
+      router.push("/home")
       router.refresh()
       // Don't set isLoading(false) - let it stay true while redirecting
     } catch (err: unknown) {
@@ -118,7 +118,7 @@ function LoginPageContent() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/home`,
         },
       })
       if (error) {

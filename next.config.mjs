@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
+  async redirects() {
+    return [{ source: '/dashboard', destination: '/home', permanent: true }]
+  },
   // Optimize @remixicon/react imports to avoid vendor-chunk resolution issues
   experimental: {
     optimizePackageImports: ['@remixicon/react'],

@@ -9,14 +9,14 @@ import { useDemo } from "@/contexts/demo-context"
 import { updateStatus as updateAppointmentStatus } from "@/features/appointments/appointments.api"
 import { InvoiceDrawer } from "@/features/accounting/components/InvoiceDrawer"
 import { useToast } from "@/hooks/useToast"
-import { buildCreateInvoiceAppointments } from "./dashboard.types"
-import type { DashboardAppointment } from "./dashboard.types"
-import { useDashboardData } from "./useDashboardData"
+import { buildCreateInvoiceAppointments } from "./home.types"
+import type { HomeAppointment } from "./home.types"
+import { useHomeData } from "./useHomeData"
 import { useQueueActions } from "./useQueueActions"
 import { NowQueueWidget } from "./NowQueueWidget"
 import { TodaysAppointmentsWidget } from "./TodaysAppointmentsWidget"
 
-export default function DashboardPage() {
+export default function HomePage() {
   const t = useAppTranslations()
   const { currentUser, currentClinic } = useUserClinic()
   const { isDemoMode } = useDemo()
@@ -29,9 +29,9 @@ export default function DashboardPage() {
     setAppointments,
     paidAppointments,
     setPaidAppointments,
-    fetchDashboardData,
+    fetchHomeData,
     loadPaymentStatus,
-  } = useDashboardData(isDemoMode, role, currentClinic)
+  } = useHomeData(isDemoMode, role, currentClinic)
 
   const queueActions = useQueueActions({
     appointments,
@@ -40,7 +40,7 @@ export default function DashboardPage() {
     setPaidAppointments,
     currentUser,
     showToast,
-    fetchDashboardData,
+    fetchHomeData,
     loadPaymentStatus,
   })
 
@@ -55,7 +55,7 @@ export default function DashboardPage() {
   const [showCreateInvoiceDrawer, setShowCreateInvoiceDrawer] = useState(false)
   const [showUnmarkArrivedModal, setShowUnmarkArrivedModal] = useState(false)
   const [showUnmarkPaidModal, setShowUnmarkPaidModal] = useState(false)
-  const [selectedAppointment, setSelectedAppointment] = useState<DashboardAppointment | null>(null)
+  const [selectedAppointment, setSelectedAppointment] = useState<HomeAppointment | null>(null)
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index)
@@ -81,7 +81,7 @@ export default function DashboardPage() {
     await queueActions.handleDrop(draggedIndex, dropIndex, setDraggedIndex, setDragOverIndex)
   }
 
-  const handleNoShowClick = (apt: DashboardAppointment) => {
+  const handleNoShowClick = (apt: HomeAppointment) => {
     setAppointmentToMarkNoShow(apt.id)
     setShowNoShowModal(true)
   }
@@ -106,7 +106,7 @@ export default function DashboardPage() {
     setMarkingArrived(selectedAppointment.id)
     try {
       await updateAppointmentStatus(selectedAppointment.id, "arrived")
-      showToast(t.dashboard.toastMarkedArrived, "success")
+      showToast(t.home.toastMarkedArrived, "success")
       setAppointments((prev) =>
         prev.map((apt) =>
           apt.id === selectedAppointment.id ? { ...apt, status: "arrived" as const } : apt
@@ -114,7 +114,7 @@ export default function DashboardPage() {
       )
       setShowArrivedModal(false)
     } catch {
-      showToast(t.dashboard.toastArrivedFailed, "error")
+      showToast(t.home.toastArrivedFailed, "error")
     } finally {
       setMarkingArrived(null)
     }
@@ -125,7 +125,7 @@ export default function DashboardPage() {
     setMarkingArrived(selectedAppointment.id)
     try {
       await updateAppointmentStatus(selectedAppointment.id, "scheduled")
-      showToast(t.dashboard.toastArrivalRemoved, "success")
+      showToast(t.home.toastArrivalRemoved, "success")
       setAppointments((prev) =>
         prev.map((apt) =>
           apt.id === selectedAppointment.id ? { ...apt, status: "scheduled" as const } : apt
@@ -133,7 +133,7 @@ export default function DashboardPage() {
       )
       setShowUnmarkArrivedModal(false)
     } catch {
-      showToast(t.dashboard.toastUnmarkArrivedFailed, "error")
+      showToast(t.home.toastUnmarkArrivedFailed, "error")
     } finally {
       setMarkingArrived(null)
     }
@@ -142,7 +142,7 @@ export default function DashboardPage() {
   const handleCreateInvoiceSuccess = async () => {
     setShowCreateInvoiceDrawer(false)
     setSelectedAppointment(null)
-    await fetchDashboardData()
+    await fetchHomeData()
     if (currentClinic) await loadPaymentStatus()
   }
 
@@ -161,7 +161,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <PageLayout title={t.nav.dashboard}>
+    <PageLayout title={t.nav.home}>
       {role === "doctor" ? (
         <div className="space-y-4">
           <NowQueueWidget
@@ -219,9 +219,9 @@ export default function DashboardPage() {
           }
         }}
         onConfirm={handleNoShowConfirm}
-        title={t.dashboard.modalNoShowTitle}
-        description={t.dashboard.modalNoShowConfirm}
-        confirmText={t.dashboard.yesMarkNoShow}
+        title={t.home.modalNoShowTitle}
+        description={t.home.modalNoShowConfirm}
+        confirmText={t.home.yesMarkNoShow}
         cancelText={t.common.cancel}
         loadingText={t.common.processing}
         variant="danger"
@@ -232,9 +232,9 @@ export default function DashboardPage() {
         isOpen={showArrivedModal}
         onClose={() => setShowArrivedModal(false)}
         onConfirm={handleMarkArrived}
-        title={t.dashboard.modalArrivedTitle}
-        description={t.dashboard.modalArrivedConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
-        confirmText={t.dashboard.confirmArrival}
+        title={t.home.modalArrivedTitle}
+        description={t.home.modalArrivedConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
+        confirmText={t.home.confirmArrival}
         cancelText={t.common.cancel}
         loadingText={t.common.processing}
         variant="success"
@@ -245,9 +245,9 @@ export default function DashboardPage() {
         isOpen={showUnmarkArrivedModal}
         onClose={() => setShowUnmarkArrivedModal(false)}
         onConfirm={handleUnmarkArrived}
-        title={t.dashboard.modalUndoArrivalTitle}
-        description={t.dashboard.modalUndoArrivalConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
-        confirmText={t.dashboard.yesUndo}
+        title={t.home.modalUndoArrivalTitle}
+        description={t.home.modalUndoArrivalConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
+        confirmText={t.home.yesUndo}
         cancelText={t.common.cancel}
         loadingText={t.common.processing}
         variant="danger"
@@ -272,9 +272,9 @@ export default function DashboardPage() {
         isOpen={showUnmarkPaidModal}
         onClose={() => setShowUnmarkPaidModal(false)}
         onConfirm={handleUnmarkPaid}
-        title={t.dashboard.modalUndoPaymentTitle}
-        description={t.dashboard.modalUndoPaymentConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
-        confirmText={t.dashboard.yesDeleteRecord}
+        title={t.home.modalUndoPaymentTitle}
+        description={t.home.modalUndoPaymentConfirm.replace("{name}", selectedAppointment?.patientName ?? "")}
+        confirmText={t.home.yesDeleteRecord}
         cancelText={t.common.cancel}
         loadingText={t.common.processing}
         variant="danger"

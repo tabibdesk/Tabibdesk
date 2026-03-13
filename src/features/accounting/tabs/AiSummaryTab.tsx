@@ -185,29 +185,37 @@ export function AiSummaryTab() {
 
       {/* Monthly KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Revenue (Month)</p>
-          <p className="mt-1 text-2xl font-semibold text-success-600 dark:text-success-400">
-            {formatCurrency(summary.totalRevenue)}
-          </p>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Revenue (Month)</p>
+            <p className="mt-1 text-2xl font-bold text-success-600 dark:text-success-400">
+              {formatCurrency(summary.totalRevenue)}
+            </p>
+          </div>
         </Card>
-        <Card className="p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Expenses (Month)</p>
-          <p className="mt-1 text-2xl font-semibold text-error-600 dark:text-error-400">
-            {formatCurrency(summary.totalExpenses)}
-          </p>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Expenses (Month)</p>
+            <p className="mt-1 text-2xl font-bold text-error-600 dark:text-error-400">
+              {formatCurrency(summary.totalExpenses)}
+            </p>
+          </div>
         </Card>
-        <Card className="p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Net Profit</p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-50">
-            {formatCurrency(summary.netProfit)}
-          </p>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Profit</p>
+            <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {formatCurrency(summary.netProfit)}
+            </p>
+          </div>
         </Card>
-        <Card className="p-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Outstanding</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-600 dark:text-amber-400">
-            {formatCurrency(summary.totalOutstanding)}
-          </p>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Outstanding</p>
+            <p className="mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {formatCurrency(summary.totalOutstanding)}
+            </p>
+          </div>
         </Card>
       </div>
 

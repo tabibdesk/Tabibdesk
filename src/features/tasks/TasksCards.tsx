@@ -75,14 +75,14 @@ export function TasksCards({
             >
               <div className={cx(isDone ? "block" : "group-hover/done:hidden")}>
                 {isDone ? (
-                  <RiCheckLine className="size-6" />
+                  <RiCheckLine className="size-5" />
                 ) : (
-                  <RiCheckboxBlankCircleLine className="size-6" />
+                  <RiCheckboxBlankCircleLine className="size-5" />
                 )}
               </div>
               {!isDone && (
                 <div className="hidden group-hover/done:block">
-                  <RiCheckLine className="size-6" />
+                  <RiCheckLine className="size-5" />
                 </div>
               )}
             </button>
@@ -100,7 +100,7 @@ export function TasksCards({
                     </Link>
                   )}
                   <p className={cx(
-                    "text-sm font-medium text-gray-900 dark:text-white leading-tight",
+                    "text-xs text-gray-500 dark:text-gray-400 truncate font-medium leading-tight",
                     isDone && "text-gray-400 line-through decoration-gray-400/50"
                   )}>
                     {task.description || task.title}
@@ -159,7 +159,7 @@ export function TasksCards({
                 )}
 
                 {(task.createdByName || task.assignedToName) && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 ms-1">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 ms-1 mt-0.5">
                     <RiUserLine className="size-3" />
                     <span>
                       {task.createdByName && <>{task.createdByName}</>}

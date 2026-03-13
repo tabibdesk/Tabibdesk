@@ -35,10 +35,9 @@ export function useBookAppointmentState(params: UseBookAppointmentStateParams) {
     onBookingComplete,
   } = params
 
-  // When from waitlist: start at patient step (first step) with patient pre-selected
-  // When initialPatient from other flows (e.g. reschedule): skip to service step
+  // When patient is already set (reschedule or book-from-waitlist): skip to service step
   const [currentStep, setCurrentStep] = useState<BookFlowStep>(
-    initialPatient && !waitlistEntry ? "service" : "patient"
+    initialPatient ? "service" : "patient"
   )
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(initialPatient)
   const [selectedService, setSelectedService] = useState<AppBookableService | null>(null)
@@ -209,10 +208,8 @@ export function useBookAppointmentState(params: UseBookAppointmentStateParams) {
   const handleBack = () => {
     switch (currentStep) {
       case "service":
-        if (!initialPatient) {
-          setSelectedPatient(null)
-          setCurrentStep("patient")
-        }
+        if (!initialPatient) setSelectedPatient(null)
+        setCurrentStep("patient")
         break
       case "datetime":
         setSelectedService(null)

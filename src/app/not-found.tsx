@@ -7,7 +7,7 @@ import { siteConfig } from "./siteConfig"
 export default function NotFound() {
   return (
     <div className="flex h-screen flex-col items-center justify-center">
-      <Link href={siteConfig.baseLinks.dashboard}>
+      <Link href={siteConfig.baseLinks.app}>
         <div className="mt-6 flex items-center gap-x-0.5">
           <img src="/logo.svg" alt="" className="size-[2rem] object-contain" aria-hidden />
           <BrandName className="text-xl text-gray-900 dark:text-gray-50" />
@@ -23,8 +23,8 @@ export default function NotFound() {
         Sorry, we couldn&apos;t find the page you&apos;re looking for.
       </p>
       <Button asChild className="group mt-8" variant="light">
-        <Link href={siteConfig.baseLinks.dashboard}>
-          Go to dashboard
+        <Link href={siteConfig.baseLinks.app}>
+          Go to home
           <RiArrowRightLine
             className="ml-1.5 size-5 text-gray-900 dark:text-gray-50"
             aria-hidden="true"

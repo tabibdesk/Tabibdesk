@@ -15,6 +15,7 @@ describe("featureResolver", () => {
     insights: true,
     alerts: true,
     accounting: true,
+    campaign: true,
     labs: false,
     medications: true,
     files: true,

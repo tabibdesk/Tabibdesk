@@ -105,16 +105,25 @@ export function SlotContextBanner({ preSelectedSlot, slotContextInfo }: SlotCont
   )
 }
 
+interface LeadForPatientStep {
+  id: string
+  name: string
+  phone: string
+  email?: string
+}
+
 interface PatientStepProps {
   initialPatient: Patient | null
+  lead?: LeadForPatientStep | null
   onPatientSelect: (patient: Patient | null) => void
 }
 
-export function PatientStep({ initialPatient, onPatientSelect }: PatientStepProps) {
+export function PatientStep({ initialPatient, lead = null, onPatientSelect }: PatientStepProps) {
   return (
     <div className="space-y-6">
       <PatientSelector
         initialPatient={initialPatient}
+        lead={lead}
         onPatientSelect={onPatientSelect}
         showEmail={true}
         required={true}

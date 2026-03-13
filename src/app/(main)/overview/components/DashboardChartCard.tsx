@@ -133,7 +133,7 @@ export function ChartCard({
         className="mt-6 h-32"
         data={chartData || []}
         index="formattedDate"
-        colors={["blue", "gray"]}
+        colors={["primary", "secondary"]}
         startEndOnly={true}
         valueFormatter={(value) => formatter(value as number)}
         showYAxis={false}

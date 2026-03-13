@@ -1,17 +1,19 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import Link from "next/link"
 import { Badge } from "@/components/Badge"
 import { Card, CardContent, CardHeader } from "@/components/Card"
 import { Select } from "@/components/Select"
 import { getBadgeColor } from "@/lib/badgeColors"
-import { RiCalendarLine, RiTimeLine, RiHistoryLine, RiCheckLine } from "@remixicon/react"
+import { RiCalendarLine, RiTimeLine, RiHistoryLine, RiCheckLine, RiUserSearchLine, RiArrowRightSLine } from "@remixicon/react"
 import { format } from "date-fns"
 import { cx } from "@/lib/utils"
 import { ListSkeleton } from "@/components/skeletons"
 import { PatientEmptyState } from "@/features/patients/detail/PatientEmptyState"
 import { getStatusBadgeVariant, getStatusLabel } from "@/features/appointments/appointments.utils"
 import { useAppTranslations } from "@/lib/useAppTranslations"
+import { getLeadsByPatientId } from "@/features/campaigns/campaigns.data"
 
 interface Appointment {
   id: string
@@ -28,6 +30,8 @@ interface Appointment {
 interface PatientHistoryTabProps {
   clinicId: string
   patientId: string
+  /** Patient for leads lookup (id + phone) */
+  patient?: { id: string; phone?: string | null } | null
   appointments: Appointment[]
   /** Completed tasks (TaskListItem or legacy shape with completed_at/created_by_name) */
   tasks?: Array<{
@@ -44,14 +48,14 @@ interface PatientHistoryTabProps {
 
 type HistoryItem = {
   id: string
-  type: "activity" | "appointment" | "task"
+  type: "activity" | "appointment" | "task" | "lead"
   date: Date
   data: any
 }
 
-type FilterType = "all" | "appointments" | "tasks" | "activity"
+type FilterType = "all" | "appointments" | "tasks" | "activity" | "leads"
 
-export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [] }: PatientHistoryTabProps) {
+export function PatientHistoryTab({ clinicId, patientId, patient, appointments, tasks = [] }: PatientHistoryTabProps) {
   const t = useAppTranslations()
   const [activityEvents, setActivityEvents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -124,9 +128,21 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
         })
       })
 
+    // Add leads (when patient is provided)
+    if (patient) {
+      getLeadsByPatientId(patient.id, patient.phone ?? undefined).forEach((lead) => {
+        items.push({
+          id: lead.id,
+          type: "lead",
+          date: new Date(lead.createdAt),
+          data: lead,
+        })
+      })
+    }
+
     // Sort by date (newest first)
     return items.sort((a, b) => b.date.getTime() - a.date.getTime())
-  }, [activityEvents, appointments, tasks])
+  }, [activityEvents, appointments, tasks, patient])
 
   // Filter history items based on selected filter
   const filteredItems = useMemo(() => {
@@ -134,6 +150,7 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
     if (filter === "appointments") return historyItems.filter(item => item.type === "appointment")
     if (filter === "tasks") return historyItems.filter(item => item.type === "task")
     if (filter === "activity") return historyItems.filter(item => item.type === "activity")
+    if (filter === "leads") return historyItems.filter(item => item.type === "lead")
     return historyItems
   }, [historyItems, filter])
 
@@ -144,6 +161,7 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
       appointments: historyItems.filter(item => item.type === "appointment").length,
       tasks: historyItems.filter(item => item.type === "task").length,
       activity: historyItems.filter(item => item.type === "activity").length,
+      leads: historyItems.filter(item => item.type === "lead").length,
     }
   }, [historyItems])
 
@@ -157,7 +175,7 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
         <div className="flex items-center gap-2">
           <RiHistoryLine className="size-4 text-primary-500/70 dark:text-primary-400/70 shrink-0" />
           <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-            {t.patients.history}
+            {t.patients.activity}
           </h3>
         </div>
         <Select
@@ -169,13 +187,15 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
           <option value="appointments">Appointments ({counts.appointments})</option>
           <option value="tasks">Tasks ({counts.tasks})</option>
           <option value="activity">Activity ({counts.activity})</option>
+          <option value="leads">{t.profile.requestsLeadsTitle} ({counts.leads})</option>
         </Select>
       </CardHeader>
       <CardContent className="p-4">
       {filteredItems.length === 0 ? (
         <PatientEmptyState
-          icon={RiHistoryLine}
-          title={t.profile.noHistoryYet}
+          icon={filter === "leads" ? RiUserSearchLine : RiHistoryLine}
+          title={filter === "leads" ? t.profile.requestsNoLeads : t.profile.noHistoryYet}
+          description={filter === "leads" ? t.profile.requestsNoLeadsDesc : undefined}
           variant="simple"
         />
       ) : (
@@ -190,7 +210,9 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
                 <div
                   className={cx(
                     "size-2 rounded-full",
-                    item.type === "appointment"
+                    item.type === "lead"
+                      ? "bg-amber-500"
+                      : item.type === "appointment"
                       ? item.data.status === "completed"
                         ? "bg-green-500"
                         : item.data.status === "cancelled" || item.data.status === "no_show"
@@ -208,7 +230,27 @@ export function PatientHistoryTab({ clinicId, patientId, appointments, tasks = [
               </div>
 
               <div className="space-y-1">
-                {item.type === "appointment" ? (
+                {item.type === "lead" ? (
+                  <Link
+                    href={`/leads?lead=${encodeURIComponent(item.data.id)}`}
+                    className="block hover:opacity-90 transition-opacity"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <RiUserSearchLine className="size-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {item.data.name}
+                          </p>
+                          <RiArrowRightSLine className="size-4 text-gray-400 shrink-0 rtl:rotate-180" />
+                        </div>
+                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                          {item.data.serviceInterest ?? item.data.phone}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ) : item.type === "appointment" ? (
                   <>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">

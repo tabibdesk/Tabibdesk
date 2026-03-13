@@ -42,7 +42,7 @@ export function ProgressChart({ metric }: ProgressChartProps) {
         data={chartData}
         index="date"
         categories={[label]}
-        colors={["blue"]}
+        colors={["primary"]}
         valueFormatter={formatValue}
         className="h-64"
         showLegend={false}

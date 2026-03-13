@@ -60,7 +60,7 @@ export default function PatientDetailPage() {
   const patientId = params.id as string
   const { showToast } = useToast()
 
-  const [activeTab, setActiveTab] = useState<string>("note")
+  const [activeTab, setActiveTab] = useState<string>("history")
   const [showAddTaskDrawer, setShowAddTaskDrawer] = useState(false)
   const [showAddPrescriptionDrawer, setShowAddPrescriptionDrawer] = useState(false)
   const [showAddPastMedicationDrawer, setShowAddPastMedicationDrawer] = useState(false)
@@ -241,7 +241,7 @@ export default function PatientDetailPage() {
     { id: "tasks", label: t.patients.tasks, icon: RiTaskLine },
     { id: "files", label: t.patients.files, icon: RiFolderLine },
     { id: "invoices", label: t.patients.invoices, icon: RiMoneyDollarCircleLine },
-    { id: "history", label: t.patients.history, icon: RiHistoryLine },
+    { id: "history", label: t.patients.activity, icon: RiHistoryLine },
   ]
 
   return (
@@ -521,6 +521,7 @@ export default function PatientDetailPage() {
           <PatientHistoryTab
             clinicId={patient.clinic_id || "clinic-001"}
             patientId={patientId}
+            patient={patient}
             appointments={appointments}
             tasks={tasks}
           />

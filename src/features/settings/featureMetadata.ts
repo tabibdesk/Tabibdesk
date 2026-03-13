@@ -49,6 +49,12 @@ export const FEATURE_METADATA: Record<FeatureKey, FeatureMetadata> = {
   },
 
   // Optional modules
+  campaign: {
+    key: "campaign",
+    name: "Leads",
+    description: "Lead management, campaign tracking, and ROI analytics",
+    group: "optional",
+  },
   labs: {
     key: "labs",
     name: "Labs",

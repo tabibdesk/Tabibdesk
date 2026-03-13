@@ -4,7 +4,7 @@ import { Button } from "@/components/Button"
 import Link from "next/link"
 import { siteConfig } from "@/app/siteConfig"
 
-export default function DashboardError({
+export default function HomeError({
   error: _error,
   reset,
 }: {
@@ -18,17 +18,17 @@ export default function DashboardError({
           Error
         </p>
         <h2 className="mt-3 text-lg font-semibold text-gray-900 dark:text-gray-50">
-          Failed to load dashboard
+          Failed to load home
         </h2>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Something went wrong while loading your dashboard. You can try again.
+          Something went wrong while loading your home. You can try again.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button variant="outline" onClick={reset} className="w-full sm:w-auto">
             Try again
           </Button>
           <Button asChild variant="primary" className="w-full sm:w-auto">
-            <Link href={siteConfig.baseLinks.dashboard}>Refresh dashboard</Link>
+            <Link href={siteConfig.baseLinks.app}>Refresh home</Link>
           </Button>
         </div>
       </div>

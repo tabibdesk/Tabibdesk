@@ -26,6 +26,7 @@ import {
   RiCalendarLine,
   RiTaskLine,
   RiBarChartLine,
+  RiMegaphoneLine,
   RiTestTubeLine,
   RiCapsuleLine,
   RiFileLine,
@@ -44,11 +45,13 @@ import {
 } from "@remixicon/react"
 import { PageSkeleton } from "@/components/skeletons"
 import { ReactivationRulesTab } from "./ReactivationRulesTab"
+import { LeadAutoAssignmentTab } from "./LeadAutoAssignmentTab"
 import {
   ClinicSettingsDrawer,
   type BranchFormValues,
 } from "./ClinicSettingsDrawer"
 import { AvailabilityDrawer, type AvailabilityRecordPayload } from "./AvailabilityDrawer"
+import { OnlineAppointmentsCard } from "./OnlineAppointmentsCard"
 import { getClinicAppointmentTypes, setClinicAppointmentTypes } from "@/api/pricing.api"
 import { getAppointmentTypeLabel } from "@/features/appointments/appointmentTypes"
 import * as availabilityApi from "@/features/appointments/availability.api"
@@ -82,6 +85,7 @@ function SettingsPageContent() {
   const [activeTab, setActiveTab] = useState<TabId>(() =>
     isValidTabId(tabFromUrl) ? tabFromUrl : "account"
   )
+  const [automationSubTab, setAutomationSubTab] = useState<"automation" | "leadRouting">("automation")
   const { currentUser } = useUserClinic()
   const t = useAppTranslations()
 
@@ -155,7 +159,38 @@ function SettingsPageContent() {
         {activeTab === "team" && <TeamTab />}
         {activeTab === "appointments" && <AppointmentsTab />}
         {activeTab === "patient" && <PatientTab />}
-        {activeTab === "automation" && <ReactivationRulesTab />}
+        {activeTab === "automation" && (
+          <div className="space-y-4">
+            <div className="border-b border-gray-200 dark:border-gray-800">
+              <nav className="-mb-px flex gap-4 sm:gap-6" aria-label="Automation sub-tabs">
+                <button
+                  onClick={() => setAutomationSubTab("automation")}
+                  className={`whitespace-nowrap border-b-2 px-1 py-2 text-xs font-medium transition-colors sm:py-3 sm:text-sm ${
+                    automationSubTab === "automation"
+                      ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300"
+                  }`}
+                  aria-current={automationSubTab === "automation" ? "page" : undefined}
+                >
+                  {t.settings.automationGeneral}
+                </button>
+                <button
+                  onClick={() => setAutomationSubTab("leadRouting")}
+                  className={`whitespace-nowrap border-b-2 px-1 py-2 text-xs font-medium transition-colors sm:py-3 sm:text-sm ${
+                    automationSubTab === "leadRouting"
+                      ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300"
+                  }`}
+                  aria-current={automationSubTab === "leadRouting" ? "page" : undefined}
+                >
+                  {t.settings.leadAutoAssignment}
+                </button>
+              </nav>
+            </div>
+            {automationSubTab === "automation" && <ReactivationRulesTab />}
+            {automationSubTab === "leadRouting" && <LeadAutoAssignmentTab />}
+          </div>
+        )}
         {activeTab === "modules" && <ModulesTab canEdit={canEditModules} />}
       </div>
     </div>
@@ -882,6 +917,7 @@ function ModulesTab({ canEdit }: { canEdit: boolean }) {
       title: t.settings.optionalModules,
       description: t.settings.additionalFeatures,
       features: [
+        { key: "campaign" as const, name: t.nav.leads, description: t.settings.leadsDesc, icon: RiMegaphoneLine },
         { key: "labs" as const, name: t.settings.labs, description: t.settings.labsDesc, icon: RiTestTubeLine },
         { key: "medications" as const, name: t.settings.medications, description: t.settings.medicationsDesc, icon: RiCapsuleLine },
         { key: "files" as const, name: t.settings.files, description: t.settings.filesDesc, icon: RiFileLine },
@@ -1450,7 +1486,10 @@ function AppointmentsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Card 1: Appointment Types */}
+      {/* Card 1: Online Appointments (Google Calendar + Meet links) */}
+      <OnlineAppointmentsCard />
+
+      {/* Card 2: Appointment Types */}
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
           <CardTitle>{t.settings.appointmentTypes}</CardTitle>
@@ -1530,7 +1569,7 @@ function AppointmentsTab() {
         </CardContent>
       </Card>
 
-      {/* Card 2: Availability */}
+      {/* Card 3: Availability */}
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
           <CardTitle>{t.settings.availability}</CardTitle>
@@ -1598,7 +1637,7 @@ function AppointmentsTab() {
         onSave={handleSaveAvailabilityDrawer}
       />
 
-      {/* Card 3: Buffer */}
+      {/* Card 4: Buffer */}
       <Card>
         <CardHeader>
           <CardTitle>{t.settings.appointmentSettings}</CardTitle>

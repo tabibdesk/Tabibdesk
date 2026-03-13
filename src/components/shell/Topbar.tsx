@@ -19,7 +19,7 @@ function getPageNavKey(pathname: string, role: "doctor" | "assistant" | "manager
 
   // Check for pathname starts with (for detail pages)
   const pathMatch = navigation.find((item) => {
-    if (item.href === "/dashboard") return false
+    if (item.href === "/home") return false
     if (item.href === "/tasks") return pathname === "/tasks"
     if (item.href === "/insights") return pathname === "/insights"
     return pathname.startsWith(item.href)

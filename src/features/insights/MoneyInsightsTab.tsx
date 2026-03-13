@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Card } from "@/components/Card"
 import { Badge } from "@/components/Badge"
-import { BarChart } from "@tremor/react"
+import { FunnelStyleChart } from "@/components/FunnelStyleChart"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { getBadgeColor } from "@/lib/badgeColors"
 import { useUserClinic } from "@/contexts/user-clinic-context"
@@ -323,18 +323,10 @@ export function MoneyInsightsTab({ dateRangePreset }: MoneyInsightsTabProps) {
             {t.insights.incomeChannelDistribution}
           </h3>
           {incomeChartData.length > 0 ? (
-            <BarChart
-              data={incomeChartData}
-              index="name"
-              categories={["value"]}
-              colors={["emerald"]}
-              layout="horizontal"
+            <FunnelStyleChart
+              data={incomeChartData.map((d) => ({ label: d.name, value: d.value }))}
               valueFormatter={(v) => `EGP ${Number(v).toLocaleString()}`}
-              yAxisWidth={100}
-              showLegend={false}
-              showGridLines={true}
-              barCategoryGap="40%"
-              className="h-64 mt-2"
+              barColor="bg-primary-600"
             />
           ) : (
             <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">
@@ -348,18 +340,10 @@ export function MoneyInsightsTab({ dateRangePreset }: MoneyInsightsTabProps) {
             {t.insights.expensesDistribution}
           </h3>
           {expenseChartData.length > 0 ? (
-            <BarChart
-              data={expenseChartData}
-              index="name"
-              categories={["value"]}
-              colors={["blue"]}
-              layout="horizontal"
+            <FunnelStyleChart
+              data={expenseChartData.map((d) => ({ label: d.name, value: d.value }))}
               valueFormatter={(v) => `EGP ${Number(v).toLocaleString()}`}
-              yAxisWidth={100}
-              showLegend={false}
-              showGridLines={true}
-              barCategoryGap="40%"
-              className="h-64 mt-2"
+              barColor="bg-primary-600"
             />
           ) : (
             <p className="text-sm text-gray-500 dark:text-gray-400 py-8 text-center">

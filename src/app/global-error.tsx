@@ -67,7 +67,7 @@ export default function GlobalError({
               marginBottom: 0,
             }}
           >
-            You can try again or head back to the dashboard.
+            You can try again or head back to home.
           </p>
           <div
             style={{
@@ -94,7 +94,7 @@ export default function GlobalError({
               Try again
             </button>
             <a
-              href="/dashboard"
+              href="/home"
               style={{
                 display: "block",
                 padding: "0.625rem 1rem",
@@ -106,11 +106,11 @@ export default function GlobalError({
                 textDecoration: "none",
               }}
             >
-              Go to dashboard
+              Go to home
             </a>
           </div>
           <a
-            href="/dashboard"
+            href="/home"
             style={{
               display: "inline-block",
               marginTop: "3rem",

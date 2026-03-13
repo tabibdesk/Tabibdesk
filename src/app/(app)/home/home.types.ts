@@ -3,7 +3,7 @@ import { mockData } from "@/data/mock/mock-data"
 
 export type QueueStatus = "now" | "next" | "waiting" | "online_now" | "no_show" | "in_progress"
 
-export interface DashboardAppointment {
+export interface HomeAppointment {
   id: string
   patient_id: string
   patientName: string
@@ -15,7 +15,7 @@ export interface DashboardAppointment {
   online_call_link?: string
 }
 
-export function buildCreateInvoiceAppointments(apt: DashboardAppointment): PatientAppointment[] {
+export function buildCreateInvoiceAppointments(apt: HomeAppointment): PatientAppointment[] {
   const full = mockData.appointments.find((a) => a.id === apt.id)
   if (!full) {
     return [

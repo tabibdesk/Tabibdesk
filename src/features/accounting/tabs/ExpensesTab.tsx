@@ -2,7 +2,7 @@
 
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
+import { Card, CardContent } from "@/components/Card"
 import { Button } from "@/components/Button"
 import { Skeleton } from "@/components/Skeleton"
 import { useExpenses } from "../hooks/useExpenses"
@@ -133,45 +133,35 @@ export function ExpensesTab({ dateRangePreset }: ExpensesTabProps) {
     <div className="space-y-4 sm:space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Total Expenses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : <p className="text-xl sm:text-2xl font-bold break-words">{totalExpenses.toFixed(2)} EGP</p>}
-          </CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
+            {loading ? <Skeleton className="mt-1 h-8 w-24" /> : <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{totalExpenses.toFixed(2)} EGP</p>}
+          </div>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Supplies</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : <p className="text-xl sm:text-2xl font-bold break-words">{suppliesTotal.toFixed(2)} EGP</p>}
-          </CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Supplies</p>
+            {loading ? <Skeleton className="mt-1 h-8 w-24" /> : <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{suppliesTotal.toFixed(2)} EGP</p>}
+          </div>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Rent</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : <p className="text-xl sm:text-2xl font-bold break-words">{rentTotal.toFixed(2)} EGP</p>}
-          </CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rent</p>
+            {loading ? <Skeleton className="mt-1 h-8 w-24" /> : <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{rentTotal.toFixed(2)} EGP</p>}
+          </div>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Salaries</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : <p className="text-xl sm:text-2xl font-bold break-words">{salariesTotal.toFixed(2)} EGP</p>}
-          </CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Salaries</p>
+            {loading ? <Skeleton className="mt-1 h-8 w-24" /> : <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{salariesTotal.toFixed(2)} EGP</p>}
+          </div>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Other</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? <Skeleton className="h-8 w-24" /> : <p className="text-xl sm:text-2xl font-bold break-words">{otherTotal.toFixed(2)} EGP</p>}
-          </CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Other</p>
+            {loading ? <Skeleton className="mt-1 h-8 w-24" /> : <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{otherTotal.toFixed(2)} EGP</p>}
+          </div>
         </Card>
       </div>
 

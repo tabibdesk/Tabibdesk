@@ -7,12 +7,15 @@ import { Select } from "@/components/Select"
 import { MetricCards } from "./MetricCards"
 import { ReactivationDashboard } from "@/features/reactivation/ReactivationDashboard"
 import { MoneyInsightsTab } from "./MoneyInsightsTab"
-import { AdSpendInsights } from "./AdSpendInsights"
+import { MarketingInsightsTab } from "./MarketingInsightsTab"
 import { PerformanceInsightsTab } from "./PerformanceInsightsTab"
 import type { TimeRange } from "./insights.types"
 import type { DateRangePreset } from "@/features/accounting/components/AccountingToolbar"
 
-type InsightsTabId = "visits" | "money" | "marketing" | "performance"
+type InsightsTabId = "visits" | "money" | "marketing" | "reactivation" | "performance"
+
+const TAB_ACTIVE = "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
+const TAB_INACTIVE = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400"
 
 export function InsightsPage() {
   const t = useAppTranslations()
@@ -20,27 +23,22 @@ export function InsightsPage() {
   const [moneyDateRangePreset, setMoneyDateRangePreset] = useState<DateRangePreset>("30days")
   const [activeTab, setActiveTab] = useState<InsightsTabId>("visits")
 
-  const showTimeRange = activeTab === "visits" || activeTab === "marketing" || activeTab === "performance"
   const showMoneyDateRange = activeTab === "money"
 
+  const tabs: { id: InsightsTabId; label: string }[] = [
+    { id: "visits", label: t.insights.visitsTab },
+    { id: "money", label: t.insights.moneyTab },
+    { id: "marketing", label: t.insights.marketingTab },
+    { id: "reactivation", label: t.insights.reactivationTab },
+    { id: "performance", label: t.insights.performanceTab },
+  ]
+
   return (
-    <div className="page-content">
+    <div className="page-content flex flex-col min-h-0 pb-12">
       <PageHeader
         title={t.insights.title}
         actions={
-          showTimeRange ? (
-            <Select
-              id="time-range"
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value as TimeRange)}
-              className="w-32"
-            >
-              <option value="today">{t.insights.today}</option>
-              <option value="7d">{t.insights.days7}</option>
-              <option value="30d">{t.insights.days30}</option>
-              <option value="custom">{t.insights.custom}</option>
-            </Select>
-          ) : showMoneyDateRange ? (
+          showMoneyDateRange ? (
             <Select
               id="money-date-range"
               value={moneyDateRangePreset}
@@ -54,69 +52,43 @@ export function InsightsPage() {
               <option value="thismonth">{t.accounting.thisMonth}</option>
               <option value="all">{t.accounting.allTime}</option>
             </Select>
-          ) : null
+          ) : (
+            <Select
+              id="time-range"
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+              className="w-32"
+            >
+              <option value="today">{t.insights.today}</option>
+              <option value="7d">{t.insights.days7}</option>
+              <option value="30d">{t.insights.days30}</option>
+              <option value="custom">{t.insights.custom}</option>
+            </Select>
+          )
         }
       />
 
-      <div className="!mt-0 mb-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="mt-6 shrink-0 border-b border-gray-200 dark:border-gray-800">
         <nav className="-mb-px flex gap-4 overflow-x-auto pb-px sm:gap-8" aria-label="Insights tabs">
-          <button
-            onClick={() => setActiveTab("visits")}
-            className={`shrink-0 border-b-2 px-1 py-3 sm:py-4 text-sm font-medium ${
-              activeTab === "visits"
-                ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400"
-            }`}
-          >
-            {t.insights.visitsTab}
-          </button>
-          <button
-            onClick={() => setActiveTab("money")}
-            className={`shrink-0 border-b-2 px-1 py-3 sm:py-4 text-sm font-medium ${
-              activeTab === "money"
-                ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400"
-            }`}
-          >
-            {t.insights.moneyTab}
-          </button>
-          <button
-            onClick={() => setActiveTab("marketing")}
-            className={`shrink-0 border-b-2 px-1 py-3 sm:py-4 text-sm font-medium ${
-              activeTab === "marketing"
-                ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400"
-            }`}
-          >
-            {t.insights.marketingTab}
-          </button>
-          <button
-            onClick={() => setActiveTab("performance")}
-            className={`shrink-0 border-b-2 px-1 py-3 sm:py-4 text-sm font-medium ${
-              activeTab === "performance"
-                ? "border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400"
-                : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400"
-            }`}
-          >
-            {t.insights.performanceTab}
-          </button>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`shrink-0 border-b-2 px-1 py-3 sm:py-4 text-sm font-medium ${
+                activeTab === tab.id ? TAB_ACTIVE : TAB_INACTIVE
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </nav>
       </div>
 
-      <div className="space-y-6">
+      <div className="min-h-[55vh] flex-1 space-y-6 pb-4">
         {activeTab === "visits" && <MetricCards />}
         {activeTab === "money" && <MoneyInsightsTab dateRangePreset={moneyDateRangePreset} />}
-        {activeTab === "marketing" && (
-          <div className="space-y-8">
-            <AdSpendInsights timeRange={timeRange} />
-            <div>
-              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                {t.insights.reactivationTab}
-              </h3>
-              <ReactivationDashboard />
-            </div>
-          </div>
-        )}
+        {activeTab === "marketing" && <MarketingInsightsTab />}
+        {activeTab === "reactivation" && <ReactivationDashboard />}
         {activeTab === "performance" && <PerformanceInsightsTab timeRange={timeRange} />}
       </div>
     </div>

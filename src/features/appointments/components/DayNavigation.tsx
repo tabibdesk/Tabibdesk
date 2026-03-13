@@ -63,10 +63,10 @@ export function DayNavigation({ currentDate, onDateChange }: DayNavigationProps)
               type="button"
               className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              <div className="bg-primary-50 dark:bg-primary-900/30 p-1.5 sm:p-2 rounded-xl text-primary-600 dark:text-primary-400 shrink-0">
-                <RiCalendarLine className="size-4 sm:size-5" />
+              <div className="bg-primary-50 dark:bg-primary-900/30 p-1.5 rounded-xl text-primary-600 dark:text-primary-400 shrink-0">
+                <RiCalendarLine className="size-4" />
               </div>
-              <h2 className="font-bold text-sm sm:text-lg text-gray-800 dark:text-gray-100 whitespace-nowrap">
+              <h2 className="text-xs font-semibold sm:text-sm text-gray-800 dark:text-gray-100 whitespace-nowrap">
                 <span className="sm:hidden">{format(currentDate, "MMM d, yyyy", { locale: DATEPICKER_LOCALE })}</span>
                 <span className="hidden sm:inline">{format(currentDate, "EEEE, MMMM d, yyyy", { locale: DATEPICKER_LOCALE })}</span>
               </h2>

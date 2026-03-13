@@ -175,7 +175,7 @@ Widgets (like Now Queue and Today's Appointments) have a specific "dense" design
 ### Reference Implementation
 
 See `src/features/patients/PatientsTable.tsx` and `src/features/patients/PatientsCards.tsx` for canonical examples of proper font hierarchy usage.
-See `src/app/(app)/dashboard/page.tsx` for the canonical widget implementation.
+See `src/app/(app)/home/page.tsx` for the canonical widget implementation.
 
 ## RTL & i18n (Internationalization)
 

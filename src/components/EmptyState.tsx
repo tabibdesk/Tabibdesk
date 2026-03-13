@@ -78,7 +78,7 @@ export function EmptyState({
 
   if (variant === "card") {
     return (
-      <Card className={cx("overflow-hidden border-none shadow-card hover:shadow-xl transition-shadow duration-500", className)}>
+      <Card className={cx("overflow-hidden border-none shadow-card", className)}>
         <CardContent className="py-10 flex items-center justify-center bg-gradient-to-b from-white to-gray-50/30 dark:from-gray-900 dark:to-gray-950/50" style={{ minHeight }}>
           {content}
         </CardContent>

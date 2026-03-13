@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { SearchInput } from "@/components/SearchInput"
 import { Label } from "@/components/Label"
 import { Button } from "@/components/Button"
@@ -20,8 +20,17 @@ export interface Patient {
   email: string | null
 }
 
+interface LeadForSelector {
+  id: string
+  name: string
+  phone: string
+  email?: string
+}
+
 interface PatientSelectorProps {
   initialPatient?: Patient | null
+  /** When passed (e.g. from leads page), lookup by phone: show suggested match or default to new patient with prefilled form */
+  lead?: LeadForSelector | null
   onPatientSelect: (patient: Patient | null) => void
   /** When true, only show search (no Existing/New toggle, no create-patient form). */
   searchOnly?: boolean
@@ -29,8 +38,13 @@ interface PatientSelectorProps {
   required?: boolean
 }
 
+function normalizePhone(phone: string): string {
+  return phone.replace(/\D/g, "")
+}
+
 export function PatientSelector({
   initialPatient = null,
+  lead = null,
   onPatientSelect,
   searchOnly = false,
   showEmail = false,
@@ -43,6 +57,9 @@ export function PatientSelector({
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<Patient[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [suggestedPatient, setSuggestedPatient] = useState<Patient | null>(null)
+  const [isCheckingLeadMatch, setIsCheckingLeadMatch] = useState(false)
+  const leadIdRef = useRef<string | null>(null)
   
   // New Patient Form State
   const [newPatientForm, setNewPatientForm] = useState<PatientFormData>({
@@ -63,10 +80,69 @@ export function PatientSelector({
     if (initialPatient != null) {
       setSelectedPatient(initialPatient)
       setPatientMode("existing")
+      setSuggestedPatient(null)
     } else {
       setSelectedPatient(null)
     }
   }, [initialPatient])
+
+  // When lead is passed: lookup patient by phone; if match show suggested, else default to new with prefilled form
+  useEffect(() => {
+    if (!lead) {
+      setSuggestedPatient(null)
+      leadIdRef.current = null
+      return
+    }
+    if (leadIdRef.current === lead.id) return
+    leadIdRef.current = lead.id
+    const digits = normalizePhone(lead.phone)
+    if (digits.length < 2) {
+      setPatientMode("new")
+      const [first = "", ...rest] = lead.name.trim().split(" ")
+      setNewPatientForm((prev) => ({
+        ...prev,
+        first_name: first,
+        last_name: rest.join(" ") || "",
+        phone: lead.phone,
+        email: showEmail ? (lead.email ?? "") : prev.email,
+      }))
+      return
+    }
+    setIsCheckingLeadMatch(true)
+    fetch(`/api/patients/search?q=${encodeURIComponent(digits)}&demo=${isDemoMode}`)
+      .then((res) => res.json())
+      .then((data: Patient[]) => {
+        const match = data.find((p) => normalizePhone(p.phone) === digits || p.phone.replace(/\D/g, "").includes(digits))
+        if (match) {
+          setSuggestedPatient(match)
+          setPatientMode("existing")
+        } else {
+          setSuggestedPatient(null)
+          setPatientMode("new")
+          const [first = "", ...rest] = lead.name.trim().split(" ")
+          setNewPatientForm((prev) => ({
+            ...prev,
+            first_name: first,
+            last_name: rest.join(" ") || "",
+            phone: lead.phone,
+            email: showEmail ? (lead.email ?? "") : prev.email,
+          }))
+        }
+      })
+      .catch(() => {
+        setSuggestedPatient(null)
+        setPatientMode("new")
+        const [first = "", ...rest] = lead.name.trim().split(" ")
+        setNewPatientForm((prev) => ({
+          ...prev,
+          first_name: first,
+          last_name: rest.join(" ") || "",
+          phone: lead.phone,
+          email: showEmail ? (lead.email ?? "") : prev.email,
+        }))
+      })
+      .finally(() => setIsCheckingLeadMatch(false))
+  }, [lead, isDemoMode, showEmail])
 
   // Patient Search with Debounce
   useEffect(() => {
@@ -248,11 +324,39 @@ export function PatientSelector({
             placeholder={t.patients.searchSelectorPlaceholder}
             value={searchTerm}
             onSearchChange={setSearchTerm}
-            loading={isSearching}
+            loading={isSearching || isCheckingLeadMatch}
             className="h-11 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 rounded-xl"
           />
 
-          {searchResults.length > 0 ? (
+          {/* Suggested match from lead - shown below search when lead has matching patient */}
+          {suggestedPatient && !searchTerm && (
+            <div className="space-y-1.5 mt-2">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                {t.patients.suggestedMatchFromLead}
+              </p>
+              <button
+                type="button"
+                onClick={() => handleExistingPatientSelect(suggestedPatient)}
+                className="w-full rounded-xl border border-primary-200 bg-primary-50/50 p-2.5 text-left transition-all hover:border-primary-300 hover:bg-primary-50 dark:border-primary-800 dark:bg-primary-900/20 dark:hover:bg-primary-900/30"
+              >
+                <div className="flex flex-col">
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-50">
+                    {suggestedPatient.first_name} {suggestedPatient.last_name}
+                  </p>
+                  <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                    <span>
+                      {suggestedPatient.phone.slice(0, Math.min(4, suggestedPatient.phone.length))}•••
+                      {suggestedPatient.phone.slice(-3)}
+                    </span>
+                    <span className="text-gray-300">•</span>
+                    <span>Last visit: 2w ago</span>
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
+
+          {searchTerm.length >= 2 && searchResults.length > 0 ? (
             <div className="max-h-48 space-y-2 overflow-y-auto pr-1 mt-2">
               {searchResults.map((patient) => (
                 <button
@@ -266,7 +370,10 @@ export function PatientSelector({
                       {patient.first_name} {patient.last_name}
                     </p>
                     <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-                      <span>{patient.phone.slice(0, 4)}•••{patient.phone.slice(-3)}</span>
+                      <span>
+                        {patient.phone.slice(0, Math.min(4, patient.phone.length))}•••
+                        {patient.phone.slice(-3)}
+                      </span>
                       <span className="text-gray-300">•</span>
                       <span>Last visit: 2w ago</span>
                     </div>
@@ -275,7 +382,8 @@ export function PatientSelector({
               ))}
             </div>
           ) : (
-            searchTerm.length >= 2 && !isSearching && (
+            searchTerm.length >= 2 &&
+            !isSearching && (
               <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center dark:border-gray-800 mt-2">
                 <p className="text-xs text-gray-500">No patients found</p>
               </div>

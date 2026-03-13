@@ -3,16 +3,16 @@
 import { useState, useEffect } from "react"
 import { mockAppointments } from "@/data/mock/mock-data"
 import { listPayments } from "@/api/payments.api"
-import type { DashboardAppointment } from "./dashboard.types"
-import type { QueueStatus } from "./dashboard.types"
+import type { HomeAppointment } from "./home.types"
+import type { QueueStatus } from "./home.types"
 
-export function useDashboardData(
+export function useHomeData(
   isDemoMode: boolean,
   role: string,
   currentClinic: { id: string } | null
 ) {
   const [loading, setLoading] = useState(true)
-  const [appointments, setAppointments] = useState<DashboardAppointment[]>([])
+  const [appointments, setAppointments] = useState<HomeAppointment[]>([])
   const [paidAppointments, setPaidAppointments] = useState<Set<string>>(new Set())
 
   const loadPaymentStatus = async () => {
@@ -45,7 +45,7 @@ export function useDashboardData(
     }
   }
 
-  const fetchDashboardData = async () => {
+  const fetchHomeData = async () => {
     setLoading(true)
 
     if (isDemoMode) {
@@ -119,7 +119,7 @@ export function useDashboardData(
   }
 
   useEffect(() => {
-    fetchDashboardData()
+    fetchHomeData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDemoMode, role])
 
@@ -136,7 +136,7 @@ export function useDashboardData(
     setAppointments,
     paidAppointments,
     setPaidAppointments,
-    fetchDashboardData,
+    fetchHomeData,
     loadPaymentStatus,
   }
 }

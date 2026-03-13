@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Card } from "@/components/Card"
-import { BarChart } from "@tremor/react"
+import { FunnelStyleChart } from "@/components/FunnelStyleChart"
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useDemo } from "@/contexts/demo-context"
@@ -120,63 +120,56 @@ export function PerformanceInsightsTab({ timeRange }: PerformanceInsightsTabProp
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {clinicTotalLeads > 0 && (
-        <Card className="insight-card p-4 max-w-sm">
-          <div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="insight-card p-4 max-w-sm">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
               {t.insights.performanceLeadsCreated}
             </p>
-            <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
               {clinicTotalLeads.toLocaleString()}
             </p>
-          </div>
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {t.insights.performanceLeadsClinicTotal}
-          </p>
-        </Card>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              {t.insights.performanceLeadsClinicTotal}
+            </p>
+          </Card>
+        </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {hasClosingRate && (
-          <Card className="insight-card p-4">
+          <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
               {t.insights.performanceTaskClosingRate}
             </h3>
-            <BarChart
-              data={closingRateData}
-              index="member"
-              categories={[closingRateKey]}
-              colors={["blue"]}
-              layout="horizontal"
-              valueFormatter={(v) => `${v}%`}
-              yAxisWidth={120}
-              showLegend={false}
-              showGridLines={true}
-              barCategoryGap="40%"
-              className="h-64 mt-2"
-            />
-          </Card>
+            <Card className="insight-card p-4">
+              <FunnelStyleChart
+                data={closingRateData.map((m) => ({
+                  label: m.member,
+                  value: m[closingRateKey as keyof typeof m] as number,
+                }))}
+                valueFormatter={(v) => `${v}%`}
+                barColor="bg-primary-600"
+              />
+            </Card>
+          </div>
         )}
 
-        <Card className="insight-card p-4">
+        <div>
           <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
             {t.insights.performanceLeadsCreated}
           </h3>
-          <BarChart
-            data={leadsData}
-            index="member"
-            categories={[leadsKey]}
-            colors={["emerald"]}
-            layout="horizontal"
-            valueFormatter={(v) => v.toString()}
-            yAxisWidth={120}
-            showLegend={false}
-            showGridLines={true}
-            barCategoryGap="40%"
-            className="h-64 mt-2"
-          />
-        </Card>
+          <Card className="insight-card p-4">
+            <FunnelStyleChart
+              data={leadsData.map((m) => ({
+                label: m.member,
+                value: m[leadsKey as keyof typeof m] as number,
+              }))}
+              barColor="bg-primary-600"
+            />
+          </Card>
+        </div>
       </div>
     </div>
   )

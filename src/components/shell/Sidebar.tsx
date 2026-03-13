@@ -104,7 +104,7 @@ export function Sidebar({ role }: SidebarProps) {
           <ul className="space-y-1">
             {filteredNavigation.map((item) => {
               const active = isActiveRoute(item.href, pathname)
-              const showSeparatorAfter = item.navKey === "insights"
+              const showSeparatorBefore = item.navKey === "bot"
 
               const linkContent = (
                 <Link
@@ -137,6 +137,11 @@ export function Sidebar({ role }: SidebarProps) {
 
               return (
                 <React.Fragment key={item.navKey}>
+                  {showSeparatorBefore && (
+                    <li className="py-2" aria-hidden="true">
+                      <div className={cx("border-t border-gray-200 dark:border-gray-700", isCollapsed ? "mx-2" : "mx-4")} />
+                    </li>
+                  )}
                   <li>
                     {isCollapsed ? (
                       <Tooltip content={t.nav[item.navKey]} side={isRtl ? "left" : "right"}>
@@ -146,11 +151,6 @@ export function Sidebar({ role }: SidebarProps) {
                       linkContent
                     )}
                   </li>
-                  {showSeparatorAfter && (
-                    <li className="py-2" aria-hidden="true">
-                      <div className={cx("border-t border-gray-200 dark:border-gray-700", isCollapsed ? "mx-2" : "mx-4")} />
-                    </li>
-                  )}
                 </React.Fragment>
               )
             })}

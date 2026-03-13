@@ -151,9 +151,9 @@ export function InvoicesTab({ patientId, clinicId, refreshTrigger = 0 }: Invoice
                 role={canOpen ? "button" : undefined}
                 onClick={canOpen ? () => setViewInvoiceId(it.id) : undefined}
                 onKeyDown={canOpen ? (e) => e.key === "Enter" && setViewInvoiceId(it.id) : undefined}
-                className={`group flex items-start gap-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 transition-all ${
+                className={`group flex items-start gap-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-card p-4 transition-all ${
                   canOpen
-                    ? "cursor-pointer hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-sm"
+                    ? "cursor-pointer hover:border-gray-200 dark:hover:border-gray-700"
                     : "opacity-60"
                 }`}
               >

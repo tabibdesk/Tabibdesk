@@ -23,6 +23,7 @@ export function BookAppointmentFlow({
   preSelectedSlot = null,
   rescheduleAppointmentId = null,
   waitlistEntry = null,
+  lead = null,
   clinicId,
   doctorId,
   onBookingComplete,
@@ -77,6 +78,7 @@ export function BookAppointmentFlow({
       {currentStep === "patient" && (
         <PatientStep
           initialPatient={initialPatient}
+          lead={lead}
           onPatientSelect={state.handlePatientSelect}
         />
       )}

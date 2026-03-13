@@ -21,7 +21,7 @@ export default function Error({
           Something went wrong
         </h1>
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          You can try again or head back to the dashboard.
+          You can try again or head back to home.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button
@@ -32,11 +32,11 @@ export default function Error({
             Try again
           </Button>
           <Button asChild variant="primary" className="w-full sm:w-auto">
-            <Link href={siteConfig.baseLinks.dashboard}>Go to dashboard</Link>
+            <Link href={siteConfig.baseLinks.app}>Go to home</Link>
           </Button>
         </div>
         <Link
-          href={siteConfig.baseLinks.dashboard}
+          href={siteConfig.baseLinks.app}
           className="mt-12 inline-block text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
         >
           {siteConfig.name}

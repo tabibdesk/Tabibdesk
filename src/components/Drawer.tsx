@@ -101,12 +101,15 @@ DrawerContent.displayName = "DrawerContent"
 
 const DrawerHeader = React.forwardRef<
   HTMLDivElement,
-  React.ComponentPropsWithoutRef<"div">
->(({ children, className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<"div"> & { noBorder?: boolean }
+>(({ children, className, noBorder, ...props }, ref) => {
   return (
     <div
       ref={ref}
-      className="flex items-start justify-between gap-x-4 border-b border-gray-200 pb-4 dark:border-gray-900"
+      className={cx(
+        "flex items-start justify-between gap-x-4 pb-4",
+        !noBorder && "border-b border-gray-200 dark:border-gray-900"
+      )}
       {...props}
     >
       <div className={cx("mt-1 flex flex-col gap-y-1", className)}>

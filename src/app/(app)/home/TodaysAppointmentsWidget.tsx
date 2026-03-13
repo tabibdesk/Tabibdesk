@@ -8,12 +8,12 @@ import { getBadgeColor } from "@/lib/badgeColors"
 import { RiCalendarLine, RiCheckboxCircleLine, RiCloseLine, RiMenuLine, RiMoneyDollarCircleLine } from "@remixicon/react"
 import { WidgetSkeleton } from "@/components/skeletons"
 import { EmptyState } from "@/components/EmptyState"
-import type { DashboardAppointment } from "./dashboard.types"
+import type { HomeAppointment } from "./home.types"
 import { getTimeDisplay, getIconColorClass, getIconBackgroundClass } from "./useQueueActions"
 
 interface TodaysAppointmentsWidgetProps {
   loading: boolean
-  appointments: DashboardAppointment[]
+  appointments: HomeAppointment[]
   paidAppointments: Set<string>
   draggedIndex: number | null
   dragOverIndex: number | null
@@ -24,11 +24,11 @@ interface TodaysAppointmentsWidgetProps {
   onDragLeave: () => void
   onDrop: (e: React.DragEvent, index: number) => void
   onDragEnd: () => void
-  onMarkArrived: (apt: DashboardAppointment) => void
-  onCreateInvoice: (apt: DashboardAppointment) => void
-  onNoShow: (apt: DashboardAppointment) => void
-  onUnmarkArrived: (apt: DashboardAppointment) => void
-  onUnmarkPaid: (apt: DashboardAppointment) => void
+  onMarkArrived: (apt: HomeAppointment) => void
+  onCreateInvoice: (apt: HomeAppointment) => void
+  onNoShow: (apt: HomeAppointment) => void
+  onUnmarkArrived: (apt: HomeAppointment) => void
+  onUnmarkPaid: (apt: HomeAppointment) => void
 }
 
 export function TodaysAppointmentsWidget({
@@ -56,7 +56,7 @@ export function TodaysAppointmentsWidget({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.todaysAppointments}</h2>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.home.todaysAppointments}</h2>
         </div>
         <WidgetSkeleton rows={5} />
       </div>
@@ -66,7 +66,7 @@ export function TodaysAppointmentsWidget({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.dashboard.todaysAppointments}</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">{t.home.todaysAppointments}</h2>
       </div>
       <div className="space-y-3">
         {appointments.length > 0 ? (
@@ -115,7 +115,7 @@ export function TodaysAppointmentsWidget({
                         </Link>
                         {(isNow || isNext) ? (
                           <Badge color={getBadgeColor(badgeVariant)} size="xs">
-                            {badgeText === "now" ? t.dashboard.now : t.dashboard.next}
+                            {badgeText === "now" ? t.home.now : t.home.next}
                           </Badge>
                         ) : (
                           <span className="shrink-0 text-[10px] font-bold tracking-widest text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-sm lowercase">
@@ -130,9 +130,9 @@ export function TodaysAppointmentsWidget({
                               e.stopPropagation()
                               onUnmarkArrived(apt)
                             }}
-                            title={t.dashboard.unmarkArrived}
+                            title={t.home.unmarkArrived}
                           >
-                            {t.dashboard.arrived}
+                            {t.home.arrived}
                           </Badge>
                         )}
                         {paidAppointments.has(apt.id) && (
@@ -143,14 +143,14 @@ export function TodaysAppointmentsWidget({
                               e.stopPropagation()
                               onUnmarkPaid(apt)
                             }}
-                            title={t.dashboard.unmarkPaid}
+                            title={t.home.unmarkPaid}
                           >
-                            {t.dashboard.paid}
+                            {t.home.paid}
                           </Badge>
                         )}
                         {apt.queueStatus === "no_show" && (
                           <Badge color="red" size="xs">
-                            {t.dashboard.noShow}
+                            {t.home.noShow}
                           </Badge>
                         )}
                       </div>
@@ -173,10 +173,10 @@ export function TodaysAppointmentsWidget({
                           }}
                           disabled={markingArrived === apt.id}
                           className="btn-secondary-widget bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
-                          title={t.dashboard.markAsArrived}
+                          title={t.home.markAsArrived}
                         >
                           <RiCheckboxCircleLine className="size-4" />
-                          <span className="hidden sm:inline lowercase">{t.dashboard.arrived}</span>
+                          <span className="hidden sm:inline lowercase">{t.home.arrived}</span>
                         </Button>
                       )}
                       {!paidAppointments.has(apt.id) && apt.status === "arrived" && (
@@ -188,10 +188,10 @@ export function TodaysAppointmentsWidget({
                           }}
                           disabled={markingPaid === apt.id || markingArrived === apt.id}
                           className="btn-secondary-widget bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/50"
-                          title={t.dashboard.createInvoice}
+                          title={t.home.createInvoice}
                         >
                           <RiMoneyDollarCircleLine className="size-4" />
-                          <span className="hidden sm:inline lowercase">{t.dashboard.createInvoice}</span>
+                          <span className="hidden sm:inline lowercase">{t.home.createInvoice}</span>
                         </Button>
                       )}
                       <Button
@@ -201,10 +201,10 @@ export function TodaysAppointmentsWidget({
                           onNoShow(apt)
                         }}
                         className="btn-secondary-widget bg-gray-50 text-gray-600 hover:bg-gray-100 dark:bg-gray-950/30 dark:text-gray-400 dark:hover:bg-gray-900/50"
-                        title={t.dashboard.markAsNoShow}
+                        title={t.home.markAsNoShow}
                       >
                         <RiCloseLine className="size-4" />
-                        <span className="hidden sm:inline lowercase">{t.dashboard.noShow}</span>
+                        <span className="hidden sm:inline lowercase">{t.home.noShow}</span>
                       </Button>
                     </div>
                   </div>
@@ -216,8 +216,8 @@ export function TodaysAppointmentsWidget({
           <EmptyState
             variant="card"
             icon={RiCalendarLine}
-            title={t.dashboard.noAppointmentsScheduledToday}
-            description={t.dashboard.todayAppointmentsDescription}
+            title={t.home.noAppointmentsScheduledToday}
+            description={t.home.todayAppointmentsDescription}
           />
         )}
       </div>

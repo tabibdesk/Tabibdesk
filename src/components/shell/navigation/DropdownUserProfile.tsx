@@ -10,6 +10,7 @@ import {
   RiLogoutBoxRLine,
   RiArrowDownSLine,
   RiArrowUpSLine,
+  RiGlobalLine,
 } from "@remixicon/react"
 import { useTheme } from "next-themes"
 import { useUserClinic } from "@/contexts/user-clinic-context"
@@ -45,11 +46,12 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
   const { currentUser, allUsers, setCurrentUser } = useUserClinic()
   const { disableDemoMode } = useDemo()
   const { theme, setTheme } = useTheme()
-  const { isRtl } = useLocale()
+  const { isRtl, lang, setLanguage } = useLocale()
   const t = useAppTranslations()
   const [isOpen, setIsOpen] = React.useState(false)
   const [isSwitchUserOpen, setIsSwitchUserOpen] = React.useState(false)
   const [isThemeOpen, setIsThemeOpen] = React.useState(false)
+  const [isLanguageOpen, setIsLanguageOpen] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
   const [isSigningOut, setIsSigningOut] = React.useState(false)
 
@@ -196,6 +198,22 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubMenuContent>
             </DropdownMenuSubMenu>
+            <DropdownMenuSubMenu>
+              <DropdownMenuSubMenuTrigger>
+                <RiGlobalLine className="size-4 shrink-0 me-2" aria-hidden="true" />
+                {t.settings.language}
+              </DropdownMenuSubMenuTrigger>
+              <DropdownMenuSubMenuContent>
+                <DropdownMenuRadioGroup value={lang} onValueChange={(v) => setLanguage(v as "ar" | "en")}>
+                  <DropdownMenuRadioItem value="ar" iconType="check">
+                    {t.settings.arabic}
+                  </DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="en" iconType="check">
+                    {t.settings.english}
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuSubMenuContent>
+            </DropdownMenuSubMenu>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem 
@@ -310,6 +328,39 @@ export function SidebarUserProfile({ mode, align = "start", children }: SidebarU
                 >
                   <opt.icon className="size-3.5" />
                   <span>{opt.id === "light" ? t.common.light : opt.id === "dark" ? t.common.dark : t.common.system}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+            className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            <div className="flex items-center gap-2">
+              <RiGlobalLine className="size-4" />
+              <span>{t.settings.language}</span>
+            </div>
+            <RiArrowDownSLine className={cx("size-4 transition-transform", isLanguageOpen && "rotate-180")} />
+          </button>
+
+          {isLanguageOpen && (
+            <div className="flex flex-col gap-1 ps-8 py-1">
+              {[
+                { id: "ar" as const, labelKey: "arabic" as const },
+                { id: "en" as const, labelKey: "english" as const },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => setLanguage(opt.id)}
+                  className={cx(
+                    "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
+                    lang === opt.id
+                      ? "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
+                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                  )}
+                >
+                  <span>{t.settings[opt.labelKey]}</span>
                 </button>
               ))}
             </div>

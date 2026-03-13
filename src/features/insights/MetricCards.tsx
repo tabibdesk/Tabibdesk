@@ -314,7 +314,7 @@ export function MetricCards() {
         <Card key={metric.id} className="insight-card overflow-hidden p-4 flex flex-col h-full justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-bold uppercase tracking-wider text-tremor-content-subtle dark:text-dark-tremor-content-subtle">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 {metric.label}
               </p>
               {metric.change && (
@@ -333,18 +333,18 @@ export function MetricCards() {
               )}
             </div>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-tremor-content-strong dark:text-dark-tremor-content-strong">
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {metric.value}
               </p>
             </div>
           </div>
 
-          <div className="h-10 w-full -mx-2 -mb-1">
+          <div className="h-10 w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 -mx-2 -mb-1 p-1.5">
             <AreaChart
               data={metric.data}
               index="date"
               categories={["value"]}
-              colors={[metric.color]}
+              colors={["blue"]}
               showXAxis={false}
               showYAxis={false}
               showTooltip={false}

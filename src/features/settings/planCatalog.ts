@@ -16,6 +16,7 @@ export const PLAN_FEATURES: Record<PlanTier, Record<FeatureKey, boolean>> = {
     insights: false, // Locked - requires Multi
     alerts: true,
     accounting: true,
+    campaign: true,
     labs: false, // Locked - requires Multi
     medications: true,
     files: true,
@@ -33,6 +34,7 @@ export const PLAN_FEATURES: Record<PlanTier, Record<FeatureKey, boolean>> = {
     insights: true, // ✅ Unlocked
     alerts: true,
     accounting: true,
+    campaign: true,
     labs: true, // ✅ Unlocked
     medications: true,
     files: true,
@@ -50,6 +52,7 @@ export const PLAN_FEATURES: Record<PlanTier, Record<FeatureKey, boolean>> = {
     insights: true,
     alerts: true,
     accounting: true,
+    campaign: true,
     labs: true,
     medications: true,
     files: true,

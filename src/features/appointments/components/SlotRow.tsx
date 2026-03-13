@@ -61,12 +61,12 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
 
   return (
     <div className="relative group">
-      <div className="transition-all duration-300 rounded-[24px] border border-primary-100 bg-white dark:bg-gray-900 dark:border-primary-900/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:ring-1 hover:ring-primary-50 dark:hover:ring-primary-900/20">
+      <div className="transition-all duration-300 rounded-2xl border border-primary-100 bg-white dark:bg-gray-900 dark:border-primary-900/30 shadow-sm flex flex-col md:flex-row md:items-center justify-between p-5 hover:ring-1 hover:ring-primary-50 dark:hover:ring-primary-900/20">
         <div className="flex items-center gap-5">
           {/* Time Indicator */}
           <div className="flex flex-col min-w-[70px]">
-            <span className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-none">{startTime}</span>
-            <span className="text-[11px] font-medium text-gray-400 mt-1 uppercase tracking-wider">{endTime}</span>
+            <span className="text-xs font-bold text-gray-900 dark:text-gray-100 leading-none">{startTime}</span>
+            <span className="text-[11px] font-medium text-gray-400 mt-0.5 uppercase tracking-wider">{endTime}</span>
           </div>
 
           {/* Divider */}
@@ -107,7 +107,7 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
             <button
               type="button"
               onClick={handleReschedule}
-              className="bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all"
+              className="bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all"
             >
               <RiCalendarLine className="size-4" />
               {t.appointments.reschedule}
@@ -117,7 +117,7 @@ export function SlotRow({ slot, onReschedule, onCancel }: SlotRowProps) {
             <button
               type="button"
               onClick={handleCancelClick}
-              className="bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all"
+              className="bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all"
             >
               <RiCloseLine className="size-4" />
               {t.common.cancel}

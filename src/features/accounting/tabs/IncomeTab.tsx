@@ -2,7 +2,7 @@
 
 import { useAppTranslations } from "@/lib/useAppTranslations"
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/Card"
+import { Card, CardContent } from "@/components/Card"
 import { Skeleton } from "@/components/Skeleton"
 import { Badge } from "@/components/Badge"
 import { usePayments } from "../hooks/usePayments"
@@ -188,55 +188,45 @@ export function IncomeTab({ dateRangePreset }: IncomeTabProps) {
     <div className="space-y-4 sm:space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Net Income</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Income</p>
             {loadingAny ? (
-              <Skeleton className="h-8 w-24" />
+              <Skeleton className="mt-1 h-8 w-24" />
             ) : (
-              <p className="text-xl sm:text-2xl font-bold break-words">{netIncome.toFixed(2)} EGP</p>
+              <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{netIncome.toFixed(2)} EGP</p>
             )}
-          </CardContent>
+          </div>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Payments</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Payments</p>
             {loadingAny ? (
-              <Skeleton className="h-8 w-24" />
+              <Skeleton className="mt-1 h-8 w-24" />
             ) : (
-              <p className="text-xl sm:text-2xl font-bold break-words">{totalCollected.toFixed(2)} EGP</p>
+              <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{totalCollected.toFixed(2)} EGP</p>
             )}
-          </CardContent>
+          </div>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">{t.invoice.refundBadge}</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t.invoice.refundBadge}</p>
             {loadingAny ? (
-              <Skeleton className="h-8 w-24" />
+              <Skeleton className="mt-1 h-8 w-24" />
             ) : (
-              <p className="text-xl sm:text-2xl font-bold break-words text-red-600 dark:text-red-400">
-                -{totalRefunded.toFixed(2)} EGP
-              </p>
+              <p className="mt-1 text-2xl font-bold text-red-600 dark:text-red-400 break-words">-{totalRefunded.toFixed(2)} EGP</p>
             )}
-          </CardContent>
+          </div>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xs sm:text-sm font-semibold">Cash</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="insight-card p-4">
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cash</p>
             {loadingAny ? (
-              <Skeleton className="h-8 w-24" />
+              <Skeleton className="mt-1 h-8 w-24" />
             ) : (
-              <p className="text-xl sm:text-2xl font-bold break-words">{cashTotal.toFixed(2)} EGP</p>
+              <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100 break-words">{cashTotal.toFixed(2)} EGP</p>
             )}
-          </CardContent>
+          </div>
         </Card>
       </div>
 

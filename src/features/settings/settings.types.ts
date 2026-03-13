@@ -19,6 +19,7 @@ export type FeatureKey =
   | "alerts"
   | "accounting"
   // Optional modules
+  | "campaign"
   | "labs"
   | "medications"
   | "files"
@@ -40,6 +41,14 @@ export interface AppointmentSettings {
   bufferMinutes: number // default 5
   slotDurationMinutes: number // default 30
   bookingRangeDays: number // default 14
+}
+
+// Online appointment / Google Calendar integration
+export interface OnlineAppointmentSettings {
+  googleCalendarConnected: boolean
+  googleCalendarEmail?: string
+  autoCreateMeetLinks: boolean
+  defaultCalendarId?: string
 }
 
 // Follow-up rules for clinic (post-cancellation/no-show task creation only)
@@ -128,6 +137,8 @@ export interface ClinicSettings {
   visitProgressChecklistIds?: string[]
   /** Medical condition ids enabled for patient profiles (checkboxes on Notes tab, display on Profile tab). Empty = use all defaults. */
   medicalConditionIds?: string[]
+  /** Online appointments: Google Calendar sync + Meet links */
+  onlineAppointmentSettings?: OnlineAppointmentSettings
 }
 
 // Effective features result (what user actually has access to)

@@ -56,7 +56,7 @@ export function ChatBox({
       className={
         embedded
           ? "flex min-h-0 flex-1 flex-col border-0 shadow-none"
-          : "flex min-h-[400px] flex-col lg:min-h-0 lg:h-full"
+          : "flex min-h-[400px] flex-col flex-1 min-h-0 lg:min-h-0 lg:h-full"
       }
     >
       <div 

@@ -108,7 +108,7 @@ function RegisterPageContent() {
             full_name: formData.fullName,
             clinic_name: formData.clinicName,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=/home`,
         },
       })
       if (error) {
@@ -125,7 +125,7 @@ function RegisterPageContent() {
       // Redirect to success or dashboard depending on email confirmation setting
       if (data.session) {
         // Immediate login - redirect to dashboard, keep spinner visible
-        router.push("/dashboard")
+        router.push("/home")
         router.refresh()
       } else {
         // Email confirmation required - show banner on this page
@@ -148,7 +148,7 @@ function RegisterPageContent() {
 
   const handleDemoMode = () => {
     enableDemoMode()
-    router.push("/dashboard")
+    router.push("/home")
     router.refresh()
   }
 
@@ -176,7 +176,7 @@ function RegisterPageContent() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback?next=/home`,
         },
       })
       if (error) {

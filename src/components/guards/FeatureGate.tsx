@@ -45,7 +45,7 @@ export function FeatureGate({
   // Handle redirect if requested
   useEffect(() => {
     if (redirect && !loading && !isEnabled) {
-      router.push("/dashboard")
+      router.push("/home")
       // Note: Toast would be shown here in a real implementation
       // For now, relying on the empty state
     }
@@ -86,6 +86,7 @@ function FeatureDisabledState({
   const featureNames: Record<FeatureKey, string> = {
     patients: "Patients",
     appointments: "Appointments",
+    campaign: "Leads",
     tasks: "Tasks",
     insights: "Insights",
     alerts: "Alerts",

@@ -35,6 +35,13 @@ export interface WaitlistEntry {
   notes?: string
 }
 
+export interface LeadForBooking {
+  id: string
+  name: string
+  phone: string
+  email?: string
+}
+
 export type BookFlowStep = "patient" | "service" | "datetime" | "confirmation" | "success"
 
 export interface BookAppointmentFlowProps {
@@ -46,6 +53,7 @@ export interface BookAppointmentFlowProps {
   preSelectedSlot?: PreSelectedSlot | null
   rescheduleAppointmentId?: string | null
   waitlistEntry?: WaitlistEntry | null
+  lead?: LeadForBooking | null
   clinicId?: string
   doctorId?: string
   onBookingComplete?: () => void

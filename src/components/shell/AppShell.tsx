@@ -5,7 +5,6 @@ import { SidebarProvider, useSidebar } from "@/contexts/sidebar-context"
 import { useUserClinic } from "@/contexts/user-clinic-context"
 import { Sidebar } from "./Sidebar"
 import { Topbar } from "./Topbar"
-import { FloatingBotWidget } from "@/features/insights/FloatingBotWidget"
 
 interface AppShellProps {
   children: React.ReactNode
@@ -39,9 +38,6 @@ function AppShellContent({ children, role: propRole }: AppShellProps) {
           </div>
         </main>
       </div>
-
-      {/* Floating bot widget - available on all app pages */}
-      <FloatingBotWidget />
     </div>
   )
 }
