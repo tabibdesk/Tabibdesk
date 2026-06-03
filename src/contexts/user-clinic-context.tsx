@@ -73,11 +73,39 @@ export function UserClinicProvider({
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    setBackendType(getBackendType())
+    const currentBackend = getBackendType()
+    setBackendType(currentBackend)
     // If mock mode, finish loading immediately
-    if (getBackendType() === "mock") {
+    if (currentBackend === "mock") {
       setIsLoading(false)
     }
+  }, []) // This needs to detect backend changes dynamically
+
+  // Watch for backend changes after initial mount (when demo mode is toggled)
+  useEffect(() => {
+    const checkBackendInterval = setInterval(() => {
+      const currentBackend = getBackendType()
+      setBackendType((prev) => {
+        if (prev !== currentBackend) {
+          // Reset Supabase state when switching backends
+          setSupabaseUser(null)
+          setSupabaseClinics([])
+          setUserRole("manager")
+          if (currentBackend === "mock") {
+            setIsLoading(false)
+            // Reset to default mock user and clinic
+            setCurrentUserId(DEFAULT_CURRENT_USER_ID)
+            setCurrentClinicId(DEFAULT_CURRENT_CLINIC_ID)
+          } else {
+            setIsLoading(true)
+          }
+          return currentBackend
+        }
+        return prev
+      })
+    }, 100)
+
+    return () => clearInterval(checkBackendInterval)
   }, [])
 
   useEffect(() => {
