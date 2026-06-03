@@ -23,6 +23,7 @@ interface UserClinicContextType {
   setCurrentClinic: (clinicId: string) => void
   allUsers: MockUser[]
   allClinics: MockClinic[]
+  isLoading: boolean
 }
 
 const UserClinicContext = createContext<UserClinicContextType | undefined>(
@@ -239,6 +240,7 @@ export function UserClinicProvider({
         setCurrentClinic,
         allUsers,
         allClinics: allowedClinics,
+        isLoading,
       }}
     >
       {children}

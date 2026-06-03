@@ -1,5 +1,6 @@
 import { LocaleSync } from "@/components/LocaleSync"
 import { AppLayoutWrapper } from "@/components/shell/AppLayoutWrapper"
+import { GlobalLoadingScreen } from "@/components/shell/GlobalLoadingScreen"
 import { ConditionalMaxWidthWrapper } from "@/components/shell/ConditionalMaxWidthWrapper"
 import { DemoProvider } from "@/contexts/demo-context"
 import { LocaleProvider } from "@/contexts/locale-context"
@@ -79,6 +80,7 @@ export default function RootLayout({
             <ThemeProvider defaultTheme="system" attribute="class">
               <DemoProvider>
                 <UserClinicProvider>
+                  <GlobalLoadingScreen />
                   <ToastProvider>
                     <AppLayoutWrapper>{children}</AppLayoutWrapper>
                   </ToastProvider>

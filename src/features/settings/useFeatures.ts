@@ -92,8 +92,24 @@ export function useFeatures(): UseFeaturesResult {
   // Compute effective features (memoized)
   const effective = useMemo(() => {
     if (!planTier) {
-      // Return empty record while loading
-      return {} as Record<FeatureKey, boolean>
+      // While loading, fail-open by allowing all features to show in sidebar
+      // This prevents empty sidebar during initial load
+      return {
+        patients: true,
+        appointments: true,
+        tasks: true,
+        insights: true,
+        alerts: true,
+        accounting: true,
+        campaign: true,
+        labs: true,
+        medications: true,
+        files: true,
+        reminders: true,
+        ai_summary: true,
+        ai_dictation: true,
+        ai_lab_extraction: true,
+      } as Record<FeatureKey, boolean>
     }
 
     const planAllowed = getPlanAllowedFeatures(planTier)
