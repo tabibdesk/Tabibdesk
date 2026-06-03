@@ -1,9 +1,16 @@
 "use client"
 
 import { useUserClinic } from "@/contexts/user-clinic-context"
+import { useContext } from "react"
+import { UserClinicContext } from "@/contexts/user-clinic-context"
 
 export function GlobalLoadingScreen() {
-  const { isLoading } = useUserClinic()
+  // Safely check if context is available (only in app layout, not on landing page)
+  const context = useContext(UserClinicContext)
+  
+  if (!context) return null
+  
+  const { isLoading } = context
 
   if (!isLoading) return null
 
