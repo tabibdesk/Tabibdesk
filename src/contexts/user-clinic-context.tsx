@@ -30,6 +30,8 @@ const UserClinicContext = createContext<UserClinicContextType | undefined>(
   undefined
 )
 
+export { UserClinicContext }
+
 function toMockClinic(c: ClinicForUser): MockClinic {
   return {
     id: c.id,
