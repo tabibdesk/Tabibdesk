@@ -1,6 +1,5 @@
 "use client"
 
-import { useUserClinic } from "@/contexts/user-clinic-context"
 import { useContext } from "react"
 import { UserClinicContext } from "@/contexts/user-clinic-context"
 
@@ -10,9 +9,10 @@ export function GlobalLoadingScreen() {
   
   if (!context) return null
   
-  const { isLoading } = context
+  // Only show global loading during initial app load, not for page navigation
+  const { isInitialLoading } = context
 
-  if (!isLoading) return null
+  if (!isInitialLoading) return null
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white dark:bg-gray-950">

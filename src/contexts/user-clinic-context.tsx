@@ -24,6 +24,7 @@ interface UserClinicContextType {
   allUsers: MockUser[]
   allClinics: MockClinic[]
   isLoading: boolean
+  isInitialLoading: boolean
 }
 
 const UserClinicContext = createContext<UserClinicContextType | undefined>(
@@ -74,6 +75,7 @@ export function UserClinicProvider({
   const [supabaseUser, setSupabaseUser] = useState<{ id: string; email: string; full_name?: string } | null>(null)
   const [userRole, setUserRole] = useState<"doctor" | "assistant" | "manager">("manager")
   const [isLoading, setIsLoading] = useState(true)
+  const [isInitialLoading, setIsInitialLoading] = useState(true)
 
   useEffect(() => {
     const currentBackend = getBackendType()
@@ -81,6 +83,7 @@ export function UserClinicProvider({
     // If mock mode, finish loading immediately
     if (currentBackend === "mock") {
       setIsLoading(false)
+      setIsInitialLoading(false)
     }
   }, []) // This needs to detect backend changes dynamically
 
@@ -243,6 +246,7 @@ export function UserClinicProvider({
         allUsers,
         allClinics: allowedClinics,
         isLoading,
+        isInitialLoading,
       }}
     >
       {children}
